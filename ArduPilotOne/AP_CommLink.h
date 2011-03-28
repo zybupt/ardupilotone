@@ -877,4 +877,4 @@ float MavlinkComm::_radiusEarth = 6378100;
 
 #endif // AP_CommLink_H
 
-// vim:ts=4:sw=4:expandtab
+// vim:ts=4:sw=4:tw=78:expandtab
