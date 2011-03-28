@@ -26,8 +26,7 @@ class AP_Location
 public:
 
     // constructor
-    AP_Location(float radius = 0) : _radius(radius)
-    {
+    AP_Location(float radius = 0) : _radius(radius) {
     }
 
     // calculate bearing
@@ -42,8 +41,12 @@ public:
     // calculates along  track distance of a current location
     virtual float alongTrack(AP_Location prev, AP_Location next) = 0;
 
-    void setRadius(float radius) { _radius = radius; }
-    float getRadius() { return _radius; }
+    void setRadius(float radius) {
+        _radius = radius;
+    }
+    float getRadius() {
+        return _radius;
+    }
 
 protected:
     // radius, used for transition radius for waypoints
@@ -51,18 +54,21 @@ protected:
 };
 
 class AP_GlobalLocation : public AP_Location
-public:
-}
+    public:
+    }
 
 class AP_LocalLocation : public AP_Location
 {
 public:
-    AP_LocalLocation(AP_GeodeticLocation * home) : 
-        _home(home)
-    {
+    AP_LocalLocation(AP_GeodeticLocation * home) :
+        _home(home) {
     }
-    void setHome(AP_GeodeticLocation * home) {_home = home; }
-    AP_GeodeticLocation getHome() {return AP_GeodeticLocation; }
+    void setHome(AP_GeodeticLocation * home) {
+        _home = home;
+    }
+    AP_GeodeticLocation getHome() {
+        return AP_GeodeticLocation;
+    }
 private:
     AP_GeodeticLocation * _home;
 };
@@ -72,27 +78,22 @@ class AP_CartesianLocation : AP_LocalLocation
 public:
     // default constructor
     AP_CartesianLocation(float x, float y, float z, AP_GeodeticLocation * home) :
-        AP_LocalLocation(home), _x(x), _y(y), _z(z)
-    {
+        AP_LocalLocation(home), _x(x), _y(y), _z(z) {
     }
     // calculate bearing
-    virtual float bearingTo(AP_Location next)
-    {
+    virtual float bearingTo(AP_Location next) {
     }
 
     // calculate distance
-    virtual float distanceTo(AP_Location next)
-    {
+    virtual float distanceTo(AP_Location next) {
     }
 
     // calculates cross track of a current location
-    virtual float crossTrack(AP_Location prev, AP_Location next)
-    {
+    virtual float crossTrack(AP_Location prev, AP_Location next) {
     }
 
     // calculates along  track distance of a current location
-    virtual float alongTrack(AP_Location prev, AP_Location next)
-    {
+    virtual float alongTrack(AP_Location prev, AP_Location next) {
     }
 }
 
@@ -102,13 +103,11 @@ class AP_GeodeticLocation : AP_GlobalLocation
 {
 public:
     AP_GeodeticLocation(int32_t lng, int32_t lat, int32_t alt) :
-        _lng(lng), _lat(lat), _alt(alt)
-    {
+        _lng(lng), _lat(lat), _alt(alt) {
     }
 
     // calculates a bearing to the next waypoint
-    float bearingTo(AP_GeodeticLocation next)
-    {
+    float bearingTo(AP_GeodeticLocation next) {
         deltaLng = latLngInt2Radians(next.lngInt() - lngInt());
         cosDeltaLng = cos(deltaLng);
         sinDeltaLng = sin(deltaLng);
@@ -120,12 +119,11 @@ public:
         cosNextLat = cos(next.latRad());
 
         return atan2(sinDeltaLng*cosNextLat,
-                cosLat*sinNextLat-sinLat*cosNextLat*cosDeltaLng);
+                     cosLat*sinNextLat-sinLat*cosNextLat*cosDeltaLng);
     }
 
     // calculates distance to a location
-    float distanceTo(AP_GeodeticLocation nextLocation)
-    {
+    float distanceTo(AP_GeodeticLocation nextLocation) {
         deltaLat = latLngInt2Radians(next.latInt() - latInt());
         deltaLng = latLngInt2Radians(next.lngInt() - lngInt());
 
@@ -141,8 +139,7 @@ public:
     }
 
     // calculates cross track of a current location
-    virtual float crossTrack(AP_Location prev, AP_Location next)
-    {
+    virtual float crossTrack(AP_Location prev, AP_Location next) {
         float d = previousWaypoint()->distanceTo(currentPosition());
         float bCurrent = perviousWaypoint()->bearingTo(currentPosition());
         float bNext = previousWaypoint()->bearingTo(nextWaypoint());
@@ -150,26 +147,41 @@ public:
     }
 
     // calculates along  track distance of a current location
-    virtual float alongTrack(AP_Location prev, AP_Location next)
-    {
+    virtual float alongTrack(AP_Location prev, AP_Location next) {
         dXt = crossTrack(prev,next);
         float d = previousWaypoint()->distanceTo(currentPosition());
         return acos(cos(d/rEarth)/cos(dXt/rEarth))*rEarth;
     }
 
     // integer accessors, 1 cm precision
-    int32_t lngInt() { return _lngInt; }
-    int32_t latInt() { return _latInt; }
-    int32_t altInt() { return _altInt; }
+    int32_t lngInt() {
+        return _lngInt;
+    }
+    int32_t latInt() {
+        return _latInt;
+    }
+    int32_t altInt() {
+        return _altInt;
+    }
 
     // float accessors, 38 cm precision TODO: check this
-    float lngRad() { return latLngInt2Radians(_lngInt); }
-    float lngDeg() { return lngRad()*rad2Deg; }
+    float lngRad() {
+        return latLngInt2Radians(_lngInt);
+    }
+    float lngDeg() {
+        return lngRad()*rad2Deg;
+    }
 
-    float latRad() { return latLngInt2Radians(_latInt); }
-    float latDeg() { return latRad()*rad2Deg; }
+    float latRad() {
+        return latLngInt2Radians(_latInt);
+    }
+    float latDeg() {
+        return latRad()*rad2Deg;
+    }
 
-    float altM() { return  alt2Meters(_altInt); }
+    float altM() {
+        return  alt2Meters(_altInt);
+    }
 
 private:
     // constants
@@ -182,13 +194,23 @@ private:
     int32_t _altInt; // units of meters * 1e2
 
     // trig for integers
-    float sinInt(int32_t val) { return sin(val/1e7); }
-    float cosInt(int32_t val) { return cos(val/1e7); }
-    float tanInt(int32_t val) { return tan(val/1e7); }
+    float sinInt(int32_t val) {
+        return sin(val/1e7);
+    }
+    float cosInt(int32_t val) {
+        return cos(val/1e7);
+    }
+    float tanInt(int32_t val) {
+        return tan(val/1e7);
+    }
 
     // conversions
-    static float latLngInt2Radians(int32_t val) { return val/1e7; } 
-    static float alt2Meters(int32_t val) { return val/1e2; } 
+    static float latLngInt2Radians(int32_t val) {
+        return val/1e7;
+    }
+    static float alt2Meters(int32_t val) {
+        return val/1e2;
+    }
 };
 
 #endif // AP_LOCATION_H

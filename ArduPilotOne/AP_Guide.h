@@ -31,15 +31,23 @@ namespace apo
 class AP_Guide
 {
 public:
-    //AP_Guide(AP_Navigator * navigator) : _navigator(navigator), 
-        //_headingCommand(), _airSpeedCommand(), _groundSpeedCommand(),
-        //_altitudeCommand()
+    //AP_Guide(AP_Navigator * navigator) : _navigator(navigator),
+    //_headingCommand(), _airSpeedCommand(), _groundSpeedCommand(),
+    //_altitudeCommand()
     //{
     //}
-    const float * headingCommand() { return &_headingCommand; }
-    const float * airSpeedCommand() { return &_airSpeedCommand; }
-    const float * groundSpeedCommand() { return &_groundSpeedCommand; }
-    const float * altitudeCommand() { return &_altitudeCommand; }
+    const float * headingCommand() {
+        return &_headingCommand;
+    }
+    const float * airSpeedCommand() {
+        return &_airSpeedCommand;
+    }
+    const float * groundSpeedCommand() {
+        return &_groundSpeedCommand;
+    }
+    const float * altitudeCommand() {
+        return &_altitudeCommand;
+    }
     virtual void update() = 0;
 protected:
     AP_Navigator * _navigator;
@@ -52,19 +60,17 @@ protected:
 class MavlinkGuide : public AP_Guide
 {
 public:
-   
-    MavlinkGuide() : flightPlan()
-    {
+
+    MavlinkGuide() : flightPlan() {
     }
-    virtual void update()
-    {
+    virtual void update() {
         //float dXt = position()->crossTrack(previousWaypoint(),nextWaypoint());
         //float dAt = position()->alongTrack(previousWaypoint(),nextWaypoint());
         //float d = previousWaypoint()->distanceTo(currentPosition());
 
         //if (d < nextWaypoint()->radius())
         //{
-            //currentWaypointIndex++;
+        //currentWaypointIndex++;
 
         //}
     }
@@ -75,8 +81,7 @@ private:
     uint8_t currentWaypointIndex;
     uint8_t previousWaypointIndex;
     Vector<mavlink_command_t *> flightPlan;
-    void incrementWaypointIndices()
-    {
+    void incrementWaypointIndices() {
         currentWaypointIndex++;
         previousWaypointIndex++;
         if (currentWaypointIndex > flightPlan.getSize()) currentWaypointIndex = 0;

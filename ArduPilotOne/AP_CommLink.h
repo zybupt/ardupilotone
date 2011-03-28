@@ -32,23 +32,20 @@ class ArduPilotOne;
 class AP_CommLink
 {
 public:
-    enum
-    {
+    enum {
         MSG_HEARTBEAT,
         MSG_ATTITUDE,
         MSG_LOCATION,
         MSG_SERVO_OUT,
     };
 
-    enum
-    {
+    enum {
         SEVERITY_LOW,
         SEVERITY_MED,
         SEVERITY_HIGH
     };
 
-    AP_CommLink(BetterStream * link) : _link(link)
-    {
+    AP_CommLink(BetterStream * link) : _link(link) {
     }
     virtual void send() = 0;
     virtual void receive() = 0;
@@ -67,7 +64,7 @@ class MavlinkComm : public AP_CommLink
 {
 public:
     MavlinkComm(BetterStream * link, ArduPilotOne * apo) :
-        AP_CommLink(link), 
+        AP_CommLink(link),
         _apo(apo),
 
         // options
@@ -86,96 +83,87 @@ public:
         // parameters
         _parameterCount(0),
         _queuedParameter(NULL),
-        _queuedParameterIndex(0)
-    {
-        switch(_nChannels)
-        {
-            case 0:
-                mavlink_comm_0_port = link;
-                _channel = MAVLINK_COMM_0;
-                _nChannels++;
-                break;
-            case 1:
-                mavlink_comm_1_port = link;
-                _channel = MAVLINK_COMM_1;
-                _nChannels++;
-                break;
-            default:
-                // signal that number of channels exceeded
-                _channel = MAVLINK_COMM_NB_HIGH;
-                break;
+        _queuedParameterIndex(0) {
+        switch(_nChannels) {
+        case 0:
+            mavlink_comm_0_port = link;
+            _channel = MAVLINK_COMM_0;
+            _nChannels++;
+            break;
+        case 1:
+            mavlink_comm_1_port = link;
+            _channel = MAVLINK_COMM_1;
+            _nChannels++;
+            break;
+        default:
+            // signal that number of channels exceeded
+            _channel = MAVLINK_COMM_NB_HIGH;
+            break;
         }
     }
 
-    virtual void send()
-    {
+    virtual void send() {
         // if number of channels exceeded return
         if (_channel == MAVLINK_COMM_NB_HIGH) return;
     }
 
-    void sendMessage(uint8_t id, uint32_t param = 0)
-    {
-         // if number of channels exceeded return
+    void sendMessage(uint8_t id, uint32_t param = 0) {
+        // if number of channels exceeded return
         if (_channel == MAVLINK_COMM_NB_HIGH) return;
 
 
         uint64_t timeStamp = micros();
 
-	    switch(id) {
+        switch(id) {
 
-		case MSG_HEARTBEAT:
-        {
-			mavlink_msg_heartbeat_send(
-					_channel,
-					mavlink_system.type,
-					MAV_AUTOPILOT_ARDUPILOTMEGA);
-			break;
+        case MSG_HEARTBEAT: {
+            mavlink_msg_heartbeat_send(
+                _channel,
+                mavlink_system.type,
+                MAV_AUTOPILOT_ARDUPILOTMEGA);
+            break;
         }
 
-	    case MSG_ATTITUDE:
-		{
-			mavlink_msg_attitude_send(
-					_channel,
-					timeStamp,
-					_apo->navigator()->roll,
-					_apo->navigator()->pitch,
-					_apo->navigator()->yaw,
-					_apo->navigator()->rollRate,
-					_apo->navigator()->pitchRate,
-					_apo->navigator()->yawRate);
-			break;
-		}
+        case MSG_ATTITUDE: {
+            mavlink_msg_attitude_send(
+                _channel,
+                timeStamp,
+                _apo->navigator()->roll,
+                _apo->navigator()->pitch,
+                _apo->navigator()->yaw,
+                _apo->navigator()->rollRate,
+                _apo->navigator()->pitchRate,
+                _apo->navigator()->yawRate);
+            break;
+        }
 
-		case MSG_LOCATION:
-		{
-			mavlink_msg_global_position_int_send(
-					_channel,
-					_apo->navigator()->latInt,
-					_apo->navigator()->lonInt,
-					_apo->navigator()->altInt * 10,
-					_apo->navigator()->vN,
-					_apo->navigator()->vE,
-					_apo->navigator()->vD);
-			break;
-		}
+        case MSG_LOCATION: {
+            mavlink_msg_global_position_int_send(
+                _channel,
+                _apo->navigator()->latInt,
+                _apo->navigator()->lonInt,
+                _apo->navigator()->altInt * 10,
+                _apo->navigator()->vN,
+                _apo->navigator()->vE,
+                _apo->navigator()->vD);
+            break;
+        }
 
-	    case MSG_SERVO_OUT:
-		{
+        case MSG_SERVO_OUT: {
             int16_t ch[8];
-            for (int i=0;i<8;i++) ch[i] = 0;
-            for (int i=0;i<8 && i<_apo->rc().getSize();i++) ch[i] = 10000*_apo->rc()[i]->getNormalized();
+            for (int i=0; i<8; i++) ch[i] = 0;
+            for (int i=0; i<8 && i<_apo->rc().getSize(); i++) ch[i] = 10000*_apo->rc()[i]->getNormalized();
             //_apo->getDebug().printf_P(PSTR("SERVO_OUT: ch 1: %d ch2 : %d"),ch[0],ch[1]);
-			mavlink_msg_rc_channels_scaled_send(_channel,ch[0],ch[1],ch[2],ch[3],ch[4],ch[5],ch[6],ch[7],255);
-			break;
-		}
+            mavlink_msg_rc_channels_scaled_send(_channel,ch[0],ch[1],ch[2],ch[3],ch[4],ch[5],ch[6],ch[7],255);
+            break;
+        }
 
 
         }
 
     }
 
-    virtual void receive()
-    {
+    virtual void receive() {
         // if number of channels exceeded return
         if (_channel == MAVLINK_COMM_NB_HIGH) return;
 
@@ -184,8 +172,7 @@ public:
         mavlink_status_t status;
 
         // process received bytes
-        while(comm_get_available(_channel))
-        {
+        while(comm_get_available(_channel)) {
             _apo->getDebug().printf("receiving data");
             uint8_t c = comm_receive_ch(_channel);
 
@@ -196,14 +183,12 @@ public:
         // Update packet drops counter
         _packetDrops += status.packet_rx_drop_count;
     }
-    
-    void sendText(uint8_t severity, const char *str)
-    {
+
+    void sendText(uint8_t severity, const char *str) {
         mavlink_msg_statustext_send(_channel,severity,(const int8_t*) str);
     }
 
-    void sendText(uint8_t severity, const prog_char_t *str)
-    {
+    void sendText(uint8_t severity, const prog_char_t *str) {
         mavlink_statustext_t m;
         uint8_t i;
         for (i=0; i<sizeof(m.text); i++) {
@@ -213,15 +198,13 @@ public:
         sendText(severity, (const char *)m.text);
     }
 
-    void acknowledge(uint8_t id, uint8_t sum1, uint8_t sum2)
-    {
+    void acknowledge(uint8_t id, uint8_t sum1, uint8_t sum2) {
     }
 
     /**
      * sends parameters one at a time
      */
-    void sendParameters()
-    {
+    void sendParameters() {
         // Check to see if we are sending parameters
         while (NULL != _queuedParameter) {
             AP_Var      *vp;
@@ -255,11 +238,9 @@ public:
     /**
      * request commands one at a time
      */
-    void requestCmds()
-    {
+    void requestCmds() {
         // request cmds one by one
-        if (_receivingCmds && _cmdRequestIndex <= _cmdCount)
-        {
+        if (_receivingCmds && _cmdRequestIndex <= _cmdCount) {
             mavlink_msg_waypoint_request_send(
                 _channel,
                 _cmdDestSysId,
@@ -304,17 +285,14 @@ private:
     uint16_t _packetDrops;
     static uint8_t _nChannels;
 
-    void _handleMessage(mavlink_message_t * msg)
-    {
+    void _handleMessage(mavlink_message_t * msg) {
         // TODO: move these to guidance
         struct     Location tell_command;                // command for telemetry
 
-        switch(msg->msgid)
-        {
-        _apo->getDebug().printf_P(PSTR("message received: %d"),msg->msgid);
+        switch(msg->msgid) {
+            _apo->getDebug().printf_P(PSTR("message received: %d"),msg->msgid);
 
-        case MAVLINK_MSG_ID_GPS_RAW:
-        {
+        case MAVLINK_MSG_ID_GPS_RAW: {
             // decode
             mavlink_gps_raw_t packet;
             mavlink_msg_gps_raw_decode(msg, &packet);
@@ -327,9 +305,8 @@ private:
             _apo->navigator()->airSpeed = packet.v;
             break;
         }
-        
-        case MAVLINK_MSG_ID_ATTITUDE:
-        {
+
+        case MAVLINK_MSG_ID_ATTITUDE: {
             // decode
             mavlink_attitude_t packet;
             mavlink_msg_attitude_decode(msg, &packet);
@@ -344,8 +321,7 @@ private:
             break;
         }
 
-        case MAVLINK_MSG_ID_ACTION:
-        {
+        case MAVLINK_MSG_ID_ACTION: {
             // decode
             mavlink_action_t packet;
             mavlink_msg_action_decode(msg, &packet);
@@ -353,23 +329,23 @@ private:
 
             // do action
             sendText(SEVERITY_LOW,PSTR("action received"));
-            switch(packet.action){
+            switch(packet.action) {
 
-                case MAV_ACTION_LAUNCH:
-                    //set_mode(TAKEOFF);
-                    break;
+            case MAV_ACTION_LAUNCH:
+                //set_mode(TAKEOFF);
+                break;
 
-                case MAV_ACTION_RETURN:
-                    //set_mode(RTL);
-                    break;
+            case MAV_ACTION_RETURN:
+                //set_mode(RTL);
+                break;
 
-                case MAV_ACTION_EMCY_LAND:
-                    //set_mode(LAND);
-                    break;
+            case MAV_ACTION_EMCY_LAND:
+                //set_mode(LAND);
+                break;
 
-                case MAV_ACTION_HALT:
-                    //do_loiter_at_location();
-                    break;
+            case MAV_ACTION_HALT:
+                //do_loiter_at_location();
+                break;
 
                 /* No mappable implementation in APM 2.0
                 case MAV_ACTION_MOTORS_START:
@@ -380,37 +356,38 @@ private:
                     break;
                 */
 
-                case MAV_ACTION_CONTINUE:
-                    //process_next_command();
-                    break;
+            case MAV_ACTION_CONTINUE:
+                //process_next_command();
+                break;
 
-                case MAV_ACTION_SET_MANUAL:
-                    //set_mode(MANUAL);
-                    break;
+            case MAV_ACTION_SET_MANUAL:
+                //set_mode(MANUAL);
+                break;
 
-                case MAV_ACTION_SET_AUTO:
-                    //set_mode(AUTO);
-                    break;
+            case MAV_ACTION_SET_AUTO:
+                //set_mode(AUTO);
+                break;
 
-                case MAV_ACTION_STORAGE_READ:
-                    AP_Var::load_all();
-                    break;
+            case MAV_ACTION_STORAGE_READ:
+                AP_Var::load_all();
+                break;
 
-                case MAV_ACTION_STORAGE_WRITE:
-                    AP_Var::save_all();
-                    break;
+            case MAV_ACTION_STORAGE_WRITE:
+                AP_Var::save_all();
+                break;
 
-                case MAV_ACTION_CALIBRATE_RC: break;
-                    //trim_radio();
-                    break;
+            case MAV_ACTION_CALIBRATE_RC:
+                break;
+                //trim_radio();
+                break;
 
-                case MAV_ACTION_CALIBRATE_GYRO:
-                case MAV_ACTION_CALIBRATE_MAG:
-                case MAV_ACTION_CALIBRATE_ACC:
-                case MAV_ACTION_CALIBRATE_PRESSURE:
-                case MAV_ACTION_REBOOT:  // this is a rough interpretation
-                    //startup_IMU_ground();
-                    break;
+            case MAV_ACTION_CALIBRATE_GYRO:
+            case MAV_ACTION_CALIBRATE_MAG:
+            case MAV_ACTION_CALIBRATE_ACC:
+            case MAV_ACTION_CALIBRATE_PRESSURE:
+            case MAV_ACTION_REBOOT:  // this is a rough interpretation
+                //startup_IMU_ground();
+                break;
 
                 /*    For future implemtation
                 case MAV_ACTION_REC_START: break;
@@ -424,9 +401,9 @@ private:
                     break;
                 */
 
-                case MAV_ACTION_NAVIGATE:
-                    //set_mode(AUTO);
-                    break;
+            case MAV_ACTION_NAVIGATE:
+                //set_mode(AUTO);
+                break;
 
                 /* Land is not an implemented flight mode in APM 2.0
                 case MAV_ACTION_LAND:
@@ -434,17 +411,17 @@ private:
                     break;
                 */
 
-                case MAV_ACTION_LOITER:
-                    //set_mode(LOITER);
-                    break;
+            case MAV_ACTION_LOITER:
+                //set_mode(LOITER);
+                break;
 
-                default: break;
-                }
+            default:
+                break;
+            }
             break;
         }
 
-        case MAVLINK_MSG_ID_WAYPOINT_REQUEST_LIST:
-        {
+        case MAVLINK_MSG_ID_WAYPOINT_REQUEST_LIST: {
             Serial.println("waypoint request list");
             sendText(SEVERITY_LOW,PSTR("waypoint request list"));
 
@@ -469,8 +446,7 @@ private:
             break;
         }
 
-        case MAVLINK_MSG_ID_WAYPOINT_REQUEST:
-        {
+        case MAVLINK_MSG_ID_WAYPOINT_REQUEST: {
             //sendText(SEVERITY_LOW,PSTR("waypoint request"));
 
             // Check if sending waypiont
@@ -491,7 +467,7 @@ private:
             } else {
                 frame = MAV_FRAME_GLOBAL; // reference frame
             }
-            
+
             float param1 = 0, param2 = 0 , param3 = 0, param4 = 0;
 
             // time that the mav should loiter in milliseconds
@@ -510,7 +486,7 @@ private:
                     z = tell_command.alt/1.0e2; // local (z), global/relative (altitude)
                 }
             }
-            
+
 
             switch (tell_command.id) {                    // Switch to map APM command fields inot MAVLink command fields
             case MAV_CMD_NAV_LOITER_TURNS:
@@ -552,16 +528,15 @@ private:
             }
 
             mavlink_msg_waypoint_send(_channel,msg->sysid,
-            msg->compid,packet.seq,frame,tell_command.id,current,autocontinue,
-            param1,param2,param3,param4,x,y,z);
+                                      msg->compid,packet.seq,frame,tell_command.id,current,autocontinue,
+                                      param1,param2,param3,param4,x,y,z);
 
             // update last waypoint comm stamp
             _cmdTimeLastSent = millis();
             break;
         }
 
-        case MAVLINK_MSG_ID_WAYPOINT_ACK:
-        {
+        case MAVLINK_MSG_ID_WAYPOINT_ACK: {
             //sendText(SEVERITY_LOW,PSTR("waypoint ack"));
 
             // decode
@@ -577,8 +552,7 @@ private:
             break;
         }
 
-        case MAVLINK_MSG_ID_PARAM_REQUEST_LIST:
-        {
+        case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: {
             Serial.println("param request list");
             sendText(SEVERITY_LOW,PSTR("param request list"));
 
@@ -594,8 +568,7 @@ private:
             break;
         }
 
-        case MAVLINK_MSG_ID_WAYPOINT_CLEAR_ALL:
-        {
+        case MAVLINK_MSG_ID_WAYPOINT_CLEAR_ALL: {
             //sendText(SEVERITY_LOW,PSTR("waypoint clear all"));
 
             // decode
@@ -608,13 +581,12 @@ private:
             _cmdCount.set_and_save(0);
 
             // send acknowledgement 3 times to makes sure it is received
-            for (int i=0;i<3;i++) mavlink_msg_waypoint_ack_send(_channel,msg->sysid,msg->compid,type);
+            for (int i=0; i<3; i++) mavlink_msg_waypoint_ack_send(_channel,msg->sysid,msg->compid,type);
 
             break;
         }
 
-        case MAVLINK_MSG_ID_WAYPOINT_SET_CURRENT:
-        {
+        case MAVLINK_MSG_ID_WAYPOINT_SET_CURRENT: {
             //sendText(SEVERITY_LOW,PSTR("waypoint set current"));
 
             // decode
@@ -636,8 +608,7 @@ private:
             break;
         }
 
-        case MAVLINK_MSG_ID_WAYPOINT_COUNT:
-        {
+        case MAVLINK_MSG_ID_WAYPOINT_COUNT: {
             //sendText(SEVERITY_LOW,PSTR("waypoint count"));
 
             // decode
@@ -657,8 +628,7 @@ private:
             break;
         }
 
-        case MAVLINK_MSG_ID_WAYPOINT:
-        {
+        case MAVLINK_MSG_ID_WAYPOINT: {
             // Check if receiving waypiont
             if (!_receivingCmds) break;
 
@@ -676,35 +646,31 @@ private:
             // defaults
             tell_command.id = packet.command;
 
-            switch (packet.frame)
-            {
+            switch (packet.frame) {
             case MAV_FRAME_MISSION:
-            case MAV_FRAME_GLOBAL:
-                {
-                    tell_command.lat = 1.0e7*packet.x; // in as DD converted to * t7
-                    tell_command.lng = 1.0e7*packet.y; // in as DD converted to * t7
-                    tell_command.alt = packet.z*1.0e2; // in as m converted to cm
-                    tell_command.options = 0;
-                    break;
-                }
+            case MAV_FRAME_GLOBAL: {
+                tell_command.lat = 1.0e7*packet.x; // in as DD converted to * t7
+                tell_command.lng = 1.0e7*packet.y; // in as DD converted to * t7
+                tell_command.alt = packet.z*1.0e2; // in as m converted to cm
+                tell_command.options = 0;
+                break;
+            }
 
-            case MAV_FRAME_LOCAL: // local (relative to _home position)
-                {
-                    tell_command.lat = 1.0e7*ToDeg(packet.x/
-                    (_radiusEarth*cos(ToRad(_home.lat/1.0e7)))) + _home.lat;
-                    tell_command.lng = 1.0e7*ToDeg(packet.y/_radiusEarth) + _home.lng;
-                    tell_command.alt = packet.z*1.0e2;
-                    tell_command.options = 1;
-                    break;
-                }
-            case MAV_FRAME_GLOBAL_RELATIVE_ALT: // absolute lat/lng, relative altitude
-                {
-                    tell_command.lat = 1.0e7*packet.x; // in as DD converted to * t7
-                    tell_command.lng = 1.0e7*packet.y; // in as DD converted to * t7
-                    tell_command.alt = packet.z*1.0e2;
-                    tell_command.options = 1;
-                    break;
-                }
+            case MAV_FRAME_LOCAL: { // local (relative to _home position)
+                tell_command.lat = 1.0e7*ToDeg(packet.x/
+                                               (_radiusEarth*cos(ToRad(_home.lat/1.0e7)))) + _home.lat;
+                tell_command.lng = 1.0e7*ToDeg(packet.y/_radiusEarth) + _home.lng;
+                tell_command.alt = packet.z*1.0e2;
+                tell_command.options = 1;
+                break;
+            }
+            case MAV_FRAME_GLOBAL_RELATIVE_ALT: { // absolute lat/lng, relative altitude
+                tell_command.lat = 1.0e7*packet.x; // in as DD converted to * t7
+                tell_command.lng = 1.0e7*packet.y; // in as DD converted to * t7
+                tell_command.alt = packet.z*1.0e2;
+                tell_command.options = 1;
+                break;
+            }
             }
 
             switch (tell_command.id) {                    // Switch to map APM command fields inot MAVLink command fields
@@ -751,15 +717,14 @@ private:
 
             // save waypoint - and prevent re-setting home
             if (packet.seq != 0)
-            // TODO: implement
-            //set_wp_with_index(tell_command, packet.seq);
+                // TODO: implement
+                //set_wp_with_index(tell_command, packet.seq);
 
-            // update waypoint receiving state machine
-            _cmdTimeLastReceived = millis();
+                // update waypoint receiving state machine
+                _cmdTimeLastReceived = millis();
             _cmdRequestIndex++;
 
-            if (_cmdRequestIndex > _cmdCount)
-            {
+            if (_cmdRequestIndex > _cmdCount) {
                 uint8_t type = 0; // ok (0), error(1)
 
                 mavlink_msg_waypoint_ack_send(
@@ -776,8 +741,7 @@ private:
             break;
         }
 
-        case MAVLINK_MSG_ID_PARAM_SET:
-        {
+        case MAVLINK_MSG_ID_PARAM_SET: {
             AP_Var                  *vp;
             AP_Meta_class::Type_id  var_type;
 
@@ -785,7 +749,7 @@ private:
             mavlink_param_set_t packet;
             mavlink_msg_param_set_decode(msg, &packet);
             if (_checkTarget(packet.target_system,packet.target_component))
-            break;
+                break;
 
             // set parameter
 
@@ -848,8 +812,7 @@ private:
         }
     }
 
-    uint16_t _countParameters()
-    {
+    uint16_t _countParameters() {
         // if we haven't cached the parameter count yet...
         if (0 == _parameterCount) {
             AP_Var  *vp;
@@ -865,8 +828,7 @@ private:
         return _parameterCount;
     }
 
-    AP_Var * _findParameter(uint16_t index)
-    {
+    AP_Var * _findParameter(uint16_t index) {
         AP_Var  *vp;
 
         vp = AP_Var::first();
@@ -891,17 +853,16 @@ private:
 
 
     // check the target
-    uint8_t _checkTarget(uint8_t sysid, uint8_t compid)
-    {
-        //Serial.print("target = "); Serial.print(sysid, DEC); Serial.print("\tcomp = "); Serial.println(compid, DEC); 
-        if (sysid != mavlink_system.sysid){
+    uint8_t _checkTarget(uint8_t sysid, uint8_t compid) {
+        //Serial.print("target = "); Serial.print(sysid, DEC); Serial.print("\tcomp = "); Serial.println(compid, DEC);
+        if (sysid != mavlink_system.sysid) {
             return 1;
 
-        }else if(compid != mavlink_system.compid){
+        } else if(compid != mavlink_system.compid) {
             sendText(SEVERITY_LOW,PSTR("component id mismatch"));
             return 0; // XXX currently not receiving correct compid from gcs
 
-        }else{
+        } else {
             return 0; // no error
         }
     }

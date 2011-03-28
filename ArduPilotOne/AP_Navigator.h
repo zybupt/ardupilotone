@@ -26,8 +26,7 @@ namespace apo
 class AP_Navigator
 {
 public:
-     enum mode_t
-    {
+    enum mode_t {
         MODE_LIVE,
         MODE_HIL_CNTL,
         MODE_HIL_NAV,
@@ -49,12 +48,24 @@ public:
     int32_t latInt;
     int32_t lonInt;
     int32_t altInt;
-    float lat() { return latInt/1e7; }
-    float lon() { return lonInt/1e7; }
-    float alt() { return altInt/1e3; }
-    void setLat(float lat) { latInt = 1e7*lat; }
-    void setLon(float lon) { lonInt = 1e7*lon; }
-    void setAlt(float alt) { altInt = 1e3*alt; }
+    float lat() {
+        return latInt/1e7;
+    }
+    float lon() {
+        return lonInt/1e7;
+    }
+    float alt() {
+        return altInt/1e3;
+    }
+    void setLat(float lat) {
+        latInt = 1e7*lat;
+    }
+    void setLon(float lon) {
+        lonInt = 1e7*lon;
+    }
+    void setAlt(float alt) {
+        altInt = 1e3*alt;
+    }
 protected:
     mode_t _mode;
 };
@@ -62,48 +73,42 @@ protected:
 class DcmNavigator : public AP_Navigator
 {
 private:
-	/**
-	 * Sensors
-	 * TODO: Abstract all sensor libraries to allow using
-	 * ArduPilot and eventually newer hardware.
-	 */
-	AP_ADC * _adc;
-	GPS * _gps;
-	APM_BMP085_Class * _baro;
-	Compass * _compass;
-	IMU * _imu;
-	AP_DCM * _dcm;
-	uint16_t _imuOffsetAddress;
+    /**
+     * Sensors
+     * TODO: Abstract all sensor libraries to allow using
+     * ArduPilot and eventually newer hardware.
+     */
+    AP_ADC * _adc;
+    GPS * _gps;
+    APM_BMP085_Class * _baro;
+    Compass * _compass;
+    IMU * _imu;
+    AP_DCM * _dcm;
+    uint16_t _imuOffsetAddress;
 public:
     DcmNavigator(mode_t mode, AP_ADC * adc=NULL, GPS * gps=NULL,
-            APM_BMP085_Class * baro=NULL, Compass * compass=NULL) :
+                 APM_BMP085_Class * baro=NULL, Compass * compass=NULL) :
         AP_Navigator(mode), _adc(adc), _gps(gps), _baro(baro),
-        _compass(compass), _imu(), _dcm(), _imuOffsetAddress(0) 
-    {
-        if(mode==MODE_LIVE)
-        {
+        _compass(compass), _imu(), _dcm(), _imuOffsetAddress(0) {
+        if(mode==MODE_LIVE) {
             if (_adc) _imu = new AP_IMU_Oilpan(_adc,_imuOffsetAddress);
             if (_imu && _gps && _compass) _dcm = new AP_DCM(_imu,_gps,_compass);
         }
         calibrate();
     }
-    virtual void calibrate()
-    {
+    virtual void calibrate() {
         // TODO: handle cold restart
-        if(_imu)
-        {
+        if(_imu) {
             /*
-             * Gyro has built in warm up cycle and should 
+             * Gyro has built in warm up cycle and should
              * run first */ _imu->init_gyro();
             _imu->init_accel();
         }
     }
-    virtual void update(float dt)
-    {
+    virtual void update(float dt) {
         if (_mode != MODE_LIVE) return;
 
-        if (_dcm)
-        {
+        if (_dcm) {
             _dcm->update_DCM(dt);
             roll = _dcm->roll;
             pitch = _dcm->pitch;
@@ -112,8 +117,7 @@ public:
             pitchRate = _dcm->get_gyro().y;
             yawRate = _dcm->get_gyro().z;
 
-            if (_gps)
-            {
+            if (_gps) {
                 Matrix3f rot = _dcm->get_dcm_matrix(); // neglecting angle of attack for now
                 vN = _gps->ground_speed * rot.b.x;
                 vE = _gps->ground_speed * rot.b.y;

@@ -6,7 +6,7 @@
 #include "AP_Var.h"
 #include <avr/pgmspace.h>
 
-#if VEHICLE_TYPE == CAR 
+#if VEHICLE_TYPE == CAR
 
 class CarController : public AP_Controller
 {
@@ -30,15 +30,14 @@ private:
 
 public:
     CarController(AP_Var::Key cntrlKey, AP_Var::Key pidStrKey, AP_Var::Key pidThrKey,
-            const float * heading, const float * velocity,
-            const float * headingCommand, const float * velocityCommand,
-            AP_RcChannel * modeCh, AP_RcChannel * steeringCh, AP_RcChannel * throttleCh) :
+                  const float * heading, const float * velocity,
+                  const float * headingCommand, const float * velocityCommand,
+                  AP_RcChannel * modeCh, AP_RcChannel * steeringCh, AP_RcChannel * throttleCh) :
         heading(heading), velocity(velocity),
-        headingCommand(headingCommand), velocityCommand(velocityCommand), 
+        headingCommand(headingCommand), velocityCommand(velocityCommand),
         modeCh(modeCh), steeringCh(steeringCh), throttleCh(throttleCh),
         _group(cntrlKey,PSTR("CNTRL")),
-        _mode(&_group,1,0,PSTR("MODE"))
-    {
+        _mode(&_group,1,0,PSTR("MODE")) {
         Serial.println("initializing car controller");
 
         // steering control loop
@@ -51,18 +50,15 @@ public:
         addBlock(new Pid(pidThrKey,PSTR("THR"),1,1,1,1,20));
         addBlock(new ToServo(throttleCh));
     }
-    virtual void update(const double dt)
-    {
+    virtual void update(const double dt) {
         if (_mode == 0)
 
         {
-            // manual control 
+            // manual control
             steeringCh->readRadio();
             throttleCh->readRadio();
             //Serial.println("manual");
-        }
-        else
-        {
+        } else {
             AP_Controller::update(dt);
             //Serial.println("automode");
         }
@@ -70,7 +66,7 @@ public:
         //Serial.printf("steering pwm :\t");
         //Serial.printf("%7d\t",steeringCh->getPwm());
         //Serial.println();
-        
+
         //Serial.printf("throttle pwm :\t");
         //Serial.printf("%7d\t",throttleCh->getPwm());
         //Serial.println();
@@ -82,13 +78,13 @@ public:
 
 void controllerInit()
 {
-	_rc.push_back(new AP_RcChannel(k_chMode,PSTR("STR"),APM_RC,7,45));
-	_rc.push_back(new AP_RcChannel(k_chStr,PSTR("STR"),APM_RC,0,45));
+    _rc.push_back(new AP_RcChannel(k_chMode,PSTR("STR"),APM_RC,7,45));
+    _rc.push_back(new AP_RcChannel(k_chStr,PSTR("STR"),APM_RC,0,45));
     _rc.push_back(new AP_RcChannel(k_chThr,PSTR("THR"),APM_RC,1,100));
 
     _controller = new CarController(k_cntrl,k_pidStr,k_pidThr,&(navigator()->yaw),
-            &(navigator()->groundSpeed),
-            guide()->headingCommand(), guide()->groundSpeedCommand(),_rc[0],_rc[1],_rc[2]);
+                                    &(navigator()->groundSpeed),
+                                    guide()->headingCommand(), guide()->groundSpeedCommand(),_rc[0],_rc[1],_rc[2]);
 
 }
 
@@ -121,25 +117,24 @@ private:
 
 public:
     QuadController(AP_Var::Key chRollKey, AP_Var::Key chPitchKey, AP_Var::Key chYawKey,
-            AP_Var::Key pidRollKey, AP_Var::Key pidPitchKey, AP_Var::Key pidYawKey) :
-        ch1(1), ch2(2), ch3(3), ch4(4)
-    {
+                   AP_Var::Key pidRollKey, AP_Var::Key pidPitchKey, AP_Var::Key pidYawKey) :
+        ch1(1), ch2(2), ch3(3), ch4(4) {
         // rc channels
         addCh(new AP_RcChannel(chRollKey,PSTR("ROLL"),APM_RC,chRoll,45));
         addCh(new AP_RcChannel(chPitchKey,PSTR("PTCH"),APM_RC,chPitch,45));
         addCh(new AP_RcChannel(chYawKey,PSTR("YAW"),APM_RC,chYaw,45));
 
         // pitch control loop
-        #if AIRSPEED_SENSOR == ENABLED
-            // pitch control loop w/ airspeed
-            addBlock(new SumGain(airspeedCommand,AP_Float_unity,airspeed,AP_Float_negative_unity));
-        #else
-            // cross feed variables
-            addBlock(new SumGain(roll,kffPitchCompk,throttleServo,kffT2P));
-        #endif
+#if AIRSPEED_SENSOR == ENABLED
+        // pitch control loop w/ airspeed
+        addBlock(new SumGain(airspeedCommand,AP_Float_unity,airspeed,AP_Float_negative_unity));
+#else
+// cross feed variables
+addBlock(new SumGain(roll,kffPitchCompk,throttleServo,kffT2P));
+#endif
         addBlock(new Pid(pidPitchKey,PSTR("PTCH"),0.1,0,0,1,20));
         addBlock(new Sink(chPitch));
-       
+
         // roll control loop
         addBlock(new SumGain(headingCommand,one,heading,negOne));
         addBlock(new Pid(headingkP,headingKI,headingKD));
@@ -193,24 +188,23 @@ private:
 
 public:
     PlaneController(AP_Var::Key chRollKey, AP_Var::Key chPitchKey, AP_Var::Key chYawKey,
-            AP_Var::Key pidRollKey, AP_Var::Key pidPitchKey, AP_Var::Key pidYawKey) :
-    {
+                    AP_Var::Key pidRollKey, AP_Var::Key pidPitchKey, AP_Var::Key pidYawKey) : {
         // rc channels
         addCh(new AP_RcChannel(chRollKey,PSTR("ROLL"),APM_RC,chRoll,45));
         addCh(new AP_RcChannel(chPitchKey,PSTR("PTCH"),APM_RC,chPitch,45));
         addCh(new AP_RcChannel(chYawKey,PSTR("YAW"),APM_RC,chYaw,45));
 
         // pitch control loop
-        #if AIRSPEED_SENSOR == ENABLED
-            // pitch control loop w/ airspeed
-            addBlock(new SumGain(airspeedCommand,AP_Float_unity,airspeed,AP_Float_negative_unity));
-        #else
-            // cross feed variables
-            addBlock(new SumGain(roll,kffPitchCompk,throttleServo,kffT2P));
-        #endif
+#if AIRSPEED_SENSOR == ENABLED
+        // pitch control loop w/ airspeed
+        addBlock(new SumGain(airspeedCommand,AP_Float_unity,airspeed,AP_Float_negative_unity));
+#else
+// cross feed variables
+addBlock(new SumGain(roll,kffPitchCompk,throttleServo,kffT2P));
+#endif
         addBlock(new Pid(pidPitchKey,PSTR("PTCH"),0.1,0,0,1,20));
         addBlock(new ToServo(getRc(chPitch)));
-       
+
         // roll control loop
         addBlock(new SumGain(headingCommand,one,heading,negOne));
         addBlock(new Pid(headingkP,headingKI,headingKD));
