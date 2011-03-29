@@ -173,7 +173,6 @@ public:
 
         // process received bytes
         while(comm_get_available(_channel)) {
-            _apo->getDebug().printf("receiving data");
             uint8_t c = comm_receive_ch(_channel);
 
             // Try to get a new message
