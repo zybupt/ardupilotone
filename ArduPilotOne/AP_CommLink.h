@@ -84,6 +84,7 @@ public:
         _parameterCount(0),
         _queuedParameter(NULL),
         _queuedParameterIndex(0) {
+
         switch(_nChannels) {
         case 0:
             mavlink_comm_0_port = link;
@@ -165,6 +166,7 @@ public:
 
     virtual void receive() {
         // if number of channels exceeded return
+        //
         if (_channel == MAVLINK_COMM_NB_HIGH) return;
 
         // receive new packets
@@ -172,6 +174,9 @@ public:
         mavlink_status_t status;
 
         // process received bytes
+        Serial.printf("channel: %d\n",_channel);
+        Serial.printf("available 0: %d\n",mavlink_comm_0_port->available());
+        //Serial.printf("available 1: %d\n",mavlink_comm_1_port->available());
         while(comm_get_available(_channel)) {
             uint8_t c = comm_receive_ch(_channel);
 

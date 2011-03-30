@@ -170,10 +170,12 @@ void ArduPilotOne::callback2(void * data)
         apo->gps()->update();
 
         // debug
+		/*
         apo->getDebug().printf_P(PSTR("lat: %ld lng: %ld alt: %ld\t"),
                                  apo->gps()->latitude,
                                  apo->gps()->longitude,
                                  apo->gps()->altitude);
+		*/
     }
 
     /*
@@ -198,13 +200,15 @@ void ArduPilotOne::callback2(void * data)
     /*
      * navigator debug
      */
+	/*
     if (apo->navigator()) {
         apo->getDebug().printf_P(PSTR("roll: %f pitch: %f yaw: %f\t"),
                                  apo->navigator()->roll*rad2deg,
                                  apo->navigator()->pitch*rad2deg,
                                  apo->navigator()->yaw*rad2deg);
     }
-    apo->getDebug().println();
+	*/
+    //apo->getDebug().println();
 }
 
 void ArduPilotOne::callback3(void * data)
@@ -241,8 +245,8 @@ void ArduPilotOne::callback4(void * data)
 void setup()
 {
     Serial.begin(115200,128,128);  // debug
-    Serial1.begin(115200,128,128); // gps
-    Serial3.begin(115200,128,128); // gcs
+    Serial1.begin(57600,128,128); // gps
+    Serial3.begin(57600,128,128); // gcs
 
     Serial.println("starting APO");
 
