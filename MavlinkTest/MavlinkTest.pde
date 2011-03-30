@@ -42,5 +42,5 @@ void loop() {
   
   Serial.print(", dropped packets: ");
   Serial.println(packetDrops);
-  delay(100);
+  delay(1000);
 }
