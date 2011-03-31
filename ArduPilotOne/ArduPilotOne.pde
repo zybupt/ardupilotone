@@ -188,6 +188,7 @@ void ArduPilotOne::callback2(void * data)
         apo->gcs()->sendMessage(AP_CommLink::MSG_LOCATION);
         apo->gcs()->sendMessage(AP_CommLink::MSG_ATTITUDE);
         apo->gcs()->sendMessage(AP_CommLink::MSG_SERVO_OUT);
+        apo->gcs()->sendMessage(AP_CommLink::MSG_RADIO_OUT);
 
         // send messages
         apo->gcs()->requestCmds();
@@ -244,7 +245,7 @@ void ArduPilotOne::callback4(void * data)
 
 void setup()
 {
-    Serial.begin(115200,128,128);  // debug
+    Serial.begin(57600,128,128);  // debug
     Serial1.begin(57600,128,128); // gps
     Serial3.begin(57600,128,128); // gcs
 

@@ -37,6 +37,7 @@ public:
         MSG_ATTITUDE,
         MSG_LOCATION,
         MSG_SERVO_OUT,
+        MSG_RADIO_OUT,
     };
 
     enum {
@@ -154,11 +155,21 @@ public:
             int16_t ch[8];
             for (int i=0; i<8; i++) ch[i] = 0;
             for (int i=0; i<8 && i<_apo->rc().getSize(); i++) ch[i] = 10000*_apo->rc()[i]->getNormalized();
-            //_apo->getDebug().printf_P(PSTR("SERVO_OUT: ch 1: %d ch2 : %d"),ch[0],ch[1]);
+            _apo->getDebug().printf_P(PSTR("SERVO_OUT: ch 1: %d ch2 : %d\n"),ch[0],ch[1]);
+            _apo->getDebug().printf_P(PSTR("SERVO_OUT_NORM: ch 1: %f ch2 : %f\n"),
+                    _apo->rc()[0]->getNormalized(),
+                    _apo->rc()[1]->getNormalized());
             mavlink_msg_rc_channels_scaled_send(_channel,ch[0],ch[1],ch[2],ch[3],ch[4],ch[5],ch[6],ch[7],255);
             break;
         }
 
+        case MSG_RADIO_OUT: {
+            int16_t ch[8];
+            for (int i=0; i<8; i++) ch[i] = 0;
+            for (int i=0; i<8 && i<_apo->rc().getSize(); i++) ch[i] = _apo->rc()[i]->getPwm();
+            mavlink_msg_rc_channels_raw_send(_channel,ch[0],ch[1],ch[2],ch[3],ch[4],ch[5],ch[6],ch[7],255);
+            break;
+        }
 
         }
 
@@ -174,8 +185,8 @@ public:
         mavlink_status_t status;
 
         // process received bytes
-        Serial.printf("channel: %d\n",_channel);
-        Serial.printf("available 0: %d\n",mavlink_comm_0_port->available());
+        //Serial.printf("channel: %d\n",_channel);
+        //Serial.printf("available 0: %d\n",mavlink_comm_0_port->available());
         //Serial.printf("available 1: %d\n",mavlink_comm_1_port->available());
         while(comm_get_available(_channel)) {
             uint8_t c = comm_receive_ch(_channel);

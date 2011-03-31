@@ -36,29 +36,32 @@ public:
         heading(heading), velocity(velocity),
         headingCommand(headingCommand), velocityCommand(velocityCommand),
         modeCh(modeCh), steeringCh(steeringCh), throttleCh(throttleCh),
-        _group(cntrlKey,PSTR("CNTRL")),
+        _group(cntrlKey,PSTR("CNTRL_")),
         _mode(&_group,1,0,PSTR("MODE")) {
         Serial.println("initializing car controller");
 
         // steering control loop
         addBlock(new SumGain(headingCommand,&one,heading,&negativeOne));
-        addBlock(new Pid(pidStrKey,PSTR("STR"),1,1,1,1,20));
+        addBlock(new Pid(pidStrKey,PSTR("STR_"),1,1,1,1,20));
         addBlock(new ToServo(steeringCh));
 
         // throttle control loop
         addBlock(new SumGain(velocityCommand,&one,velocity,&negativeOne));
-        addBlock(new Pid(pidThrKey,PSTR("THR"),1,1,1,1,20));
+        addBlock(new Pid(pidThrKey,PSTR("THR_"),1,1,1,1,20));
         addBlock(new ToServo(throttleCh));
     }
     virtual void update(const double dt) {
+        // read mode switch
+        modeCh->readRadio();
+    
+        // manual
         if (_mode == 0)
-
         {
-            // manual control
             steeringCh->readRadio();
             throttleCh->readRadio();
             //Serial.println("manual");
-        } else {
+        
+        } else { // auto
             AP_Controller::update(dt);
             //Serial.println("automode");
         }
@@ -78,9 +81,9 @@ public:
 
 void controllerInit()
 {
-    _rc.push_back(new AP_RcChannel(k_chMode,PSTR("STR"),APM_RC,7,45));
-    _rc.push_back(new AP_RcChannel(k_chStr,PSTR("STR"),APM_RC,0,45));
-    _rc.push_back(new AP_RcChannel(k_chThr,PSTR("THR"),APM_RC,1,100));
+    _rc.push_back(new AP_RcChannel(k_chMode,PSTR("MODE_"),APM_RC,7,45));
+    _rc.push_back(new AP_RcChannel(k_chStr,PSTR("STR_"),APM_RC,0,45));
+    _rc.push_back(new AP_RcChannel(k_chThr,PSTR("THR_"),APM_RC,1,100));
 
     _controller = new CarController(k_cntrl,k_pidStr,k_pidThr,&(navigator()->yaw),
                                     &(navigator()->groundSpeed),

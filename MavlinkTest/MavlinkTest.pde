@@ -16,7 +16,7 @@ void handleMessage(mavlink_message_t * msg) {
 
 void setup() {
   Serial.begin(57600);
-  Serial3.begin(38400);
+  Serial3.begin(57600);
   mavlink_comm_0_port = &Serial3;
   packetDrops = 0;
 }
