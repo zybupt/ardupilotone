@@ -155,10 +155,6 @@ public:
             int16_t ch[8];
             for (int i=0; i<8; i++) ch[i] = 0;
             for (int i=0; i<8 && i<_apo->rc().getSize(); i++) ch[i] = 10000*_apo->rc()[i]->getNormalized();
-            _apo->getDebug().printf_P(PSTR("SERVO_OUT: ch 1: %d ch2 : %d\n"),ch[0],ch[1]);
-            _apo->getDebug().printf_P(PSTR("SERVO_OUT_NORM: ch 1: %f ch2 : %f\n"),
-                    _apo->rc()[0]->getNormalized(),
-                    _apo->rc()[1]->getNormalized());
             mavlink_msg_rc_channels_scaled_send(_channel,ch[0],ch[1],ch[2],ch[3],ch[4],ch[5],ch[6],ch[7],255);
             break;
         }

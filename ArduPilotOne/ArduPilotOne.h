@@ -92,6 +92,9 @@ public:
     AP_CommLink * gcs() {
         return _gcs;
     }
+    AP_CommLink * hil() {
+        return _hil;
+    }
 private:
 
     /**
@@ -167,6 +170,7 @@ private:
      * Communication Channels
      */
     AP_CommLink * _gcs;
+	AP_CommLink * _hil;
 
     /**
      * Navigator
