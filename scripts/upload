@@ -1,3 +1,18 @@
-#!/binb/bash
-port=$1
-avrdude -c arduino -p m1280 -P $port -carduino -b57600 -U /tmp/ArduPilotOne.build/ArduPilotOne.hex
+#!/bin/bash
+echo running avrdude to program board
+
+echo -n -e 'enter port (i.e. /dev/ttyUSB0) : '
+read port
+if [[ $port = '' ]]; then
+	port='/dev/ttyUSB0'
+fi
+echo -e 'port entered: >>${port}<<'
+
+echo -n -e 'enter sketch (i.e. ArduPilotOne) : '
+read sketch
+if [[ $sketch = '' ]]; then
+	sketch='ArduPilotOne'
+fi
+echo -e 'sketch entered: >>$sketch<<'
+
+avrdude -c arduino -p m1280 -P $port -carduino -b57600 -U /tmp/ArduPilotOne.build/$sketch.hex

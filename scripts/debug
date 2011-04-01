@@ -1,3 +1,12 @@
 #!/bin/bash
+
+echo -n -e 'enter sketch (i.e. ArduPilotOne) : '
+read sketch
+if [[ $sketch = '' ]]; then
+	sketch='ArduPilotOne'
+fi
+echo -e 'sketch entered: >>$sketch<<'
+
 avarice --mkII --capture --jtag usb :4242 &
-gnome-terminal -x avr-gdb /tmp/ArduPilotOne.build/ArduPilotOne.elf
+gnome-terminal -x avr-gdb /tmp/ArduPilotOne.build/$sketch.elf
+echo -e '\n\nat the gdb prompt type "target remote localhost:4242"'
