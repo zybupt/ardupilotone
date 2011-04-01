@@ -13,6 +13,6 @@ read sketch
 if [[ $sketch = '' ]]; then
 	sketch='ArduPilotOne'
 fi
-echo -e 'sketch entered: >>$sketch<<'
+echo -e "sketch entered: >>$sketch<<"
 
-avrdude -c arduino -p m1280 -P $port -carduino -b57600 -U /tmp/ArduPilotOne.build/$sketch.hex
+avrdude -c arduino -p m1280 -P $port -carduino -b57600 -U /tmp/$sketch.build/$sketch.hex
