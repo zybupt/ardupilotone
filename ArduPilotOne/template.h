@@ -19,17 +19,14 @@
 #ifndef Class_H
 #define Class_H
 
-namespace apo
-{
+namespace apo {
 
 /// Class desciprtion
-class Class
-{
+class Class {
 public:
 }
 
 } // namespace apo
 
 #endif // Class_H
-
 // vim:ts=4:sw=4:expandtab

@@ -1,5 +1,4 @@
 #define BOARD ARDUPILOTMEGA
 #define AIRSPEED_SENSOR DISABLED
 #define VEHICLE_TYPE CAR // SELECT FROM CAR/ PLANE/ QUAD
-
 // vim:ts=4:sw=4:expandtab

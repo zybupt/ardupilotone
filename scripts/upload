@@ -6,7 +6,7 @@ read port
 if [[ $port = '' ]]; then
 	port='/dev/ttyUSB0'
 fi
-echo -e 'port entered: >>${port}<<'
+echo -e "port entered: >>$port<<"
 
 echo -n -e 'enter sketch (i.e. ArduPilotOne) : '
 read sketch

@@ -29,8 +29,7 @@
  * ArduPilotOne does not use any global
  * variables.
  */
-namespace apo
-{
+namespace apo {
 
 // forward declarations
 class AP_CommLink;
@@ -50,144 +49,140 @@ class AP_CommLink;
  *
 
  */
-class ArduPilotOne : public Loop
-{
+class ArduPilotOne: public Loop {
 public:
-    /**
-     * Default constructor
-     */
-    ArduPilotOne(
-        BetterStream & debug,
-        BetterStream & gcs,
-        AP_ADC * adc, GPS * gps,
-        APM_BMP085_Class * baro, Compass * compass);
+	/**
+	 * Default constructor
+	 */
+	ArduPilotOne(BetterStream & debug, BetterStream & gcs, AP_ADC * adc,
+			GPS * gps, APM_BMP085_Class * baro, Compass * compass);
 
-    /**
-     * Accessors
-     */
-    Vector<AP_RcChannel*> & rc() {
-        return _rc;
-    }
-    AP_ADC * adc() {
-        return _adc;
-    }
-    GPS * gps() {
-        return _gps;
-    }
-    Compass * compass() {
-        return _compass;
-    }
-    AP_Navigator * navigator() {
-        return _navigator;
-    }
-    AP_Guide * guide() {
-        return _guide;
-    }
-    AP_Controller * controller() {
-        return _controller;
-    }
-    BetterStream & getDebug() {
-        return _debug;
-    }
-    AP_CommLink * gcs() {
-        return _gcs;
-    }
+	/**
+	 * Accessors
+	 */
+	Vector<AP_RcChannel*> & rc() {
+		return _rc;
+	}
+	AP_ADC * adc() {
+		return _adc;
+	}
+	GPS * gps() {
+		return _gps;
+	}
+	Compass * compass() {
+		return _compass;
+	}
+	AP_Navigator * navigator() {
+		return _navigator;
+	}
+	AP_Guide * guide() {
+		return _guide;
+	}
+	AP_Controller * controller() {
+		return _controller;
+	}
+	BetterStream & getDebug() {
+		return _debug;
+	}
+	AP_CommLink * gcs() {
+		return _gcs;
+	}
 private:
 
-    /**
-     * Include the AP_Var keys
-     */
+	/**
+	 * Include the AP_Var keys
+	 */
 #include "AP_Var_keys.h"
 
-    /**
-     * Include the user defined controllers file.
-     */
+	/**
+	 * Include the user defined controllers file.
+	 */
 #include "controllers.h"
 
-    /**
-     * Loop 0 Callbacks (fastest)
-     * - inertial navigation
-     * @param data A void pointer used to pass the apo class
-     *  so that the apo public interface may be accessed.
-     */
-    static void callback0(void * data);
+	/**
+	 * Loop 0 Callbacks (fastest)
+	 * - inertial navigation
+	 * @param data A void pointer used to pass the apo class
+	 *  so that the apo public interface may be accessed.
+	 */
+	static void callback0(void * data);
 
-    /**
-     * Loop 1 Callbacks
-     * - control
-     * - compass reading
-     * @see callback0
-     */
-    static void callback1(void * data);
+	/**
+	 * Loop 1 Callbacks
+	 * - control
+	 * - compass reading
+	 * @see callback0
+	 */
+	static void callback1(void * data);
 
-    /**
-     * Loop 2 Callbacks
-     * - gps sensor fusion
-     * - compass sensor fusion
-     * @see callback0
-     */
-    static void callback2(void * data);
+	/**
+	 * Loop 2 Callbacks
+	 * - gps sensor fusion
+	 * - compass sensor fusion
+	 * @see callback0
+	 */
+	static void callback2(void * data);
 
-    /**
-     * Loop 3 Callbacks
-     * - slow messages
-     * @see callback0
-     */
-    static void callback3(void * data);
+	/**
+	 * Loop 3 Callbacks
+	 * - slow messages
+	 * @see callback0
+	 */
+	static void callback3(void * data);
 
-    /**
-     * Loop 4 Callbacks
-     * - super slow mesages
-     * - log writing
-     * @see callback0
-     */
-    static void callback4(void * data);
+	/**
+	 * Loop 4 Callbacks
+	 * - super slow mesages
+	 * - log writing
+	 * @see callback0
+	 */
+	static void callback4(void * data);
 
-    /**
-     * Comm ports
-     */
-    BetterStream & _debug;
+	/**
+	 * Comm ports
+	 */
+	BetterStream & _debug;
 
-    /**
-     * Sensors
-     * TODO: Abstract all sensor libraries to allow using
-     * ArduPilot and eventually newer hardware.
-     */
-    AP_ADC * _adc;
-    GPS * _gps;
-    APM_BMP085_Class * _baro;
-    Compass * _compass;
+	/**
+	 * Sensors
+	 * TODO: Abstract all sensor libraries to allow using
+	 * ArduPilot and eventually newer hardware.
+	 */
+	AP_ADC * _adc;
+	GPS * _gps;
+	APM_BMP085_Class * _baro;
+	Compass * _compass;
 
-    /**
-     * Radio Channels
-     */
-    Vector<AP_RcChannel *> _rc;
+	/**
+	 * Radio Channels
+	 */
+	Vector<AP_RcChannel *> _rc;
 
-    /**
-     * Communication Channels
-     */
-    AP_CommLink * _gcs;
+	/**
+	 * Communication Channels
+	 */
+	AP_CommLink * _gcs;
 
-    /**
-     * Navigator
-     */
-    AP_Navigator * _navigator;
+	/**
+	 * Navigator
+	 */
+	AP_Navigator * _navigator;
 
-    /**
-     * Guide
-     */
-    AP_Guide * _guide;
+	/**
+	 * Guide
+	 */
+	AP_Guide * _guide;
 
-    /**
-     * Controller
-     */
-    AP_Controller * _controller;
+	/**
+	 * Controller
+	 */
+	AP_Controller * _controller;
 
-    /**
-     * Constants
-     */
-    static const float deg2rad = M_PI/180;
-    static const float rad2deg = 180/M_PI;
+	/**
+	 * Constants
+	 */
+	static const float deg2rad = M_PI / 180;
+	static const float rad2deg = 180 / M_PI;
 };
 
 } // namespace apo
