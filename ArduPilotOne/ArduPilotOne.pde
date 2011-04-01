@@ -72,19 +72,11 @@ ArduPilotOne::ArduPilotOne(
     AP_ADC * adc, GPS * gps,
     APM_BMP085_Class * baro, Compass * compass):
     Loop(LOOP_0_RATE,callback0,this),
-    _debug(Serial1),
-	_hil(NULL),
+    _debug(debug),
     _gcs(new MavlinkComm(&gcs,this)),
     _controller(NULL),
     _adc(adc), _gps(gps), _baro(baro), _compass(compass)
 {
-
-#ifdef HIL
-	// take over debug line for HIL mode using mavlink protocol
-	_hil = new MavlinkComm(&debug,this);
-#else
-	_debug = debug;
-#endif
 
     /*
      * Attach loops
@@ -152,19 +144,6 @@ void ArduPilotOne::callback1(void * data)
     ArduPilotOne * apo = (ArduPilotOne *)data;
 
     /*
-     * if running hardware in the loop look for data 
-     */
-    if (apo->hil()) {
-        // send messages
-        apo->hil()->sendMessage(AP_CommLink::MSG_LOCATION);
-        apo->hil()->sendMessage(AP_CommLink::MSG_ATTITUDE);
-        apo->hil()->sendMessage(AP_CommLink::MSG_SERVO_OUT);
-
-        // receive messages
-        apo->hil()->receive();
-    }
-
-    /*
      * read compass
      */
     if (apo->compass()) apo->compass()->read();
@@ -202,6 +181,8 @@ void ArduPilotOne::callback2(void * data)
     /*
      * handle ground control station communication
      */
+    {
+    }
     if (apo->gcs()) {
         // send messages
         apo->gcs()->sendMessage(AP_CommLink::MSG_LOCATION);
@@ -270,14 +251,9 @@ void setup()
 
     Serial.println("starting APO");
 
-#ifdef HIL
-    apoGlobal = new apo::ArduPilotOne(Serial,Serial3,NULL, NULL, NULL, NULL);
-#else
     apoGlobal = new apo::ArduPilotOne(Serial,Serial3,
                                       new AP_ADC_ADS7844, new AP_GPS_UBLOX(&Serial1),
                                       new APM_BMP085_Class, new AP_Compass_HMC5843);
-#endif
-
 }
 
 void loop()
