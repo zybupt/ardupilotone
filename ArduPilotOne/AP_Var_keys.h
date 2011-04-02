@@ -13,7 +13,7 @@ enum keys {
 #endif // CAR
 
 	// 200-256 allocated for commands
-	k_cmdStart=200,
+	k_firstCommand=200,
 };
 
 // max 256 keys

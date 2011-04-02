@@ -25,6 +25,7 @@
 #include <AP_Vector.h>
 #include "defines.h"
 #include "AP_Var_keys.h"
+#include "RangeFinder.h"
 
 namespace apo {
 
@@ -40,13 +41,23 @@ private:
 		float _z;
 	};
 	AP_VarS<CommandStorage> _data;
+	static uint8_t _numberOfCommands;
 public:
+	/**
+	 * Constructor for loading from memory.
+	 * @param index Start at zero.
+	 */
 	Command(uint8_t index) :
-		_data(k_cmdStart + index) {
-		_data.load();
+		_data(k_firstCommand + index) {
+		if (getNumberOfCommands() > index)
+			_data.load();
 	}
+	/**
+	 * Constructor for saving from command a mavlink waypoint.
+	 * @param cmd The mavlink_waopint_t structure for the command.
+	 */
 	Command(mavlink_waypoint_t cmd) :
-		_data(k_cmdStart + cmd.seq) {
+		_data(k_firstCommand + cmd.seq) {
 		_data.get()._command = cmd.command;
 		_data.get()._autocontinue = cmd.autocontinue;
 		_data.get()._frame = cmd.frame;
@@ -54,6 +65,7 @@ public:
 		_data.get()._x = cmd.x;
 		_data.get()._y = cmd.y;
 		_data.get()._z = cmd.z;
+		_data.save();
 	}
 	bool save() {
 		return _data.save();
@@ -61,15 +73,27 @@ public:
 	bool load() {
 		return _data.load();
 	}
+	uint8_t getNumberOfCommands() {
+		return _numberOfCommands;
+	}
+	void setNumberOfCommands(uint8_t numberOfCommands) {
+		_numberOfCommands = numberOfCommands;
+	}
 };
+uint8_t Command::_numberOfCommands = 1;
 
 /// Guide class
 class AP_Guide {
 public:
 
+	/**
+	 * This is the constructor, which requires a link to the navigator.
+	 * @param navigator This is the navigator pointer.
+	 */
 	AP_Guide(AP_Navigator * navigator) :
 		_navigator(navigator), headingCommand(0), airSpeedCommand(0),
-				groundSpeedCommand(0), altitudeCommand(0), _prevCommand(0), _nextCommand(1) {
+				groundSpeedCommand(0), altitudeCommand(0), _prevCommand(0),
+				_nextCommand(1) {
 	}
 
 	virtual void update() = 0;
@@ -112,10 +136,26 @@ protected:
 class MavlinkGuide: public AP_Guide {
 public:
 
-	MavlinkGuide(AP_Navigator * navigator) :
-		AP_Guide(navigator) {
+	MavlinkGuide(AP_Navigator * navigator,
+			RangeFinder * frontRangeFinder =NULL,
+			RangeFinder * backRangeFinder =NULL,
+			RangeFinder * leftRangeFinder =NULL,
+			RangeFinder * rightRangeFinder =NULL) :
+			AP_Guide(navigator) ,
+			_frontRangeFinder(frontRangeFinder),
+			_backRangeFinder(backRangeFinder),
+			_leftRangeFinder(leftRangeFinder),
+			_rightRangeFinder(leftRangeFinder)
+			{
 	}
 	virtual void update() {
+
+		// stop if your going to drive into something in front of you
+		if (_frontRangeFinder && _frontRangeFinder->distance < 10 ) {
+			airSpeedCommand = 0;
+			groundSpeedCommand = 0;
+		}
+
 		//float dXt = position()->crossTrack(previousWaypoint(),nextWaypoint());
 		//float dAt = position()->alongTrack(previousWaypoint(),nextWaypoint());
 		//float d = previousWaypoint()->distanceTo(currentPosition());
@@ -126,6 +166,11 @@ public:
 
 		//}
 	}
+private:
+	RangeFinder * _frontRangeFinder;
+	RangeFinder * _backRangeFinder;
+	RangeFinder * _leftRangeFinder;
+	RangeFinder * _rightRangeFinder;
 };
 
 } // namespace apo
