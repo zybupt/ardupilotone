@@ -55,11 +55,11 @@ public:
 		_data.get()._y = cmd.y;
 		_data.get()._z = cmd.z;
 	}
-	void save() {
-		_data.save();
+	bool save() {
+		return _data.save();
 	}
-	void load() {
-		_data.load();
+	bool load() {
+		return _data.load();
 	}
 };
 

@@ -12,8 +12,8 @@ enum keys {
 	k_chStr,
 #endif // CAR
 
-	// 250-256 allocated for commands
-	k_cmdStart=250,
+	// 200-256 allocated for commands
+	k_cmdStart=200,
 };
 
 // max 256 keys
