@@ -49,14 +49,10 @@
 #include "ArduPilotOne.h"
 /*
  * Required Global Declarations
- */FastSerialPort0(Serial)
-;
-FastSerialPort1(Serial1)
-;
-FastSerialPort2(Serial2)
-;
-FastSerialPort3(Serial3)
-;
+ */
+FastSerialPort0(Serial);
+FastSerialPort1(Serial1);FastSerialPort2(Serial2);
+FastSerialPort3(Serial3);
 
 apo::ArduPilotOne * apoGlobal = NULL;
 
@@ -66,10 +62,10 @@ class AP_CommLink;
 
 ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs,
 		AP_ADC * adc = NULL, GPS * gps = NULL, APM_BMP085_Class * baro = NULL,
-		Compass * compass = NULL, RangeFinder * frontRangeFinder = NULL,
-		RangeFinder * backRangeFinder = NULL,
-		RangeFinder * leftRangeFinder = NULL,
-		RangeFinder * rightRangeFinder = NULL) :
+		Compass * compass = NULL /*, RangeFinder * frontRangeFinder = NULL,
+ RangeFinder * backRangeFinder = NULL,
+ RangeFinder * leftRangeFinder = NULL,
+ RangeFinder * rightRangeFinder = NULL*/) :
 	Loop(LOOP_0_RATE, callback0, this), _debug(debug),
 			_gcs(new MavlinkComm(&gcs, this)), _controller(NULL), _adc(adc),
 			_gps(gps), _baro(baro), _compass(compass) {
@@ -126,8 +122,8 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs,
 	/*
 	 * Guide
 	 */
-	_guide = new MavlinkGuide(_navigator, frontRangeFinder, backRangeFinder,
-			leftRangeFinder, rightRangeFinder);
+	_guide = new MavlinkGuide(_navigator/*, frontRangeFinder, backRangeFinder,
+	 leftRangeFinder, rightRangeFinder*/);
 
 	getDebug().println("initialization complete");
 }
@@ -253,9 +249,9 @@ void setup() {
 
 	Serial.println("starting APO");
 
-	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, new AP_ADC_ADS7844,
-			new AP_GPS_UBLOX(&Serial1), new APM_BMP085_Class,
-			new AP_Compass_HMC5843, new AP_RangeFinder_MaxsonarLV, new AP_RangeFinder_MaxsonarLV);
+	 apoGlobal = new apo::ArduPilotOne(Serial, Serial3, new AP_ADC_ADS7844,
+	 new AP_GPS_UBLOX(&Serial1), new APM_BMP085_Class,
+	 new AP_Compass_HMC5843 /* , new AP_RangeFinder_MaxsonarLV, new AP_RangeFinder_MaxsonarLV*/);
 }
 
 void loop() {

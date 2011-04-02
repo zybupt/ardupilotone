@@ -119,45 +119,12 @@ public:
 	QuadController(AP_Var::Key chRollKey, AP_Var::Key chPitchKey, AP_Var::Key chYawKey,
 			AP_Var::Key pidRollKey, AP_Var::Key pidPitchKey, AP_Var::Key pidYawKey) :
 	ch1(1), ch2(2), ch3(3), ch4(4) {
-		// rc channels
-		addCh(new AP_RcChannel(chRollKey,PSTR("ROLL"),APM_RC,chRoll,45));
-		addCh(new AP_RcChannel(chPitchKey,PSTR("PTCH"),APM_RC,chPitch,45));
-		addCh(new AP_RcChannel(chYawKey,PSTR("YAW"),APM_RC,chYaw,45));
-
-		// pitch control loop
-#if AIRSPEED_SENSOR == ENABLED
-		// pitch control loop w/ airspeed
-		addBlock(new SumGain(airspeedCommand,AP_Float_unity,airspeed,AP_Float_negative_unity));
-#else
-		// cross feed variables
-		addBlock(new SumGain(roll,kffPitchCompk,throttleServo,kffT2P));
-#endif
-		addBlock(new Pid(pidPitchKey,PSTR("PTCH"),0.1,0,0,1,20));
-		addBlock(new Sink(chPitch));
-
-		// roll control loop
-		addBlock(new SumGain(headingCommand,one,heading,negOne));
-		addBlock(new Pid(headingkP,headingKI,headingKD));
-		addBlock(new Sink(rollCommand));
-		addBlock(new SumGain(rollCommand,one,roll,negOne));
-		addBlock(new Pid(rollKP,rollKI,rollKD));
-		addBlock(new Sink(chRoll));
-
-		// throttle control loop
-		addBlock(new SumGain(airspeedCommand,one,airspeed,negOne));
-		addBlock(new Pid(throttleKP,throttleKI,throttleKD));
-		addBlock(new Sink(chThr));
-
-		// mixing
-		addBlock(new QuadMix(getRc(chRoll,chPitch,chYaw,chThr)));
-
-		// TODO: This is just the plane controller, need to do some motor mixing here
 	}
 };
 
 void controllerInit()
 {
-	controller = new QuadController;
+	//controller = new QuadController;
 }
 
 #elif VEHICLE_TYPE == PLANE

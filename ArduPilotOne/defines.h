@@ -12,6 +12,10 @@
 #define ARDUPILOT 1
 #define ARDUPILOTMEGA 2
 
+#define CAR 1
+#define QUAD 2
+#define PLANE 3
+
 //Hardware Parameters
 #define SLIDE_SWITCH_PIN 40
 #define PUSHBUTTON_PIN 41

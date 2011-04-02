@@ -25,7 +25,6 @@
 #include <AP_Vector.h>
 #include "defines.h"
 #include "AP_Var_keys.h"
-#include "RangeFinder.h"
 
 namespace apo {
 
@@ -136,25 +135,27 @@ protected:
 class MavlinkGuide: public AP_Guide {
 public:
 
-	MavlinkGuide(AP_Navigator * navigator,
+	MavlinkGuide(AP_Navigator * navigator/*,
 			RangeFinder * frontRangeFinder =NULL,
 			RangeFinder * backRangeFinder =NULL,
 			RangeFinder * leftRangeFinder =NULL,
-			RangeFinder * rightRangeFinder =NULL) :
-			AP_Guide(navigator) ,
+			RangeFinder * rightRangeFinder =NULL*/) :
+			AP_Guide(navigator)/* ,
 			_frontRangeFinder(frontRangeFinder),
 			_backRangeFinder(backRangeFinder),
 			_leftRangeFinder(leftRangeFinder),
-			_rightRangeFinder(leftRangeFinder)
+			_rightRangeFinder(leftRangeFinder)*/
 			{
 	}
 	virtual void update() {
 
+		/*
 		// stop if your going to drive into something in front of you
 		if (_frontRangeFinder && _frontRangeFinder->distance < 10 ) {
 			airSpeedCommand = 0;
 			groundSpeedCommand = 0;
 		}
+		*/
 
 		//float dXt = position()->crossTrack(previousWaypoint(),nextWaypoint());
 		//float dAt = position()->alongTrack(previousWaypoint(),nextWaypoint());
@@ -167,10 +168,11 @@ public:
 		//}
 	}
 private:
+	/*
 	RangeFinder * _frontRangeFinder;
 	RangeFinder * _backRangeFinder;
 	RangeFinder * _leftRangeFinder;
-	RangeFinder * _rightRangeFinder;
+	RangeFinder * _rightRangeFinder*/
 };
 
 } // namespace apo
