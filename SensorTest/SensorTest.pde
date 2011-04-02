@@ -1,46 +1,38 @@
 /*
-  AnalogReadSerial
- Reads an analog input on pin 0, prints the result to the serial monitor 
- 
- This example code is in the public domain.
- */
+  AP_RangeFinder_test
+  Code by DIYDrones.com
+*/
 
-#include <GCS_MAVLink.h>
+#include <AP_RangeFinder.h>     // Range finder library
+#include <AP_ADC.h>		// ArduPilot Mega Analog to Digital Converter Library
 
-int packetDrops = 0;
+#define RF_PIN AP_RANGEFINDER_PITOT_TUBE // the pitot tube on the front of the oilpan
+//#define RF_PIN A5 // A5 is the far back-right pin on the oilpan (near the CLI switch)
 
-void handleMessage(mavlink_message_t * msg) {
-  Serial.print(", received mavlink message: ");
-  Serial.print(msg->msgid,DEC);
+// declare global instances for reading pitot tube
+AP_ADC_ADS7844	adc;
+
+// create the range finder object
+//AP_RangeFinder_SharpGP2Y aRF;
+AP_RangeFinder_MaxsonarXL aRF;
+//AP_RangeFinder_MaxsonarLV aRF;
+
+void setup()
+{
+  Serial.begin(115200);
+  Serial.println("Range Finder Test v1.0");
+  adc.Init();            // APM ADC library initialization
+  aRF.init(RF_PIN, &adc);
 }
 
-void setup() {
-  Serial.begin(57600);
-  Serial3.begin(57600);
-  mavlink_comm_0_port = &Serial3;
-  packetDrops = 0;
+void loop()
+{
+    int i = 0;
+    Serial.print("dist:");
+    Serial.print(aRF.read());
+    Serial.print("\traw:");
+    Serial.print(aRF.raw_value);
+    Serial.println();
+    delay(20);
 }
 
-void loop() {
-  mavlink_msg_heartbeat_send(MAVLINK_COMM_0,mavlink_system.type,MAV_AUTOPILOT_ARDUPILOTMEGA);
-  Serial.print("heartbeat sent");
-    
-  // receive new packets
-  mavlink_message_t msg;
-  mavlink_status_t status;
-
-  Serial.print(", bytes available: "); Serial.print(comm_get_available(MAVLINK_COMM_0));
-  while(comm_get_available(MAVLINK_COMM_0)) {
-      uint8_t c = comm_receive_ch(MAVLINK_COMM_0);
-
-      // Try to get a new message
-      if(mavlink_parse_char(MAVLINK_COMM_0, c, &msg, &status)) handleMessage(&msg);
-  }
-
-  // Update packet drops counter
-  packetDrops += status.packet_rx_drop_count;
-  
-  Serial.print(", dropped packets: ");
-  Serial.println(packetDrops);
-  delay(1000);
-}
