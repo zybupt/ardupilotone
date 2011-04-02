@@ -84,7 +84,7 @@ void controllerInit() {
 
 	_controller = new CarController(k_cntrl, k_pidStr, k_pidThr,
 			&(navigator()->yaw), &(navigator()->groundSpeed),
-			guide()->headingCommand(), guide()->groundSpeedCommand(), _rc[0],
+			&guide()->headingCommand, &guide()->groundSpeedCommand, _rc[0],
 			_rc[1], _rc[2]);
 
 }

@@ -28,30 +28,38 @@
 
 namespace apo {
 
-
 class Command {
 private:
 	struct CommandStorage {
 		uint8_t _command;
 		uint8_t _autocontinue;
 		uint8_t _frame;
-		uint8_t _options;
-		uint8_t _param1;
-		int32_t _x;
-		int32_t _y;
-		int32_t _z;
+		float _param1;
+		float _x;
+		float _y;
+		float _z;
 	};
 	AP_VarS<CommandStorage> _data;
 public:
-	Command(mavlink_waypoint_t cmd) : _data(k_cmdStart + cmd.seq)
-	{
+	Command(uint8_t index) :
+		_data(k_cmdStart + index) {
+		_data.load();
+	}
+	Command(mavlink_waypoint_t cmd) :
+		_data(k_cmdStart + cmd.seq) {
+		_data.get()._command = cmd.command;
 		_data.get()._autocontinue = cmd.autocontinue;
 		_data.get()._frame = cmd.frame;
-		_data.get()._command = cmd.command;
+		_data.get()._param1 = cmd.param1;
 		_data.get()._x = cmd.x;
 		_data.get()._y = cmd.y;
 		_data.get()._z = cmd.z;
-		_data.get()._param1 = cmd.param1;
+	}
+	void save() {
+		_data.save();
+	}
+	void load() {
+		_data.load();
 	}
 };
 
@@ -60,20 +68,8 @@ class AP_Guide {
 public:
 
 	AP_Guide(AP_Navigator * navigator) :
-		_navigator(navigator), _headingCommand(), _airSpeedCommand(),
-				_groundSpeedCommand(), _altitudeCommand() {
-	}
-	const float * headingCommand() {
-		return &_headingCommand;
-	}
-	const float * airSpeedCommand() {
-		return &_airSpeedCommand;
-	}
-	const float * groundSpeedCommand() {
-		return &_groundSpeedCommand;
-	}
-	const float * altitudeCommand() {
-		return &_altitudeCommand;
+		_navigator(navigator), headingCommand(0), airSpeedCommand(0),
+				groundSpeedCommand(0), altitudeCommand(0), _prevCommand(0), _nextCommand(1) {
 	}
 
 	virtual void update() = 0;
@@ -99,16 +95,18 @@ public:
 			return _cmdIndex + 1;
 	}
 
+	float headingCommand;
+	float airSpeedCommand;
+	float groundSpeedCommand;
+	float altitudeCommand;
+
 protected:
 	uint8_t _cmdNum;
 	uint8_t _cmdIndex;
 	AP_Navigator * _navigator;
-	float _headingCommand;
-	float _airSpeedCommand;
-	float _groundSpeedCommand;
-	float _altitudeCommand;
-	//Command _prevCommand;
-	//Command _nextCommand;
+
+	Command _prevCommand;
+	Command _nextCommand;
 };
 
 class MavlinkGuide: public AP_Guide {
@@ -128,10 +126,6 @@ public:
 
 		//}
 	}
-private:
-	//AP_Waypoint * currentWaypoint() { return flightPlan[currentWaypointIndex]; }
-	//AP_Waypoint * previousWaypoint() { return flightPlan[previousWaypointIndex]; }
-	//AP_Waypoint * position() { return _navigator->getPosition(); }
 };
 
 } // namespace apo
