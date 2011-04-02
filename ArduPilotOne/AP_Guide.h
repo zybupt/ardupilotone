@@ -27,7 +27,9 @@
 #include "AP_Var_keys.h"
 
 namespace apo {
-struct CommandStroage {
+
+class CommandStroage {
+public:
 	uint8_t _command;
 	uint8_t _autocontinue;
 	uint8_t _frame;
@@ -104,8 +106,8 @@ protected:
 	float _airSpeedCommand;
 	float _groundSpeedCommand;
 	float _altitudeCommand;
-	Command _prevCommand;
-	Command _nextCommand;
+	//Command _prevCommand;
+	//Command _nextCommand;
 };
 
 class MavlinkGuide: public AP_Guide {
