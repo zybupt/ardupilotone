@@ -28,29 +28,30 @@
 
 namespace apo {
 
-class CommandStroage {
-public:
-	uint8_t _command;
-	uint8_t _autocontinue;
-	uint8_t _frame;
-	uint8_t _options;
-	uint8_t _param1;
-	int32_t _x;
-	int32_t _y;
-	int32_t _z;
-};
 
-class Command : public AP_VarS<CommandStroage> {
+class Command {
+private:
+	struct CommandStorage {
+		uint8_t _command;
+		uint8_t _autocontinue;
+		uint8_t _frame;
+		uint8_t _options;
+		uint8_t _param1;
+		int32_t _x;
+		int32_t _y;
+		int32_t _z;
+	};
+	AP_VarS<CommandStorage> _data;
 public:
-	Command(mavlink_waypoint_t cmd) : AP_VarS<CommandStorage>(k_cmdStart + cmd.seq)
+	Command(mavlink_waypoint_t cmd) : _data(k_cmdStart + cmd.seq)
 	{
-		get()._autocontinue = cmd.autocontinue;
-		get()._frame = cmd.frame;
-		get()._command = cmd.command;
-		get()._x = cmd.x;
-		get()._y = cmd.y;
-		get()._z = cmd.z;
-		get()._param1 = cmd.param1;
+		_data.get()._autocontinue = cmd.autocontinue;
+		_data.get()._frame = cmd.frame;
+		_data.get()._command = cmd.command;
+		_data.get()._x = cmd.x;
+		_data.get()._y = cmd.y;
+		_data.get()._z = cmd.z;
+		_data.get()._param1 = cmd.param1;
 	}
 };
 
