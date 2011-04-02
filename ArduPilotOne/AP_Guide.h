@@ -28,7 +28,6 @@
 
 namespace apo {
 
-// command class that manages its memory through AP_VarS
 class Command {
 private:
 	struct CommandStorage {
@@ -56,11 +55,11 @@ public:
 		_data.get()._y = cmd.y;
 		_data.get()._z = cmd.z;
 	}
-	bool save() {
-		return _data.save();
+	void save() {
+		_data.save();
 	}
-	bool load() {
-		return _data.load();
+	void load() {
+		_data.load();
 	}
 };
 

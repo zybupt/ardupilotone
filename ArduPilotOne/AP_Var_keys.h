@@ -12,7 +12,7 @@ enum keys {
 	k_chStr,
 #endif // CAR
 
-	// 200-256 allocated for commands
+	// 250-256 allocated for commands
 	k_cmdStart=250,
 };
 
