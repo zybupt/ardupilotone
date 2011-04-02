@@ -23,17 +23,43 @@
 #include "AP_Navigator.h"
 #include <AP_Common.h>
 #include <AP_Vector.h>
+#include "defines.h"
+#include "AP_Var_keys.h"
 
 namespace apo {
+struct CommandStroage {
+	uint8_t _command;
+	uint8_t _autocontinue;
+	uint8_t _frame;
+	uint8_t _options;
+	uint8_t _param1;
+	int32_t _x;
+	int32_t _y;
+	int32_t _z;
+};
+
+class Command : public AP_VarS<CommandStroage> {
+public:
+	Command(mavlink_waypoint_t cmd) : AP_VarS<CommandStorage>(k_cmdStart + cmd.seq)
+	{
+		get()._autocontinue = cmd.autocontinue;
+		get()._frame = cmd.frame;
+		get()._command = cmd.command;
+		get()._x = cmd.x;
+		get()._y = cmd.y;
+		get()._z = cmd.z;
+		get()._param1 = cmd.param1;
+	}
+};
 
 /// Guide class
 class AP_Guide {
 public:
-	//AP_Guide(AP_Navigator * navigator) : _navigator(navigator),
-	//_headingCommand(), _airSpeedCommand(), _groundSpeedCommand(),
-	//_altitudeCommand()
-	//{
-	//}
+
+	AP_Guide(AP_Navigator * navigator) :
+		_navigator(navigator), _headingCommand(), _airSpeedCommand(),
+				_groundSpeedCommand(), _altitudeCommand() {
+	}
 	const float * headingCommand() {
 		return &_headingCommand;
 	}
@@ -46,20 +72,47 @@ public:
 	const float * altitudeCommand() {
 		return &_altitudeCommand;
 	}
+
 	virtual void update() = 0;
+
+	// current command index
+	uint8_t cmdIndex() {
+		return _cmdIndex;
+	}
+
+	// previous command index
+	uint8_t prevCmdIndex() {
+		if (_cmdIndex = 0)
+			return _cmdNum;
+		else
+			return _cmdIndex - 1;
+	}
+
+	// next command index
+	uint8_t nextCmdIndex() {
+		if (_cmdIndex >= _cmdNum - 1)
+			return 0;
+		else
+			return _cmdIndex + 1;
+	}
+
 protected:
+	uint8_t _cmdNum;
+	uint8_t _cmdIndex;
 	AP_Navigator * _navigator;
 	float _headingCommand;
 	float _airSpeedCommand;
 	float _groundSpeedCommand;
 	float _altitudeCommand;
+	Command _prevCommand;
+	Command _nextCommand;
 };
 
 class MavlinkGuide: public AP_Guide {
 public:
 
-	MavlinkGuide() :
-		flightPlan() {
+	MavlinkGuide(AP_Navigator * navigator) :
+		AP_Guide(navigator) {
 	}
 	virtual void update() {
 		//float dXt = position()->crossTrack(previousWaypoint(),nextWaypoint());
@@ -76,17 +129,6 @@ private:
 	//AP_Waypoint * currentWaypoint() { return flightPlan[currentWaypointIndex]; }
 	//AP_Waypoint * previousWaypoint() { return flightPlan[previousWaypointIndex]; }
 	//AP_Waypoint * position() { return _navigator->getPosition(); }
-	uint8_t currentWaypointIndex;
-	uint8_t previousWaypointIndex;
-	Vector<mavlink_command_t *> flightPlan;
-	void incrementWaypointIndices() {
-		currentWaypointIndex++;
-		previousWaypointIndex++;
-		if (currentWaypointIndex > flightPlan.getSize())
-			currentWaypointIndex = 0;
-		if (previousWaypointIndex > flightPlan.getSize())
-			previousWaypointIndex = 0;
-	}
 };
 
 } // namespace apo

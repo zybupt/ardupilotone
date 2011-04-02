@@ -126,6 +126,11 @@ ArduPilotOne::ArduPilotOne(
      */
     _navigator = new DcmNavigator(AP_Navigator::MODE_LIVE,_adc,_gps,_baro,_compass);
 
+    /*
+     * Guide
+     */
+    _guide = new MavlinkGuide(_navigator);
+
     getDebug().println("initialization complete");
 }
 
