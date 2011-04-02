@@ -1,4 +1,4 @@
-sketches= ArduPilotOne MavlinkTest
+sketches= ArduPilotOne MavlinkTest SensorsTest
 
 all:
 	for sketch in $(sketches); do echo "\nbuilding $$sketch\n"; make -C $$sketch; done
