@@ -218,7 +218,18 @@ void setup() {
 	Serial1.begin(57600, 128, 128); // gps
 	Serial3.begin(57600, 128, 128); // gcs
 
-	Serial.println("starting APO");
+
+	/*
+	 * Pins
+	 */
+	Serial.println("settings pin modes");
+	delay(1000);
+	pinMode(A_LED_PIN, OUTPUT); //  extra led
+	pinMode(B_LED_PIN, OUTPUT); //  imu led
+	pinMode(C_LED_PIN, OUTPUT); //  gps led
+	pinMode(SLIDE_SWITCH_PIN, INPUT);
+	pinMode(PUSHBUTTON_PIN, INPUT);
+	DDRL |= B00000100; // set port L, pint 2 to output for the relay
 
 	/*
 	 * Sensor initialization
@@ -228,11 +239,11 @@ void setup() {
 
 	Serial.println("initializing adc");
 	AP_ADC * adc = new AP_ADC_ADS7844;
-	adc->Init();
+	adc->Init();;
 
 	Serial.println("initializing gps");
 	GPS * gps;
-	AP_GPS_Auto(&Serial1,&gps);
+	gps = new AP_GPS_Auto(&Serial1,&gps);
 	gps->init();
 
 	Serial.println("initializing baro");
@@ -240,6 +251,7 @@ void setup() {
 	baro->Init();
 
 	Serial.println("initializing compass");
+	delay(1000);
 	Compass * compass = new AP_Compass_HMC5843;
 	compass->init();
 
@@ -253,17 +265,6 @@ void setup() {
 	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 	rangeFinders[0]->init(1);
 	rangeFinders[0]->set_orientation(-1,0,0);
-
-	/*
-	 * Pins
-	 */
-	Serial.println("settings pin modes");
-	pinMode(A_LED_PIN, OUTPUT); //  extra led
-	pinMode(B_LED_PIN, OUTPUT); //  imu led
-	pinMode(C_LED_PIN, OUTPUT); //  gps led
-	pinMode(SLIDE_SWITCH_PIN, INPUT);
-	pinMode(PUSHBUTTON_PIN, INPUT);
-	DDRL |= B00000100; // set port L, pint 2 to output for the relay
 
 	/*
 	 * Start the autopilot
