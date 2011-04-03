@@ -95,7 +95,7 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStrea
 	 */
 	controllerInit();
 
-	getDebug().println("initialization complete");
+	getDebug().println_P(PSTR("initialization complete"));
 
 }
 
@@ -218,12 +218,10 @@ void setup() {
 	Serial1.begin(57600, 128, 128); // gps
 	Serial3.begin(57600, 128, 128); // gcs
 
-
 	/*
 	 * Pins
 	 */
-	Serial.println("settings pin modes");
-	delay(1000);
+	Serial.println_P(PSTR("settings pin modes"));
 	pinMode(A_LED_PIN, OUTPUT); //  extra led
 	pinMode(B_LED_PIN, OUTPUT); //  imu led
 	pinMode(C_LED_PIN, OUTPUT); //  gps led
@@ -234,33 +232,32 @@ void setup() {
 	/*
 	 * Sensor initialization
 	 */
-	Serial.println("initializing radio");
+	Serial.println_P(PSTR("initializing radio"));
 	APM_RC.Init(); // APM Radio initialization
 
-	Serial.println("initializing adc");
+	Serial.println_P(PSTR("initializing adc"));
 	AP_ADC * adc = new AP_ADC_ADS7844;
 	adc->Init();;
 
-	Serial.println("initializing gps");
+	Serial.println_P(PSTR("initializing gps"));
 	GPS * gps = new AP_GPS_MTK(&Serial1);
-	gps->init();
 
-	Serial.println("initializing baro");
+	Serial.println_P(PSTR("initializing baro"));
 	APM_BMP085_Class * baro = new APM_BMP085_Class;
 	baro->Init();
 
-	Serial.println("initializing compass");
+	Serial.println_P(PSTR("initializing compass"));
 	delay(1000);
 	Compass * compass = new AP_Compass_HMC5843;
 	compass->init();
 
-	Serial.println("initializing front range finder");
+	Serial.println_P(PSTR("initializing front range finder"));
 	Vector<RangeFinder *> rangeFinders;
 	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 	rangeFinders[0]->init(0);
 	rangeFinders[0]->set_orientation(1,0,0);
 
-	Serial.println("initializing back range finder");
+	Serial.println_P(PSTR("initializing back range finder"));
 	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 	rangeFinders[0]->init(1);
 	rangeFinders[0]->set_orientation(-1,0,0);
@@ -268,7 +265,8 @@ void setup() {
 	/*
 	 * Start the autopilot
 	 */
-	Serial.println("initializing ArduPilotOne");
+	Serial.println_P(PSTR("initializing ArduPilotOne"));
+	Serial.printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
 	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, Serial1, adc,
 		gps, baro, compass, &rangeFinders);
 

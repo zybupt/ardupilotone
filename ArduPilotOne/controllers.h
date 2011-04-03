@@ -38,7 +38,7 @@ public:
 	steeringCh(steeringCh), throttleCh(throttleCh),
 	_group(cntrlKey, PSTR("CNTRL_")),
 	_mode(&_group, 1, 0, PSTR("MODE")) {
-		Serial.println("initializing car controller");
+		Serial.println_P(PSTR("initializing car controller"));
 
 		// steering control loop
 		addBlock(new SumGain(headingCommand, &one, heading, &negativeOne));
@@ -183,7 +183,7 @@ public:
 		chLeft(chLeft), chRight(chRight), chFront(chFront),
 		chBack(chBack)
 	{
-		Serial.println("initializing quad controller");
+		Serial.println_P(PSTR("initializing quad controller"));
 		//addBlock(new QuadMix(getRc(chRoll, chPitch, chYaw, chThr)));
 		// RC channels
 
