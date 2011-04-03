@@ -5,12 +5,24 @@ enum keys {
 	k_config = 0,
 	k_cntrl,
 	k_chMode,
+
 #if VEHICLE_TYPE == CAR
 	k_pidThr,
 	k_pidStr,
 	k_chThr,
 	k_chStr,
-#endif // CAR
+#elif VEHICLE_TYPE == QUAD
+	k_pidPN,
+	k_pidPE,
+	k_pidPD,
+	k_pidRoll,
+	k_pidPitch,
+	k_pidYaw,
+	k_chLeft,
+	k_chRight,
+	k_chFront,
+	k_chBack,
+#endif // QUAD
 
 	// 200-256 allocated for commands
 	k_firstCommand=200,
