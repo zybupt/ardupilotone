@@ -1,6 +1,5 @@
 Overview
 --------------------------------------------------------------------------------------
-This is a playground for testing out some new ideas that are too radical to try on trunk.
 The overall goal is a single autopilot system capable of flying a quad/ car/ heli/ boat/ plane
 just by changing a compile time flag. In order to reach this goal many existing structures
 have been highly abstracted and reworked.
@@ -10,11 +9,6 @@ also be used for the original ArduPilot system and future DIY drones hardware.
 
 The ArduPilot support will require further library abstraction that has not yet 
 been handled.
-
-ArduPilotOne... one ArduPilot to rule them all :-P
-
-Jokes aside I'd like to see the advantageous bits of this branch merged back into the 
-trunk when the trunk is ready for them.
 
 COMPLETED: Loop Scheduling
 --------------------------------------------------------------------------------------
@@ -31,18 +25,18 @@ COMPLETED: EEPROM Parameter Management
 The AP_EEProm class has been created to allow automatic mapping of EEPROM stored 
 variables.
 
-DEBUGGING: Control System
+COMPLETED: Control System
 --------------------------------------------------------------------------------------
 The control system is defined by a set of blocks, much like scicoslab or simulink. This block set
 is then read in and loads the appropriate classes to create the control system.
 
-TODO: Guidance System
+IN PROGRESS: Guidance System
 --------------------------------------------------------------------------------------
 The guidance system takes the waypoints and current position as input and outputs the desired
 heading, velocity, and altitude to the controller. This should be relatively easy to 
 implement.
 
-TODO: Communication
+DEBUGGING: Communication
 --------------------------------------------------------------------------------------
 The mavlink communication protocol will be used for comms at this time.
 This has not been implemented yet but shouldn't take much work.
@@ -66,7 +60,7 @@ The coding standard is pretty well.. standard :-)
 2. lowercase for variables names
 3. uppercase for classes
 4. enums are lower case followed by _t ... example_t
-5. Format the code with astyle on the default settings.
+5. Format the code with astyle on the K/R setting.
 
 All are welcome to help with the code.
 
