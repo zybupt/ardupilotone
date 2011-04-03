@@ -193,9 +193,10 @@ void ArduPilotOne::callback3(void * data) {
 	apo->gcs()->sendMessage(AP_CommLink::MSG_HEARTBEAT);
 
 	/*
-	 * load debug
+	 * load/loop rate/ram debug
 	 */
-	apo->getDebug().printf_P(PSTR("load: %d%%\n"),apo->load());
+	apo->getDebug().printf_P(PSTR("load: %d%%\trate: %f Hz\tfree ram: %d bytes\n"),
+			apo->load(),1.0/apo->dt(),freeMemory());
 
 	/*
 	 * adc debug
