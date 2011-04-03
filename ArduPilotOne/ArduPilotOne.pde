@@ -61,7 +61,7 @@ namespace apo {
 
 class AP_CommLink;
 
-ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs,
+ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStream & hil,
 		AP_ADC * adc = NULL, GPS * gps = NULL, APM_BMP085_Class * baro = NULL,
 		Compass * compass = NULL, Vector<RangeFinder*> * rangeFinders = NULL) :
 	Loop(LOOP_0_RATE, callback0, this), _debug(debug),
@@ -242,8 +242,7 @@ void setup() {
 	adc->Init();;
 
 	Serial.println("initializing gps");
-	GPS * gps;
-	gps = new AP_GPS_Auto(&Serial1,&gps);
+	GPS * gps = new AP_GPS_MTK(&Serial1);
 	gps->init();
 
 	Serial.println("initializing baro");
@@ -270,7 +269,7 @@ void setup() {
 	 * Start the autopilot
 	 */
 	Serial.println("initializing ArduPilotOne");
-	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, adc,
+	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, Serial1, adc,
 		gps, baro, compass, &rangeFinders);
 
 }

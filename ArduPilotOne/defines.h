@@ -16,6 +16,9 @@
 #define QUAD 2
 #define PLANE 3
 
+#define ENABLE 1
+#define DISABLE 0
+
 //Hardware Parameters
 #define SLIDE_SWITCH_PIN 40
 #define PUSHBUTTON_PIN 41
