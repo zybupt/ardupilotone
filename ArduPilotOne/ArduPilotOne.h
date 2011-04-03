@@ -87,6 +87,12 @@ public:
 	AP_CommLink * gcs() {
 		return _gcs;
 	}
+	AP_CommLink * hil() {
+		return _hil;
+	}
+	runMode_t  runMode() {
+		return _runMode;
+	}
 private:
 
 	/**
@@ -161,7 +167,9 @@ private:
 	/**
 	 * Communication Channels
 	 */
-	AP_CommLink * _gcs;
+	AP_CommLink * _gcs; // ground control station
+	AP_CommLink * _hil; // hardware in the loop
+	runMode_t _runMode; // live/ hardware in the loop cntrl/ nav
 
 	/**
 	 * Navigator
