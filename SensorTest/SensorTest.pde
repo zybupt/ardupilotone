@@ -31,23 +31,25 @@ void setup()
 void loop()
 {
     int i = 0;
-
+    int ar0 = 0, ar1 = 0;
+    ar0 = aRF0.read() / 2;
+    ar1 = aRF1.read() / 2;
     Serial.print("dist0:");
-    Serial.print(aRF0.read());
+    Serial.print(aRF0.read()/2);
 
     Serial.print("\traw0:");
-    Serial.print(aRF0.raw_value);
+    Serial.print(aRF0.raw_value/2);
 
     Serial.println();
 
     Serial.print("dist1:");
-    Serial.print(aRF1.read());
+    Serial.print(aRF1.read()/2);
 
     Serial.print("\traw1:");
-    Serial.print(aRF1.raw_value);
+    Serial.print(aRF1.raw_value/2);
 
     Serial.println();
 
-    delay(20);
+    delay(2000);
 }
 
