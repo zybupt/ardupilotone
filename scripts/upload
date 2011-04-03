@@ -15,4 +15,4 @@ if [[ $sketch = '' ]]; then
 fi
 echo -e "sketch entered: >>$sketch<<"
 
-avrdude -c arduino -p m1280 -P $port -carduino -b57600 -U /tmp/$sketch.build/$sketch.hex
+avrdude -c arduino -p m1280 -P $port -carduino -b57600 -U ./build/$sketch.build/$sketch.hex

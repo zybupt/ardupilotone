@@ -135,9 +135,9 @@ void ArduPilotOne::callback1(void * data) {
 		apo->hil()->receive();
 
 		// send messages
-		apo->hil()->sendMessage(AP_CommLink::MSG_LOCATION);
-		apo->hil()->sendMessage(AP_CommLink::MSG_ATTITUDE);
-		apo->hil()->sendMessage(AP_CommLink::MSG_SERVO_OUT);
+		apo->hil()->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
+		apo->hil()->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
+		apo->hil()->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
 	}
 #endif
 	/*
@@ -179,10 +179,10 @@ void ArduPilotOne::callback2(void * data) {
 	}
 	if (apo->gcs()) {
 		// send messages
-		apo->gcs()->sendMessage(AP_CommLink::MSG_LOCATION);
-		apo->gcs()->sendMessage(AP_CommLink::MSG_ATTITUDE);
-		apo->gcs()->sendMessage(AP_CommLink::MSG_SERVO_OUT);
-		apo->gcs()->sendMessage(AP_CommLink::MSG_RADIO_OUT);
+		apo->gcs()->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
+		apo->gcs()->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
+		apo->gcs()->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
+		apo->gcs()->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
 
 		// send messages
 		apo->gcs()->requestCmds();
@@ -212,7 +212,7 @@ void ArduPilotOne::callback3(void * data) {
 	/*
 	 * send heartbeat
 	 */
-	apo->gcs()->sendMessage(AP_CommLink::MSG_HEARTBEAT);
+	apo->gcs()->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 
 	/*
 	 * load/loop rate/ram debug
