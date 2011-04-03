@@ -38,6 +38,7 @@
 #include <AP_DCM.h>
 #include <AP_Loop.h>
 #include <GCS_MAVLink.h>
+#include <AP_RangeFinder.h>
 /*
  * Local Modules
  */
@@ -51,9 +52,9 @@
  * Required Global Declarations
  */
 FastSerialPort0(Serial);
-FastSerialPort1(Serial1);FastSerialPort2(Serial2);
+FastSerialPort1(Serial1);
+FastSerialPort2(Serial2);
 FastSerialPort3(Serial3);
-
 apo::ArduPilotOne * apoGlobal = NULL;
 
 namespace apo {
@@ -62,10 +63,7 @@ class AP_CommLink;
 
 ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs,
 		AP_ADC * adc = NULL, GPS * gps = NULL, APM_BMP085_Class * baro = NULL,
-		Compass * compass = NULL /*, RangeFinder * frontRangeFinder = NULL,
- RangeFinder * backRangeFinder = NULL,
- RangeFinder * leftRangeFinder = NULL,
- RangeFinder * rightRangeFinder = NULL*/) :
+		Compass * compass = NULL, Vector<RangeFinder*> * rangeFinders = NULL) :
 	Loop(LOOP_0_RATE, callback0, this), _debug(debug),
 			_gcs(new MavlinkComm(&gcs, this)), _controller(NULL), _adc(adc),
 			_gps(gps), _baro(baro), _compass(compass) {
@@ -79,39 +77,6 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs,
 	subLoops().push_back(new Loop(LOOP_3_RATE, callback3, this));
 	subLoops().push_back(new Loop(LOOP_4_RATE, callback4, this));
 
-	/*
-	 * Pins
-	 */
-	Serial.println("settings pin modes");
-	pinMode(A_LED_PIN, OUTPUT); //  extra led
-	pinMode(B_LED_PIN, OUTPUT); //  imu led
-	pinMode(C_LED_PIN, OUTPUT); //  gps led
-	pinMode(SLIDE_SWITCH_PIN, INPUT);
-	pinMode(PUSHBUTTON_PIN, INPUT);
-	DDRL |= B00000100; // set port L, pint 2 to output for the relay
-
-	/*
-	 * Component initialization
-	 */
-	APM_RC.Init(); // APM Radio initialization
-
-	controllerInit();
-	if (_adc) {
-		Serial.println("initializing adc");
-		_adc->Init();
-	}
-	if (_gps) {
-		Serial.println("initializing gps");
-		_gps->init();
-	}
-	if (_baro) {
-		Serial.println("initializing baro");
-		_baro->Init();
-	}
-	if (_compass) {
-		Serial.println("initializing compass");
-		_compass->init();
-	}
 
 	/*
 	 * Navigator
@@ -125,7 +90,13 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs,
 	_guide = new MavlinkGuide(_navigator/*, frontRangeFinder, backRangeFinder,
 	 leftRangeFinder, rightRangeFinder*/);
 
+	/*
+	 * Controller Initialization
+	 */
+	controllerInit();
+
 	getDebug().println("initialization complete");
+
 }
 
 void ArduPilotOne::callback0(void * data) {
@@ -249,9 +220,58 @@ void setup() {
 
 	Serial.println("starting APO");
 
-	 apoGlobal = new apo::ArduPilotOne(Serial, Serial3, new AP_ADC_ADS7844,
-	 new AP_GPS_UBLOX(&Serial1), new APM_BMP085_Class,
-	 new AP_Compass_HMC5843 /* , new AP_RangeFinder_MaxsonarLV, new AP_RangeFinder_MaxsonarLV*/);
+	/*
+	 * Sensor initialization
+	 */
+	Serial.println("initializing radio");
+	APM_RC.Init(); // APM Radio initialization
+
+	Serial.println("initializing adc");
+	AP_ADC * adc = new AP_ADC_ADS7844;
+	adc->Init();
+
+	Serial.println("initializing gps");
+	GPS * gps;
+	AP_GPS_Auto(&Serial1,&gps);
+	gps->init();
+
+	Serial.println("initializing baro");
+	APM_BMP085_Class * baro = new APM_BMP085_Class;
+	baro->Init();
+
+	Serial.println("initializing compass");
+	Compass * compass = new AP_Compass_HMC5843;
+	compass->init();
+
+	Serial.println("initializing front range finder");
+	Vector<RangeFinder *> rangeFinders;
+	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+	rangeFinders[0]->init(0);
+	rangeFinders[0]->set_orientation(1,0,0);
+
+	Serial.println("initializing back range finder");
+	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+	rangeFinders[0]->init(1);
+	rangeFinders[0]->set_orientation(-1,0,0);
+
+	/*
+	 * Pins
+	 */
+	Serial.println("settings pin modes");
+	pinMode(A_LED_PIN, OUTPUT); //  extra led
+	pinMode(B_LED_PIN, OUTPUT); //  imu led
+	pinMode(C_LED_PIN, OUTPUT); //  gps led
+	pinMode(SLIDE_SWITCH_PIN, INPUT);
+	pinMode(PUSHBUTTON_PIN, INPUT);
+	DDRL |= B00000100; // set port L, pint 2 to output for the relay
+
+	/*
+	 * Start the autopilot
+	 */
+	Serial.println("initializing ArduPilotOne");
+	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, adc,
+		gps, baro, compass, &rangeFinders);
+
 }
 
 void loop() {
