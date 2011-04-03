@@ -19,11 +19,16 @@ enum keys {
 	k_pidPD,
 	k_pidRoll,
 	k_pidPitch,
+	k_pidYawRate,
 	k_pidYaw,
 	k_chLeft,
 	k_chRight,
 	k_chFront,
 	k_chBack,
+	k_chRoll,
+	k_chPitch,
+	k_chYaw,
+	k_chThr,
 #endif // QUAD
 
 	// 200-256 allocated for commands

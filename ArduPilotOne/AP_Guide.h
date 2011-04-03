@@ -150,6 +150,9 @@ public:
 	float airSpeedCommand;
 	float groundSpeedCommand;
 	float altitudeCommand;
+	float pNCmd;
+	float pECmd;
+	float pDCmd;
 
 protected:
 	uint8_t _cmdNum;

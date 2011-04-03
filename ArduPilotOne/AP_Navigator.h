@@ -43,6 +43,9 @@ public:
 	float vN;
 	float vE;
 	float vD;
+	float pN;
+	float pE;
+	float pD;
 	int32_t latInt;
 	int32_t lonInt;
 	int32_t altInt;
