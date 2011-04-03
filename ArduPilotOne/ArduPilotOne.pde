@@ -263,6 +263,11 @@ void setup() {
 	rangeFinders[0]->init(1);
 	rangeFinders[0]->set_orientation(-1,0,0);
 
+	Serial.println_P(PSTR("initializing down range finder"));
+	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+	rangeFinders[0]->init(2);
+	rangeFinders[0]->set_orientation(0,0,1);
+
 	/*
 	 * Start the autopilot
 	 */
