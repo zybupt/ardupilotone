@@ -445,7 +445,7 @@ private:
 		Command cmd(packet.seq);
 
 		mavlink_waypoint_t msg = cmd.convert();
-		mavlink_msg_waypoint_send(_channel,255,0,msg.seq,msg.frame,
+		mavlink_msg_waypoint_send(_channel,msg.target_system,msg.target_component,msg.seq,msg.frame,
 				msg.command,msg.current,msg.autocontinue,msg.param1,msg.param2,msg.param3,msg.param4,
 				msg.x,msg.y,msg.z);
 
@@ -546,7 +546,7 @@ private:
 		if (packet.count > _cmdMax) {
 			packet.count = _cmdMax;
 		}
-		Command::number = packet.count; // XXX this had a -1, why?
+		Command::number = packet.count - 1;
 		Command::number.save();
 		_cmdTimeLastReceived = millis();
 		_receivingCmds = true;

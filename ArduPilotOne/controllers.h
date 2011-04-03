@@ -7,7 +7,7 @@
 #include <avr/pgmspace.h>
 #include "defines.h"
 
-#if VEHICLE_TYPE == CAR
+#if VEHICLE_TYPE == VEHICLE_CAR
 
 class CarController: public AP_Controller {
 private:
@@ -90,7 +90,7 @@ void controllerInit() {
 
 }
 
-#elif VEHICLE_TYPE == QUAD
+#elif VEHICLE_TYPE == VEHICLE_QUAD
 
 class QuadController: public AP_Controller {
 private:
@@ -238,7 +238,7 @@ public:
 				_rc[1], _rc[2], _rc[3], _rc[4]);
 	}
 
-#elif VEHICLE_TYPE == PLANE
+#elif VEHICLE_TYPE == VEHICLE_PLANE
 
 	class PlaneController : public AP_Controller
 	{

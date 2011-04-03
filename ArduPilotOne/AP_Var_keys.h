@@ -1,17 +1,19 @@
 #ifndef AP_Var_keys_H
 #define AP_Var_keys_H
 
+#include "config.h"
+
 enum keys {
 	k_config = 0,
 	k_cntrl,
 	k_chMode,
 
-#if VEHICLE_TYPE == CAR
+#if VEHICLE_TYPE == VEHICLE_CAR
 	k_pidThr,
 	k_pidStr,
 	k_chThr,
 	k_chStr,
-#elif VEHICLE_TYPE == QUAD
+#elif VEHICLE_TYPE == VEHICLE_QUAD
 	k_pidPN,
 	k_pidPE,
 	k_pidPD,
@@ -24,9 +26,8 @@ enum keys {
 	k_chBack,
 #endif // QUAD
 
-	// 226-256 allocated for commands
-	// (31 commands max, @ 33 bytes/command -> 1023/1024 bytes of EEPROM used
-	k_firstCommand=225,
+	// 200-256 allocated for commands
+	k_firstCommand=200,
 };
 
 // max 256 keys

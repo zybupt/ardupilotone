@@ -42,7 +42,6 @@
 /*
  * Local Modules
  */
-#include "defines"
 #include "AP_RcChannel.h"
 #include "AP_Controller.h"
 #include "AP_Navigator.h"
@@ -112,16 +111,6 @@ void ArduPilotOne::callback0(void * data) {
 
 void ArduPilotOne::callback1(void * data) {
 	ArduPilotOne * apo = (ArduPilotOne *) data;
-
-	/*
-	 * hardware in the loop
-	 */
-	if (apo->runMode() != RUNMODE_LIVE && apo->hil()) {
-		// send messages
-		apo->hil()->sendMessage(AP_CommLink::MSG_LOCATION);
-		apo->hil()->sendMessage(AP_CommLink::MSG_ATTITUDE);
-		apo->hil()->sendMessage(AP_CommLink::MSG_SERVO_OUT);
-	}
 
 	/*
 	 * read compass
@@ -278,7 +267,7 @@ void setup() {
 	 */
 	Serial.println_P(PSTR("initializing ArduPilotOne"));
 	Serial.printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
-	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, Serial, adc,
+	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, Serial1, adc,
 		gps, baro, compass, &rangeFinders);
 
 }

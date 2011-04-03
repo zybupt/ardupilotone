@@ -1,7 +1,7 @@
 #ifndef defines_H
 #define defines_H
 
-#include "APO_Config.h"
+const float loop0Rate = 150;
 
 #define LOOP_0_RATE 150
 #define LOOP_1_RATE 20
@@ -9,12 +9,14 @@
 #define LOOP_3_RATE 1
 #define LOOP_4_RATE 0.1
 
-#define ARDUPILOT 1
-#define ARDUPILOTMEGA 2
+#define BOARD_ARDUPILOTMEGA 1
 
-#define CAR 1
-#define QUAD 2
-#define PLANE 3
+#define VEHICLE_CAR 1
+#define VEHICLE_QUAD 2
+#define VEHICLE_PLANE 3
+
+#define RUNMODE_LIVE 1
+#define RUNMODE_HIL_STATE 2
 
 #define ENABLE 1
 #define DISABLE 0
@@ -32,6 +34,21 @@
 // parameters get the first 1KiB of EEPROM, remainder is for waypoints
 #define WP_START_BYTE 0x400 // where in memory home WP is stored + all other WP
 #define WP_SIZE 20 // mavlink_command_t size
+
+
+#include "APO_Config.h"
+
+#ifndef VEHICLE_TYPE
+#error must define VEHICLE_TYPE
+#endif
+
+#ifndef BOARD_TYPE
+#error must define BOARD_TYPE
+#endif
+
+#ifndef RUNMODE_TYPE
+#error must define RUNMODE_TYPE
+#endif
 
 #endif // defines_H
 // vim:ts=4:sw=4:expandtab
