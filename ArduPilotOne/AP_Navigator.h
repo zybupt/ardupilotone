@@ -103,11 +103,24 @@ public:
 			 * run first */_imu->init_gyro();
 			_imu->init_accel();
 		}
+
 	}
 	virtual void update(float dt) {
 		if (_mode != MODE_LIVE)
 			return;
 
+		if(_baro) {
+			/**The following 4 lines implement the following formula:
+			 * altitude (in m) = 44330*(1-(p/po)^(1/5.255)).
+			 * Here, po is pressure in Pa at sea level (101325 Pa)
+			 *See http://www.sparkfun.com/tutorials/253 or type this formula in a search engine for more information.
+			 */
+			float tmp;									//Temporary float variable used in the three lines that follow
+			tmp = (APM_BMP085.Press / 101325.0);
+			tmp = pow(tmp, 0.190295);
+			altitude = 44330 * (1.0 - tmp);
+			setAlt(altitude);							//Changes altitude into millimeters
+		}
 		if (_dcm) {
 			_dcm->update_DCM(dt);
 			roll = _dcm->roll;
