@@ -69,13 +69,6 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStrea
 			_gps(gps), _baro(baro), _compass(compass) {
 
 	/*
-	 * Start HIL if requested
-	 */
-#if RUNMODE_TYPE == RUNMODE_HIL_STATE
-	_hil = new MavlinkComm(&hil,this);
-#endif
-
-	/*
 	 * Attach loops
 	 */
 	Serial.println("attaching loops");
@@ -88,8 +81,14 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStrea
 	/*
 	 * Navigator
 	 */
+#if RUNMODE_TYPE == RUNMODE_LIVE
 	_navigator = new DcmNavigator(AP_Navigator::MODE_LIVE, _adc, _gps, _baro,
 			_compass);
+#else
+	_hil = new MavlinkComm(&hil,this);
+	_navigator = new DcmNavigator(AP_Navigator::MODE_HIL_CNTL, _adc, _gps, _baro,
+			_compass);
+#endif
 
 	/*
 	 * Guide
