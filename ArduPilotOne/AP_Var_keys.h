@@ -24,8 +24,9 @@ enum keys {
 	k_chBack,
 #endif // QUAD
 
-	// 200-256 allocated for commands
-	k_firstCommand=200,
+	// 226-256 allocated for commands
+	// (31 commands max, @ 33 bytes/command -> 1023/1024 bytes of EEPROM used
+	k_firstCommand=225,
 };
 
 // max 256 keys
