@@ -306,6 +306,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_ACTION: {
+		sendText(SEVERITY_LOW,PSTR("action"));
 		// decode
 		mavlink_action_t packet;
 		mavlink_msg_action_decode(msg, &packet);
@@ -407,7 +408,6 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_REQUEST_LIST: {
-		Serial.println("waypoint request list");
 		sendText(SEVERITY_LOW, PSTR("waypoint request list"));
 
 		// decode
@@ -430,7 +430,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_REQUEST: {
-		//sendText(SEVERITY_LOW,PSTR("waypoint request"));
+		sendText(SEVERITY_LOW,PSTR("waypoint request"));
 
 		// Check if sending waypiont
 		if (!_sendingCmds)
@@ -455,7 +455,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_ACK: {
-		//sendText(SEVERITY_LOW,PSTR("waypoint ack"));
+		sendText(SEVERITY_LOW,PSTR("waypoint ack"));
 
 		// decode
 		mavlink_waypoint_ack_t packet;
@@ -472,7 +472,6 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: {
-		Serial.println("param request list");
 		sendText(SEVERITY_LOW, PSTR("param request list"));
 
 		// decode
@@ -489,7 +488,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_CLEAR_ALL: {
-		//sendText(SEVERITY_LOW,PSTR("waypoint clear all"));
+		sendText(SEVERITY_LOW,PSTR("waypoint clear all"));
 
 		// decode
 		mavlink_waypoint_clear_all_t packet;
@@ -511,7 +510,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_SET_CURRENT: {
-		//sendText(SEVERITY_LOW,PSTR("waypoint set current"));
+		sendText(SEVERITY_LOW,PSTR("waypoint set current"));
 
 		// decode
 		mavlink_waypoint_set_current_t packet;
@@ -535,7 +534,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_COUNT: {
-		//sendText(SEVERITY_LOW,PSTR("waypoint count"));
+		sendText(SEVERITY_LOW,PSTR("waypoint count"));
 
 		// decode
 		mavlink_waypoint_count_t packet;
@@ -557,6 +556,8 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT: {
+		sendText(SEVERITY_LOW,PSTR("waypoint"));
+
 		// Check if receiving waypiont
 		if (!_receivingCmds)
 			break;
@@ -577,6 +578,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_PARAM_SET: {
+		sendText(SEVERITY_LOW,PSTR("param set"));
 		AP_Var *vp;
 		AP_Meta_class::Type_id var_type;
 
