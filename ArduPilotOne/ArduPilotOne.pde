@@ -49,7 +49,6 @@
 #include "AP_Guide.h"
 #include "AP_CommLink.h"
 #include "ArduPilotOne.h"
-
 /*
  * Required Global Declarations
  */
