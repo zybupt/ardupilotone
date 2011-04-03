@@ -65,8 +65,15 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStrea
 		AP_ADC * adc = NULL, GPS * gps = NULL, APM_BMP085_Class * baro = NULL,
 		Compass * compass = NULL, Vector<RangeFinder*> * rangeFinders = NULL) :
 	Loop(LOOP_0_RATE, callback0, this), _debug(debug),
-			_gcs(new MavlinkComm(&gcs, this)), _controller(NULL), _adc(adc),
+			_gcs(new MavlinkComm(&gcs, this)), _hil(NULL), _controller(NULL), _adc(adc),
 			_gps(gps), _baro(baro), _compass(compass) {
+
+	/*
+	 * Start HIL if requested
+	 */
+#if RUNMODE_TYPE == RUNMODE_HIL_STATE
+	_hil = new MavlinkComm(&hil,this);
+#endif
 
 	/*
 	 * Attach loops
@@ -118,6 +125,21 @@ void ArduPilotOne::callback1(void * data) {
 	if (apo->compass())
 		apo->compass()->read();
 
+	/*
+	 * hardware in the loop
+	 */
+#if RUNMODE_TYPE == RUNMODE_HIL_STATE
+	if (apo->hil())
+	{
+		// receive message
+		apo->hil()->receive();
+
+		// send messages
+		apo->hil()->sendMessage(AP_CommLink::MSG_LOCATION);
+		apo->hil()->sendMessage(AP_CommLink::MSG_ATTITUDE);
+		apo->hil()->sendMessage(AP_CommLink::MSG_SERVO_OUT);
+	}
+#endif
 	/*
 	 * update control laws
 	 */
@@ -273,7 +295,7 @@ void setup() {
 	 */
 	Serial.println_P(PSTR("initializing ArduPilotOne"));
 	Serial.printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
-	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, Serial1, adc,
+	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, Serial, adc,
 		gps, baro, compass, &rangeFinders);
 
 }

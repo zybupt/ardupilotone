@@ -3,6 +3,7 @@
 
 #include "ArduPilotOne.h"
 #include "AP_Controller.h"
+#include "AP_RcChannel.h"
 #include "AP_Var.h"
 #include <avr/pgmspace.h>
 #include "defines.h"
@@ -55,7 +56,7 @@ public:
 		modeCh->readRadio();
 
 		// manual
-		if (_mode == 0) {
+		if ( modeCh->getPosition() > 0 ) {
 			steeringCh->readRadio();
 			throttleCh->readRadio();
 			//Serial.println("manual");
