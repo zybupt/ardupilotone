@@ -85,7 +85,7 @@ public:
 	}
 	virtual void update() {
 
-		// command a
+		// TODO, setting to a fixed value for testing with the car right now
 		headingCommand = M_PI;
 		groundSpeedCommand = 1;
 
@@ -153,7 +153,6 @@ public:
 		case MAV_CMD_DO_SET_SERVO:
 		case MAV_CMD_PREFLIGHT_CALIBRATION:
 		case MAV_CMD_PREFLIGHT_STORAGE:
-		case MAV_CMD_NAV_WAYPOINT:
 		case MAV_CMD_NAV_LAND:
 		case MAV_CMD_NAV_LAST:
 		case MAV_CMD_NAV_LOITER_TIME:

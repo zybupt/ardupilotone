@@ -280,7 +280,6 @@ private:
 	ArduPilotOne * _apo;
 
 	// channel
-	Location _home; // TODO: move this to guidance
 	mavlink_channel_t _channel;
 	uint16_t _packetDrops;
 	static uint8_t _nChannels;
