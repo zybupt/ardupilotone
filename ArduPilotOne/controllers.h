@@ -54,26 +54,26 @@ public:
 	virtual void update(const float & dt) {
 		// read mode switch
 		modeCh->readRadio();
-		//Serial.printf_P(PSTR("normalized mode: %f"), modeCh->getNormalized());
 
+		Serial.printf_P(PSTR("normalized mode: %f"), modeCh->getNormalized());
 		// manual
 		if ( modeCh->getNormalized() > 0 ) {
 			steeringCh->readRadio();
 			throttleCh->readRadio();
-			//Serial.println("manual");
+			Serial.println("manual");
 
 		} else { // auto
 			AP_Controller::update(dt);
-			//Serial.println("automode");
+			Serial.println("automode");
 		}
 
-//		Serial.printf("steering pwm :\t");
-//		Serial.printf("%7d\t",steeringCh->getPwm());
-//		Serial.println();
+		Serial.printf("steering pwm :\t");
+		Serial.printf("%7d\t",steeringCh->getPwm());
+		Serial.println();
 
-//		Serial.printf("throttle pwm :\t");
-//		Serial.printf("%7d\t",throttleCh->getPwm());
-//		Serial.println();
+		Serial.printf("throttle pwm :\t");
+		Serial.printf("%7d\t",throttleCh->getPwm());
+		Serial.println();
 
 		delay(100);
 	}
