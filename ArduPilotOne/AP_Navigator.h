@@ -43,9 +43,13 @@ public:
 	float vN;
 	float vE;
 	float vD;
+<<<<<<< .mine
+	float front;
+=======
 	float pN;
 	float pE;
 	float pD;
+>>>>>>> .r103
 	int32_t latInt;
 	int32_t lonInt;
 	int32_t altInt;
@@ -85,11 +89,29 @@ private:
 	IMU * _imu;
 	AP_DCM * _dcm;
 	uint16_t _imuOffsetAddress;
+
+	RangeFinder * _rangeFinderDown;
+
 public:
-	DcmNavigator(mode_t mode, AP_ADC * adc = NULL, GPS * gps = NULL,
-			APM_BMP085_Class * baro = NULL, Compass * compass = NULL) :
+	DcmNavigator(mode_t mode, AP_ADC * adc, GPS * gps, APM_BMP085_Class * baro,
+			Compass * compass, Vector<RangeFinder*> & rangeFinders) :
 		AP_Navigator(mode), _adc(adc), _gps(gps), _baro(baro),
 				_compass(compass), _imu(), _dcm(), _imuOffsetAddress(0) {
+
+		// if orientation equal to front, store as front
+		/**
+		 * rangeFinder<direction> is assigned values based on orientation which
+		 * is specified in ArduPilotOne.pde.
+		 */
+		for (int i = 0; i < rangeFinders.getSize(); i++) {
+			if (rangeFinders[i] == NULL)
+				continue;
+			if (rangeFinders[i]->orientation_x == 0
+					&& rangeFinders[i]->orientation_y == 0
+					&& rangeFinders[i]->orientation_z == 1)
+				_rangeFinderDown = rangeFinders[i];
+		}
+
 		if (mode == MODE_LIVE) {
 			if (_adc)
 				_imu = new AP_IMU_Oilpan(_adc, _imuOffsetAddress);
@@ -112,16 +134,25 @@ public:
 		if (_mode != MODE_LIVE)
 			return;
 
-		if(_baro) {
-			/**The following 4 lines implement the following formula:
-			 * altitude (in m) = 44330*(1-(p/po)^(1/5.255)).
-			 * Here, po is pressure in Pa at sea level (101325 Pa)
-			 *See http://www.sparkfun.com/tutorials/253 or type this formula in a search engine for more information.
-			 */
-			float tmp = (_baro->Press / 101325.0);
-			tmp = pow(tmp, 0.190295);
-			setAlt(44330 * (1.0 - tmp)); //sets the altitude in meters
+		/**The altitued is read off the barometer by implementing the following formula:
+		 * altitude (in m) = 44330*(1-(p/po)^(1/5.255)),
+		 * where, po is pressure in Pa at sea level (101325 Pa).
+		 *See http://www.sparkfun.com/tutorials/253 or type this formula
+		 *in a search engine for more information.
+		 *altInt contains the altitude in meters.
+		 */
+		if (_baro) {
+
+			if (_rangeFinderDown != NULL && _rangeFinderDown->distance <= 695)
+				setAlt(_rangeFinderDown->distance);
+
+			else {
+				float tmp = (_baro->Press / 101325.0);
+				tmp = pow(tmp, 0.190295);
+				setAlt(44330 * (1.0 - tmp)); //sets the altitude in meters
+			}
 		}
+
 		if (_dcm) {
 			_dcm->update_DCM(dt);
 			roll = _dcm->roll;

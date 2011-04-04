@@ -165,27 +165,50 @@ protected:
 class MavlinkGuide: public AP_Guide {
 public:
 
-	MavlinkGuide(AP_Navigator * navigator/*,
-	 RangeFinder * frontRangeFinder =NULL,
-	 RangeFinder * backRangeFinder =NULL,
-	 RangeFinder * leftRangeFinder =NULL,
-	 RangeFinder * rightRangeFinder =NULL*/) :
-		AP_Guide(navigator)/* ,
-	 _frontRangeFinder(frontRangeFinder),
-	 _backRangeFinder(backRangeFinder),
-	 _leftRangeFinder(leftRangeFinder),
-	 _rightRangeFinder(leftRangeFinder)*/
+	MavlinkGuide(AP_Navigator * navigator, Vector<RangeFinder *> & rangeFinder) :
+		AP_Guide(navigator)
 	{
+		for (int i = 0;i<rangeFinder.getSize();i++)
+		{
+			RangeFinder * rF = rangeFinder[i];
+			if (rF == NULL) continue;
+			if(rF->orientation_x == 1 && rF->orientation_y == 0 && rF->orientation_z == 0)
+				_rangeFinderFront = rF;
+			else if(rF->orientation_x == -1 && rF->orientation_y == 0 && rF->orientation_z == 0)
+				_rangeFinderBack = rF;
+			else if(rF->orientation_x == 0 && rF->orientation_y == 1 && rF->orientation_z == 0)
+				_rangeFinderRight = rF;
+			else if(rF->orientation_x == 0 && rF->orientation_y == -1 && rF->orientation_z == 0)
+				_rangeFinderLeft = rF;
+
+		}
 	}
 	virtual void update() {
 
-		/*
+
 		 // stop if your going to drive into something in front of you
-		 if (_frontRangeFinder && _frontRangeFinder->distance < 10 ) {
-		 airSpeedCommand = 0;
-		 groundSpeedCommand = 0;
+		 if (_rangeFinderFront && _rangeFinderFront->distance < 30 )
+		 {
+			 airSpeedCommand = 0;
+			 groundSpeedCommand = 0;
 		 }
-		 */
+		 if (_rangeFinderBack && _rangeFinderBack->distance <30)
+		 {
+			 airSpeedCommand = 0;
+			 groundSpeedCommand = 0;
+		 }
+
+		 if (_rangeFinderLeft && _rangeFinderLeft->distance <30)
+		 {
+			 airSpeedCommand = 0;
+			 groundSpeedCommand = 0;
+		 }
+
+		 if (_rangeFinderRight && _rangeFinderRight->distance <30)
+		 {
+			 airSpeedCommand = 0;
+			 groundSpeedCommand = 0;
+		 }
 
 		//float dXt = position()->crossTrack(previousWaypoint(),nextWaypoint());
 		//float dAt = position()->alongTrack(previousWaypoint(),nextWaypoint());
@@ -198,11 +221,11 @@ public:
 		//}
 	}
 private:
-	/*
-	 RangeFinder * _frontRangeFinder;
-	 RangeFinder * _backRangeFinder;
-	 RangeFinder * _leftRangeFinder;
-	 RangeFinder * _rightRangeFinder*/
+
+	 RangeFinder * _rangeFinderFront;
+	 RangeFinder * _rangeFinderBack;
+	 RangeFinder * _rangeFinderLeft;
+	 RangeFinder * _rangeFinderRight;
 };
 
 } // namespace apo

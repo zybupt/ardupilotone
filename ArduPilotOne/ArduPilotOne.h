@@ -55,7 +55,7 @@ public:
 	 * Default constructor
 	 */
 	ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStream & hil, AP_ADC * adc,
-			GPS * gps, APM_BMP085_Class * baro, Compass * compass, Vector<RangeFinder*> * rangeFinders);
+			GPS * gps, APM_BMP085_Class * baro, Compass * compass, Vector<RangeFinder*> & rangeFinders);
 
 	/**
 	 * Accessors

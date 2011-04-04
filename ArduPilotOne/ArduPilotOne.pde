@@ -62,8 +62,8 @@ namespace apo {
 class AP_CommLink;
 
 ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStream & hil,
-		AP_ADC * adc = NULL, GPS * gps = NULL, APM_BMP085_Class * baro = NULL,
-		Compass * compass = NULL, Vector<RangeFinder*> * rangeFinders = NULL) :
+		AP_ADC * adc, GPS * gps, APM_BMP085_Class * baro, Compass * compass,
+		Vector<RangeFinder*> & rangeFinders) :
 	Loop(LOOP_0_RATE, callback0, this), _debug(debug),
 			_gcs(new MavlinkComm(&gcs, this)), _hil(NULL), _controller(NULL), _adc(adc),
 			_gps(gps), _baro(baro), _compass(compass) {
@@ -83,7 +83,7 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStrea
 	 */
 #if RUNMODE_TYPE == RUNMODE_LIVE
 	_navigator = new DcmNavigator(AP_Navigator::MODE_LIVE, _adc, _gps, _baro,
-			_compass);
+			_compass, rangeFinders);
 #else
 	_hil = new MavlinkComm(&hil,this);
 	_navigator = new DcmNavigator(AP_Navigator::MODE_HIL_CNTL, _adc, _gps, _baro,
@@ -93,8 +93,7 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStrea
 	/*
 	 * Guide
 	 */
-	_guide = new MavlinkGuide(_navigator/*, frontRangeFinder, backRangeFinder,
-	 leftRangeFinder, rightRangeFinder*/);
+	_guide = new MavlinkGuide(_navigator, rangeFinders);
 
 	/*
 	 * Controller Initialization
@@ -273,6 +272,15 @@ void setup() {
 	Compass * compass = new AP_Compass_HMC5843;
 	compass->init();
 
+	/**
+	 * Initialize ultrasonic sensors. If sensors are not plugged in, the navigator will not
+	 * initialize them and NULL will be assigned to those corresponding pointers.
+	 * On detecting NULL assigned to any ultrasonic sensor, its corresponding block of code
+	 * will not be executed by the navigator.
+	 * The coordinate system is assigned by the right hand screw rule with the thumb pointing down.
+	 * In set_orientation, it is defind as (front/back,left/right,down,up)
+	 */
+
 	Serial.println_P(PSTR("initializing front range finder"));
 	Vector<RangeFinder *> rangeFinders;
 	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
@@ -281,13 +289,23 @@ void setup() {
 
 	Serial.println_P(PSTR("initializing back range finder"));
 	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	rangeFinders[0]->init(1);
-	rangeFinders[0]->set_orientation(-1,0,0);
+	rangeFinders[1]->init(1);
+	rangeFinders[1]->set_orientation(-1,0,0);
+
+	Serial.println_P(PSTR("initializing right range finder"));
+	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+	rangeFinders[2]->init(2);
+	rangeFinders[2]->set_orientation(0,1,0);
+
+	Serial.println_P(PSTR("initializing left range finder"));
+	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+	rangeFinders[3]->init(3);
+	rangeFinders[3]->set_orientation(0,-1,0);
 
 	Serial.println_P(PSTR("initializing down range finder"));
 	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	rangeFinders[0]->init(2);
-	rangeFinders[0]->set_orientation(0,0,1);
+	rangeFinders[4]->init(4);
+	rangeFinders[4]->set_orientation(0,0,1);
 
 	/*
 	 * Start the autopilot
@@ -295,7 +313,7 @@ void setup() {
 	Serial.println_P(PSTR("initializing ArduPilotOne"));
 	Serial.printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
 	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, Serial, adc,
-		gps, baro, compass, &rangeFinders);
+		gps, baro, compass, rangeFinders);
 
 }
 
