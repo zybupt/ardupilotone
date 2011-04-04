@@ -132,7 +132,7 @@ public:
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
-			return getX();
+			return getY();
 			break;
 		case MAV_FRAME_LOCAL:
 		case MAV_FRAME_MISSION:
@@ -147,8 +147,6 @@ public:
 			setY(val);
 			break;
 		case MAV_FRAME_LOCAL:
-			setY(val + AP_MavlinkCommand(0).getLat());
-			break;
 		case MAV_FRAME_MISSION:
 			break;
 		}
@@ -172,8 +170,6 @@ public:
 			setX(val);
 			break;
 		case MAV_FRAME_LOCAL:
-			setX(val + AP_MavlinkCommand(0).getLon());
-			break;
 		case MAV_FRAME_MISSION:
 			break;
 		}
@@ -193,27 +189,43 @@ public:
 		}
 	}
 	/**
+	 * set the altitude in meters
+	 */
+	void setAlt(float val) {
+		switch (getFrame()) {
+		case MAV_FRAME_GLOBAL:
+		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
+			setZ(val);
+			break;
+		case MAV_FRAME_LOCAL:
+			setZ(val - AP_MavlinkCommand(0).getLon());
+			break;
+		case MAV_FRAME_MISSION:
+			break;
+		}
+	}
+	/**
 	 * Get the relative altitud to home
 	 * @return relative altitude in meters
 	 */
 	float getRelAlt() {
-			switch (getFrame()) {
-			case MAV_FRAME_GLOBAL:
-				return getZ() - AP_MavlinkCommand(0).getAlt();
-				break;
-			case MAV_FRAME_GLOBAL_RELATIVE_ALT:
-			case MAV_FRAME_LOCAL:
-				return getZ();
-				break;
-			case MAV_FRAME_MISSION:
-				return 0;
-				break;
-			}
+		switch (getFrame()) {
+		case MAV_FRAME_GLOBAL:
+			return getZ() - AP_MavlinkCommand(0).getAlt();
+			break;
+		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
+		case MAV_FRAME_LOCAL:
+			return getZ();
+			break;
+		case MAV_FRAME_MISSION:
+			return 0;
+			break;
 		}
-	/*
-	 * set the relative altitude to home in meters
+	}
+	/**
+	 * set the relative altitude in meters from home
 	 */
-	void setAlt(float val) {
+	void setRelAlt(float val) {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
@@ -225,6 +237,10 @@ public:
 		case MAV_FRAME_MISSION:
 			break;
 		}
+	}
+
+	float getRadius() {
+		return getParam2();
 	}
 
 	/**
@@ -265,15 +281,12 @@ public:
 	 * Bearing form this command to a gps coordinate in integer units
 	 * @param lat latitude in degrees E-7
 	 * @param lon longitude in degrees E-7
-	 * @param alt altitude in meters E-3 (millimeters)
 	 * @return
 	 */
-	float bearingTo(int32_t lat, int32_t lon, int32_t alt) {
-		static float degInt2Rad = M_PI/180/1e7;
-		static float convert = 1e7*180/M_PI;
+	float bearingTo(int32_t lat, int32_t lon) {
 		// have to be careful to maintain the precision of the gps coordinate
-		float deltaLon = (lon - convert*getLon())*degInt2Rad;
-		float nextLat = lat*degInt2Rad;
+		float deltaLon = (lon - rad2DegInt*getLon())/rad2DegInt;
+		float nextLat = lat/rad2DegInt;
 		return atan2(sin(deltaLon)*cos(nextLat), cos(getLat())*sin(nextLat) -
 				sin(getLat())*cos(nextLat)*cos(deltaLon));
 	}
@@ -284,74 +297,37 @@ public:
 	 * @return The distance in meters.
 	 */
 	float distanceTo(AP_MavlinkCommand next) {
-			// deltaLat = latLngInt2Radians(next.latInt() - latInt());
-			//		deltaLng = latLngInt2Radians(next.lngInt() - lngInt());
-			//
-			//		cosLat = cos(latRad());
-			//		cosNextLat = cos(next.latRad());
-			//
-			//		sinDeltaLat2 = sin(deltaLat / 2);
-			//		sinDeltaLng2 = sin(deltaLng / 2);
-			//
-			//		float a = sinDeltaLat2 * sinDeltaLat2 + cosLat * cosNextLat
-			//				* sinDeltaLng2 * sinDeltaLng2;
-			//		float c = 2 * atan2(sqrt(a), sqrt(1 - a));
-			//		return rEarth * c;
+		float sinDeltaLat2 = sin((getLat()-next.getLat())/2);
+		float sinDeltaLon2 = sin((getLon()-next.getLon())/2);
+		float a = sinDeltaLat2*sinDeltaLat2 + cos(getLat())*cos(next.getLat())*
+				sinDeltaLon2*sinDeltaLon2;
+		float c = 2*atan2(sqrt(a),sqrt(1-a));
+		return rEarth*c;
 	}
 
 	/**
 	 * Distance to a gps coordinate in integer units
 	 * @param lat latitude in degrees E-7
 	 * @param lon longitude in degrees E-7
-	 * @param alt altitude in meters E-3 (millimeters)
 	 * @return The distance in meters.
 	 */
-	float distanceTo(int32_t lat, int32_t lon, int32_t alt) {
-
+	float distanceTo(int32_t lat, int32_t lon) {
+		float sinDeltaLat2 = sin((lat - rad2DegInt*getLat())/rad2DegInt/2);
+		float sinDeltaLon2 = sin((lon - rad2DegInt*getLon())/rad2DegInt/2);
+		float a = sinDeltaLat2*sinDeltaLat2 +
+				cos(getLat())*cos(lat/rad2DegInt)*sinDeltaLon2*sinDeltaLon2;
+		float c = 2*atan2(sqrt(a),sqrt(1-a));
+		return rEarth*c;
 	}
 
-	// calculates distance to a location
-	//	float distanceTo(AP_MavlinkCommand next) {
-	//		deltaLat = latLngInt2Radians(next.latInt() - latInt());
-	//		deltaLng = latLngInt2Radians(next.lngInt() - lngInt());
-	//
-	//		cosLat = cos(latRad());
-	//		cosNextLat = cos(next.latRad());
-	//
-	//		sinDeltaLat2 = sin(deltaLat / 2);
-	//		sinDeltaLng2 = sin(deltaLng / 2);
-	//
-	//		float a = sinDeltaLat2 * sinDeltaLat2 + cosLat * cosNextLat
-	//				* sinDeltaLng2 * sinDeltaLng2;
-	//		float c = 2 * atan2(sqrt(a), sqrt(1 - a));
-	//		return rEarth * c;
-	//	}
-
-	// calculates cross track of a current location
-	//	float crossTrack() {
-	//		float d = previousWaypoint()->distanceTo(currentPosition());
-	//		float bCurrent = perviousWaypoint()->bearingTo(currentPosition());
-	//		float bNext = previousWaypoint()->bearingTo(nextWaypoint());
-	//		return asin(sin(d / rEarth) * sin(bCurrent - bNext)) * rEarth;
-	//	}
-
-	// calculates along  track distance of a current location
-	//	float alongTrack() {
-	//		dXt = crossTrack(prev, next);
-	//		float d = previousWaypoint()->distanceTo(currentPosition());
-	//		return acos(cos(d / rEarth) / cos(dXt / rEarth)) * rEarth;
-	//	}
-	// conversions
-	static float latLngInt2Radians(int32_t val) {
-		return val / 1e7;
-	}
-	static float alt2Meters(int32_t val) {
-		return val / 1e2;
-	}
 	static AP_Uint8 number;
 	static AP_Uint8 currentIndex;
+	// constants
+	static float rad2DegInt;
 };
 AP_Uint8 AP_MavlinkCommand::number = 1;
 AP_Uint8 AP_MavlinkCommand::currentIndex = 1;
+float AP_MavlinkCommand::rad2DegInt = 1e7*rad2Deg;
+
 
 #endif /* AP_MAVLINKCOMMAND_H_ */

@@ -29,7 +29,6 @@
 
 namespace apo {
 
-
 /// Guide class
 class AP_Guide {
 public:
@@ -83,12 +82,17 @@ public:
 
 		}
 	}
+
 	virtual void update() {
 
 		// TODO, setting to a fixed value for testing with the car right now
 		headingCommand = M_PI;
 		groundSpeedCommand = 1;
 
+		// process mavlink commands
+		handleCommand();
+
+		// obstacle avoidance overrides
 		// stop if your going to drive into something in front of you
 		if (_rangeFinderFront && _rangeFinderFront->distance < 30) {
 			airSpeedCommand = 0;
@@ -108,17 +112,23 @@ public:
 			airSpeedCommand = 0;
 			groundSpeedCommand = 0;
 		}
-
-		//float dXt = position()->crossTrack(previousWaypoint(),nextWaypoint());
-		//float dAt = position()->alongTrack(previousWaypoint(),nextWaypoint());
-		//float d = previousWaypoint()->distanceTo(currentPosition());
-
-		//if (d < nextWaypoint()->radius())
-		//{
-		//currentWaypointIndex++;
-
-		//}
 	}
+
+	//calculates cross track of a current location
+	float crossTrack() {
+		float d = _prevCommand.distanceTo(_navigator->latInt,_navigator->lonInt);
+		float bCurrent = _prevCommand.bearingTo(_navigator->latInt,_navigator->lonInt);
+		float bNext = _prevCommand.bearingTo(_nextCommand);
+		return asin(sin(d/rEarth) * sin(bCurrent - bNext)) * rEarth;
+	}
+
+	// calculates along  track distance of a current location
+	float alongTrack() {
+		float dXt = crossTrack();
+		float d = _prevCommand.distanceTo(_navigator->latInt,_navigator->lonInt);
+		return acos(cos(d / rEarth) / cos(dXt / rEarth)) * rEarth;
+	}
+
 	void nextCommand() {
 		// if command index is exceeded, return home and repeat the mission
 		_prevCommand = AP_MavlinkCommand(_cmdIndex);
@@ -131,8 +141,15 @@ public:
 		// TODO handle more commands
 		switch(_nextCommand.getCommand()) {
 		case MAV_CMD_NAV_WAYPOINT:
+		{
 			// if within radius, increment
+			float d = _prevCommand.distanceTo(_navigator->latInt,_navigator->lonInt);
+			if (d < _nextCommand.getRadius())
+			{
+				nextCommand();
+			}
 			break;
+		}
 		/*
 		case MAV_CMD_CONDITION_CHANGE_ALT:
 		case MAV_CMD_CONDITION_DELAY:
