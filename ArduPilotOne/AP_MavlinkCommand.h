@@ -323,11 +323,15 @@ public:
 	static AP_Uint8 number;
 	static AP_Uint8 currentIndex;
 	// constants
+	static float rEarth;
+	static float rad2Deg;
 	static float rad2DegInt;
 };
 AP_Uint8 AP_MavlinkCommand::number = 1;
 AP_Uint8 AP_MavlinkCommand::currentIndex = 1;
 float AP_MavlinkCommand::rad2DegInt = 1e7*rad2Deg;
+float AP_MavlinkCommand::rad2Deg = 180/M_PI;
+float AP_MavlinkCommand::rEarth = 6371000;
 
 
 #endif /* AP_MAVLINKCOMMAND_H_ */

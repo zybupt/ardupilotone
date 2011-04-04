@@ -52,6 +52,7 @@ public:
 	float pNCmd;
 	float pECmd;
 	float pDCmd;
+	static float rEarth;
 protected:
 	uint8_t _cmdNum;
 	uint8_t _cmdIndex;
@@ -60,7 +61,6 @@ protected:
 
 class MavlinkGuide: public AP_Guide {
 public:
-
 	MavlinkGuide(AP_Navigator * navigator, Vector<RangeFinder *> & rangeFinder) :
 		AP_Guide(navigator), _prevCommand(0), _nextCommand(1) {
 		for (int i = 0; i < rangeFinder.getSize(); i++) {
@@ -194,6 +194,7 @@ private:
 	AP_MavlinkCommand _prevCommand;
 	AP_MavlinkCommand _nextCommand;
 };
+float AP_Guide::rEarth = 6371000;
 
 } // namespace apo
 
