@@ -22,8 +22,7 @@ scheduling forms the backbone of the code and has already been completed.
 
 COMPLETED: EEPROM Parameter Management
 --------------------------------------------------------------------------------------
-The AP_EEProm class has been created to allow automatic mapping of EEPROM stored 
-variables.
+The AP_Var classes have been utilized.
 
 COMPLETED: Control System
 --------------------------------------------------------------------------------------
@@ -36,10 +35,9 @@ The guidance system takes the waypoints and current position as input and output
 heading, velocity, and altitude to the controller. This should be relatively easy to 
 implement.
 
-DEBUGGING: Communication
+COMPLETED: Communication
 --------------------------------------------------------------------------------------
 The mavlink communication protocol will be used for comms at this time.
-This has not been implemented yet but shouldn't take much work.
 
 Libraries
 --------------------------------------------------------------------------------------
