@@ -8,7 +8,11 @@
 #ifndef AP_HARDWAREABSTRACTIONLAYER_H_
 #define AP_HARDWAREABSTRACTIONLAYER_H_
 
+/**
+ * DO NOT INCLUDE ANY HEADERS HERE!
+ */
 class AP_ADC;
+class IMU;
 class GPS;
 class APM_BMP085;
 class Compass;
@@ -23,6 +27,15 @@ class AP_CommLink;
 class AP_HardwareAbstractionLayer {
 
 public:
+	AP_HardwareAbstractionLayer() :
+		adc(), gps(), baro(), compass(), rangeFinders(),
+				imu(), rc(), gcs(), hil(), debug()
+	{
+	}
+
+	enum mode_t {
+		MODE_LIVE, MODE_HIL_CNTL, MODE_HIL_NAV
+	} mode;
 
 	/**
 	 * Sensors
@@ -32,6 +45,7 @@ public:
 	APM_BMP085_Class * baro;
 	Compass * compass;
 	Vector<RangeFinder *> rangeFinders;
+	IMU * imu;
 
 	/**
 	 * Radio Channels

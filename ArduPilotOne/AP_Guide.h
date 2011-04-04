@@ -24,7 +24,7 @@
 #include <AP_Common.h>
 #include <AP_Vector.h>
 #include "defines.h"
-#include "AP_Var_keys.h"
+
 #include "AP_MavlinkCommand.h"
 
 namespace apo {
@@ -37,10 +37,10 @@ public:
 	 * This is the constructor, which requires a link to the navigator.
 	 * @param navigator This is the navigator pointer.
 	 */
-	AP_Guide(AP_Navigator * navigator) :
+	AP_Guide(AP_Navigator * navigator, AP_HardwareAbstractionLayer * hal) :
 		_navigator(navigator), headingCommand(0), airSpeedCommand(0),
 				groundSpeedCommand(0), altitudeCommand(0),
-				pNCmd(0), pECmd(0), pDCmd(0) {
+				pNCmd(0), pECmd(0), pDCmd(0), _hal(hal) {
 	}
 
 	virtual void update() = 0;
@@ -57,16 +57,17 @@ protected:
 	uint8_t _cmdNum;
 	uint8_t _cmdIndex;
 	AP_Navigator * _navigator;
+	AP_HardwareAbstractionLayer * _hal;
 };
 
 class MavlinkGuide: public AP_Guide {
 public:
-	MavlinkGuide(AP_Navigator * navigator, Vector<RangeFinder *> & rangeFinder) :
-		AP_Guide(navigator), _rangeFinderFront(), _rangeFinderBack(),
+	MavlinkGuide(AP_Navigator * navigator, AP_HardwareAbstractionLayer * hal) :
+		AP_Guide(navigator,hal),_rangeFinderFront(), _rangeFinderBack(),
 		 _rangeFinderLeft(), _rangeFinderRight(),
 		_prevCommand(0), _nextCommand(1) {
-		for (int i = 0; i < rangeFinder.getSize(); i++) {
-			RangeFinder * rF = rangeFinder[i];
+		for (int i = 0; i < _hal->rangeFinders.getSize(); i++) {
+			RangeFinder * rF = _hal->rangeFinders[i];
 			if (rF == NULL)
 				continue;
 			if (rF->orientation_x == 1 && rF->orientation_y == 0

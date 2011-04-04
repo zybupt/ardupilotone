@@ -35,8 +35,8 @@ public:
 		SEVERITY_LOW, SEVERITY_MED, SEVERITY_HIGH
 	};
 
-	AP_CommLink(FastSerial * link) :
-		_link(link) {
+	AP_CommLink(FastSerial * link, AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller, AP_HardwareAbstractionLayer * hal) :
+		_link(link), _navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
 	}
 	virtual void send() = 0;
 	virtual void receive() = 0;
@@ -49,13 +49,17 @@ public:
 
 protected:
 	FastSerial * _link;
+	AP_Navigator * _navigator;
+	AP_Guide * _guide;
+	AP_Controller * _controller;
+	AP_HardwareAbstractionLayer * _hal;
 };
 
 class MavlinkComm: public AP_CommLink {
 public:
-	MavlinkComm(FastSerial * link, ArduPilotOne * apo) :
-				AP_CommLink(link),
-				_apo(apo),
+	MavlinkComm(FastSerial * link, AP_Navigator * nav, AP_Guide * guide,
+			AP_Controller * controller, AP_HardwareAbstractionLayer * hal) :
+				AP_CommLink(link, nav, guide, controller, hal),
 
 				// options
 				_useRelativeAlt(true),
@@ -111,17 +115,17 @@ public:
 
 		case MAVLINK_MSG_ID_ATTITUDE: {
 			mavlink_msg_attitude_send(_channel, timeStamp,
-					_apo->navigator()->roll, _apo->navigator()->pitch,
-					_apo->navigator()->yaw, _apo->navigator()->rollRate,
-					_apo->navigator()->pitchRate, _apo->navigator()->yawRate);
+					_navigator->roll, _navigator->pitch,
+					_navigator->yaw, _navigator->rollRate,
+					_navigator->pitchRate, _navigator->yawRate);
 			break;
 		}
 
 		case MAVLINK_MSG_ID_GLOBAL_POSITION: {
 			mavlink_msg_global_position_int_send(_channel,
-					_apo->navigator()->latInt, _apo->navigator()->lonInt,
-					_apo->navigator()->altInt * 10, _apo->navigator()->vN,
-					_apo->navigator()->vE, _apo->navigator()->vD);
+					_navigator->latInt, _navigator->lonInt,
+					_navigator->altInt * 10, _navigator->vN,
+					_navigator->vE, _navigator->vD);
 			break;
 		}
 
@@ -129,8 +133,8 @@ public:
 			int16_t ch[8];
 			for (int i = 0; i < 8; i++)
 				ch[i] = 0;
-			for (int i = 0; i < 8 && i < _apo->rc().getSize(); i++)
-				ch[i] = 10000 * _apo->rc()[i]->getNormalized();
+			for (int i = 0; i < 8 && i < _hal->rc.getSize(); i++)
+				ch[i] = 10000 * _hal->rc[i]->getNormalized();
 			mavlink_msg_rc_channels_scaled_send(_channel, ch[0], ch[1], ch[2],
 					ch[3], ch[4], ch[5], ch[6], ch[7], 255);
 			break;
@@ -140,8 +144,8 @@ public:
 			int16_t ch[8];
 			for (int i = 0; i < 8; i++)
 				ch[i] = 0;
-			for (int i = 0; i < 8 && i < _apo->rc().getSize(); i++)
-				ch[i] = _apo->rc()[i]->getPwm();
+			for (int i = 0; i < 8 && i < _hal->rc.getSize(); i++)
+				ch[i] = _hal->rc[i]->getPwm();
 			mavlink_msg_rc_channels_raw_send(_channel, ch[0], ch[1], ch[2],
 					ch[3], ch[4], ch[5], ch[6], ch[7], 255);
 			break;
@@ -276,9 +280,6 @@ private:
 	uint16_t _queuedParameterIndex;
 	uint16_t _cmdMax;
 
-	// links
-	ArduPilotOne * _apo;
-
 	// channel
 	mavlink_channel_t _channel;
 	uint16_t _packetDrops;
@@ -287,19 +288,19 @@ private:
 	void _handleMessage(mavlink_message_t * msg) {
 
 		switch (msg->msgid) {
-		_apo->getDebug().printf_P(PSTR("message received: %d"), msg->msgid);
+		_hal->debug->printf_P(PSTR("message received: %d"), msg->msgid);
 
 	case MAVLINK_MSG_ID_GPS_RAW: {
 		// decode
 		mavlink_gps_raw_t packet;
 		mavlink_msg_gps_raw_decode(msg, &packet);
 
-		_apo->navigator()->latInt = packet.lat;
-		_apo->navigator()->lonInt = packet.lon;
-		_apo->navigator()->altInt = packet.alt;
-		_apo->navigator()->yaw = packet.hdg;
-		_apo->navigator()->groundSpeed = packet.v;
-		_apo->navigator()->airSpeed = packet.v;
+		_navigator->latInt = packet.lat;
+		_navigator->lonInt = packet.lon;
+		_navigator->altInt = packet.alt;
+		_navigator->yaw = packet.hdg;
+		_navigator->groundSpeed = packet.v;
+		_navigator->airSpeed = packet.v;
 		break;
 	}
 
@@ -309,12 +310,12 @@ private:
 		mavlink_msg_attitude_decode(msg, &packet);
 
 		// set dcm hil sensor
-		_apo->navigator()->roll = packet.roll;
-		_apo->navigator()->pitch = packet.pitch;
-		_apo->navigator()->yaw = packet.yaw;
-		_apo->navigator()->rollRate = packet.rollspeed;
-		_apo->navigator()->pitchRate = packet.pitchspeed;
-		_apo->navigator()->yawRate = packet.yawspeed;
+		_navigator->roll = packet.roll;
+		_navigator->pitch = packet.pitch;
+		_navigator->yaw = packet.yaw;
+		_navigator->rollRate = packet.rollspeed;
+		_navigator->pitchRate = packet.pitchspeed;
+		_navigator->yawRate = packet.yawspeed;
 		break;
 	}
 

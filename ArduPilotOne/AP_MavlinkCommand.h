@@ -8,6 +8,8 @@
 #ifndef AP_MAVLINKCOMMAND_H_
 #define AP_MAVLINKCOMMAND_H_
 
+#include "AP_Var_keys.h"
+
 class AP_MavlinkCommand {
 private:
 	struct CommandStorage {

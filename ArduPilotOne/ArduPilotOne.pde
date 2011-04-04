@@ -49,6 +49,7 @@
 #include "AP_Guide.h"
 #include "AP_CommLink.h"
 #include "ArduPilotOne.h"
+#include "controllers.h"
 /*
  * Required Global Declarations
  */
@@ -62,12 +63,10 @@ namespace apo {
 
 class AP_CommLink;
 
-ArduPilotOne::ArduPilotOne(FastSerial * debug, AP_CommLink * gcs, AP_CommLink * hil,
-		AP_ADC * adc, GPS * gps, APM_BMP085_Class * baro, Compass * compass,
-		Vector<RangeFinder*> & rangeFinders) :
-	Loop(LOOP_0_RATE, callback0, this), _debug(debug),
-			_gcs(gcs), _hil(hil), _controller(NULL), _adc(adc),
-			_gps(gps), _baro(baro), _compass(compass) {
+ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller,
+		AP_HardwareAbstractionLayer * hal) :
+	Loop(LOOP_0_RATE, callback0, this),
+			_navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
 
 	/*
 	 * Attach loops
@@ -77,29 +76,6 @@ ArduPilotOne::ArduPilotOne(FastSerial * debug, AP_CommLink * gcs, AP_CommLink * 
 	subLoops().push_back(new Loop(LOOP_2_RATE, callback2, this));
 	subLoops().push_back(new Loop(LOOP_3_RATE, callback3, this));
 	subLoops().push_back(new Loop(LOOP_4_RATE, callback4, this));
-
-
-	/*
-	 * Navigator
-	 */
-#if RUNMODE_TYPE == RUNMODE_LIVE
-	_navigator = new DcmNavigator(AP_Navigator::MODE_LIVE, _adc, _gps, _baro,
-			_compass, rangeFinders);
-#else
-	_navigator = new DcmNavigator(AP_Navigator::MODE_HIL_CNTL, _adc, _gps, _baro, _compass, rangeFinders);
-#endif
-
-	/*
-	 * Guide
-	 */
-	_guide = new MavlinkGuide(_navigator, rangeFinders);
-
-	/*
-	 * Controller Initialization
-	 */
-	controllerInit();
-
-	getDebug().println_P(PSTR("initialization complete"));
 
 }
 
@@ -116,6 +92,7 @@ void ArduPilotOne::callback0(void * data) {
 void ArduPilotOne::callback1(void * data) {
 	ArduPilotOne * apo = (ArduPilotOne *) data;
 
+
 #if RUNMODE_TYPE == RUNMODE_LIVE
 	/*
 	 * read compass
@@ -127,15 +104,15 @@ void ArduPilotOne::callback1(void * data) {
 	/*
 	 * hardware in the loop
 	 */
-	if (apo->hil())
+	if (apo->hal()->mode!=AP_HardwareAbstractionLayer::MODE_LIVE)
 	{
 		// receive message
-		apo->hil()->receive();
+		apo->hal()->hil->receive();
 
 		// send messages
-		apo->hil()->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
-		apo->hil()->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
-		apo->hil()->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
+		apo->hal()->hil->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
+		apo->hal()->hil->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
+		apo->hal()->hil->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
 	}
 #endif
 	/*
@@ -151,7 +128,7 @@ void ArduPilotOne::callback1(void * data) {
 		apo->controller()->update(1./LOOP_1_RATE);
 	char msg[50];
 	sprintf(msg, "c_hdg: %f, c_thr: %f", apo->guide()->headingCommand, apo->guide()->groundSpeedCommand);
-	apo->gcs()->sendText(AP_CommLink::SEVERITY_LOW, msg);
+	apo->hal()->gcs->sendText(AP_CommLink::SEVERITY_LOW, msg);
 	//apo->controller()->update(1. / apo->subLoops()[1]->dt());
 }
 
@@ -161,15 +138,15 @@ void ArduPilotOne::callback2(void * data) {
 	/*
 	 * compass correction for ahrs
 	 */
-	if (apo->compass())
-		apo->compass()->calculate(apo->navigator()->roll,
+	if (apo->hal()->compass)
+		apo->hal()->compass->calculate(apo->navigator()->roll,
 				apo->navigator()->pitch);
 
 	/*
 	 * read gps and correct position
 	 */
-	if (apo->gps()) {
-		apo->gps()->update();
+	if (apo->hal()->gps) {
+		apo->hal()->gps->update();
 
 		// debug
 		/*
@@ -185,19 +162,19 @@ void ArduPilotOne::callback2(void * data) {
 	 */
 	{
 	}
-	if (apo->gcs()) {
+	if (apo->hal()->gcs) {
 		// send messages
-		apo->gcs()->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
-		apo->gcs()->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
-		apo->gcs()->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
-		apo->gcs()->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
 
 		// send messages
-		apo->gcs()->requestCmds();
-		apo->gcs()->sendParameters();
+		apo->hal()->gcs->requestCmds();
+		apo->hal()->gcs->sendParameters();
 
 		// receive messages
-		apo->gcs()->receive();
+		apo->hal()->gcs->receive();
 	}
 
 	/*
@@ -220,12 +197,12 @@ void ArduPilotOne::callback3(void * data) {
 	/*
 	 * send heartbeat
 	 */
-	apo->gcs()->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
+	apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 
 	/*
 	 * load/loop rate/ram debug
 	 */
-	apo->getDebug().printf_P(PSTR("load: %d%%\trate: %f Hz\tfree ram: %d bytes\n"),
+	apo->hal()->debug->printf_P(PSTR("load: %d%%\trate: %f Hz\tfree ram: %d bytes\n"),
 			apo->load(),1.0/apo->dt(),freeMemory());
 
 	/*
@@ -253,13 +230,14 @@ void setup() {
 	/*
 	 * Communications
 	 */
-	Serial.println_P(PSTR("initializing comms"));
 	Serial.begin(57600, 128, 128); // debug
 	Serial1.begin(57600, 128, 128); // gps
 	Serial3.begin(57600, 128, 128); // gcs
+
 	hal->debug = &Serial;
-	hal->gcs = new MavlinkComm(&Serial3,NULL);
-	hal->hil = new MavlinkComm(&Serial,NULL);
+	hal->debug->println_P(PSTR("initializing comms"));
+	hal->gcs = new MavlinkComm(&Serial3,NULL,NULL,NULL,hal);
+	hal->hil = new MavlinkComm(&Serial,NULL,NULL,NULL,hal);
 
 	/*
 	 * Pins
@@ -302,39 +280,54 @@ void setup() {
 	 * In set_orientation, it is defind as (front/back,left/right,down,up)
 	 */
 
-	Serial.println_P(PSTR("initializing front range finder"));
-	Vector<RangeFinder *> rangeFinders;
-	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	rangeFinders[0]->init(0);
-	rangeFinders[0]->set_orientation(1,0,0);
+	hal->debug->println_P(PSTR("initializing front range finder"));
+	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+	hal->rangeFinders[0]->init(0);
+	hal->rangeFinders[0]->set_orientation(1,0,0);
 
-	Serial.println_P(PSTR("initializing back range finder"));
-	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	rangeFinders[1]->init(1);
-	rangeFinders[1]->set_orientation(-1,0,0);
+	hal->debug->println_P(PSTR("initializing back range finder"));
+	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+	hal->rangeFinders[1]->init(1);
+	hal->rangeFinders[1]->set_orientation(-1,0,0);
 
-	Serial.println_P(PSTR("initializing right range finder"));
-	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	rangeFinders[2]->init(2);
-	rangeFinders[2]->set_orientation(0,1,0);
+	hal->debug->println_P(PSTR("initializing right range finder"));
+	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+	hal->rangeFinders[2]->init(2);
+	hal->rangeFinders[2]->set_orientation(0,1,0);
 
-	Serial.println_P(PSTR("initializing left range finder"));
-	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	rangeFinders[3]->init(3);
-	rangeFinders[3]->set_orientation(0,-1,0);
+	hal->debug->println_P(PSTR("initializing left range finder"));
+	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+	hal->rangeFinders[3]->init(3);
+	hal->rangeFinders[3]->set_orientation(0,-1,0);
 
-	Serial.println_P(PSTR("initializing down range finder"));
-	rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	rangeFinders[4]->init(4);
-	rangeFinders[4]->set_orientation(0,0,1);
+	hal->debug->println_P(PSTR("initializing down range finder"));
+	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+	hal->rangeFinders[4]->init(4);
+	hal->rangeFinders[4]->set_orientation(0,0,1);
+
+	/*
+	 * Navigator
+	 */
+	AP_Navigator * navigator = new DcmNavigator(hal);
+
+	/*
+	 * Guide
+	 */
+	AP_Guide * guide = new MavlinkGuide(navigator,hal);
+
+	/*
+	 * Controller Initialization
+	 */
+	AP_Controller * controller = new CarController(k_cntrl,k_pidStr,k_pidThr,navigator,guide,hal);
+
+	hal->debug->println_P(PSTR("initialization complete"));
 
 	/*
 	 * Start the autopilot
 	 */
 	Serial.println_P(PSTR("initializing ArduPilotOne"));
 	Serial.printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
-	apoGlobal = new apo::ArduPilotOne(&Serial, hal->gcs, hal->hil, hal->adc,
-		hal->gps, hal->baro, hal->compass, hal->rangeFinders);
+	apoGlobal = new apo::ArduPilotOne(navigator,guide,controller,hal);
 
 }
 

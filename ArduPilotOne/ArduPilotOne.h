@@ -54,24 +54,12 @@ public:
 	/**
 	 * Default constructor
 	 */
-	ArduPilotOne(FastSerial * debug, AP_CommLink * gcs, AP_CommLink * hil, AP_ADC * adc,
-			GPS * gps, APM_BMP085_Class * baro, Compass * compass, Vector<RangeFinder*> & rangeFinders);
+	ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller,
+			AP_HardwareAbstractionLayer * hal);
 
 	/**
 	 * Accessors
 	 */
-	Vector<AP_RcChannel*> & rc() {
-		return _rc;
-	}
-	AP_ADC * adc() {
-		return _adc;
-	}
-	GPS * gps() {
-		return _gps;
-	}
-	Compass * compass() {
-		return _compass;
-	}
 	AP_Navigator * navigator() {
 		return _navigator;
 	}
@@ -81,26 +69,11 @@ public:
 	AP_Controller * controller() {
 		return _controller;
 	}
-	FastSerial & getDebug() {
-		return *(_debug);
+	AP_HardwareAbstractionLayer * hal() {
+		return _hal;
 	}
-	AP_CommLink * gcs() {
-		return _gcs;
-	}
-	AP_CommLink * hil() {
-		return _hil;
-	}
+
 private:
-
-	/**
-	 * Include the AP_Var keys
-	 */
-#include "AP_Var_keys.h"
-
-	/**
-	 * Include the user defined controllers file.
-	 */
-#include "controllers.h"
 
 	/**
 	 * Loop 0 Callbacks (fastest)
@@ -142,45 +115,12 @@ private:
 	static void callback4(void * data);
 
 	/**
-	 * Comm ports
-	 */
-	FastSerial * _debug;
-
-	/**
-	 * Sensors
-	 * TODO: Abstract all sensor libraries to allow using
-	 * ArduPilot and eventually newer hardware.
-	 */
-	AP_ADC * _adc;
-	GPS * _gps;
-	APM_BMP085_Class * _baro;
-	Compass * _compass;
-
-	/**
-	 * Radio Channels
-	 */
-	Vector<AP_RcChannel *> _rc;
-
-	/**
-	 * Communication Channels
-	 */
-	AP_CommLink * _gcs;
-	AP_CommLink * _hil;
-
-	/**
-	 * Navigator
+	 * Components
 	 */
 	AP_Navigator * _navigator;
-
-	/**
-	 * Guide
-	 */
 	AP_Guide * _guide;
-
-	/**
-	 * Controller
-	 */
 	AP_Controller * _controller;
+	AP_HardwareAbstractionLayer * _hal;
 
 	/**
 	 * Constants
