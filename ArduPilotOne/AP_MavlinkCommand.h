@@ -192,8 +192,9 @@ public:
 			break;
 		}
 	}
-	/*
-	 * get the relative altitude to home in meters
+	/**
+	 * Get the relative altitud to home
+	 * @return relative altitude in meters
 	 */
 	float getRelAlt() {
 			switch (getFrame()) {
@@ -233,16 +234,16 @@ public:
 	mavlink_waypoint_t convert() {
 		mavlink_waypoint_t mavCmd;
 		mavCmd.seq = getSeq();
-		mavCmd.command = _data.get().command;
-		mavCmd.frame = _data.get().frame;
-		mavCmd.param1 = _data.get().param1;
-		mavCmd.param2 = _data.get().param2;
-		mavCmd.param3 = _data.get().param3;
-		mavCmd.param4 = _data.get().param4;
-		mavCmd.x = _data.get().x;
-		mavCmd.y = _data.get().y;
-		mavCmd.z = _data.get().z;
-		mavCmd.autocontinue = _data.get().autocontinue;
+		mavCmd.command = getCommand();
+		mavCmd.frame = getFrame();
+		mavCmd.param1 = getParam1();
+		mavCmd.param2 = getParam2();
+		mavCmd.param3 = getParam3();
+		mavCmd.param4 = getParam4();
+		mavCmd.x = getX();
+		mavCmd.y = getY();
+		mavCmd.z = getZ();
+		mavCmd.autocontinue = getAutocontinue();
 		mavCmd.current = getCurrent();
 		mavCmd.target_component = mavlink_system.compid;
 		mavCmd.target_system = mavlink_system.sysid;
@@ -251,25 +252,63 @@ public:
 	/**
 	 * Calculate the bearing from this command to the next command
 	 * @param next The command to calculate the bearing to.
-	 * @return
+	 * @return the bearing
 	 */
 	float bearingTo(AP_MavlinkCommand next) {
-
+		float deltaLon = getLon() - next.getLon();
+		return atan2(sin(deltaLon)*cos(next.getLat()),
+				cos(getLat())*sin(next.getLat()) -
+				sin(getLat())*cos(next.getLat())*cos(deltaLon));
 	}
 
-	//		deltaLng = latLngInt2Radians(next.lngInt() - lngInt());
-	//		cosDeltaLng = cos(deltaLng);
-	//		sinDeltaLng = sin(deltaLng);
-	//
-	//		cosLat = cos(latRad());
-	//		sinLat = sin(latRad());
-	//
-	//		sinNextLat = sin(next.latRad());
-	//		cosNextLat = cos(next.latRad());
-	//
-	//		return atan2(sinDeltaLng * cosNextLat,
-	//				cosLat * sinNextLat - sinLat * cosNextLat * cosDeltaLng);
-	//           }
+	/**
+	 * Bearing form this command to a gps coordinate in integer units
+	 * @param lat latitude in degrees E-7
+	 * @param lon longitude in degrees E-7
+	 * @param alt altitude in meters E-3 (millimeters)
+	 * @return
+	 */
+	float bearingTo(int32_t lat, int32_t lon, int32_t alt) {
+		static float degInt2Rad = M_PI/180/1e7;
+		static float convert = 1e7*180/M_PI;
+		// have to be careful to maintain the precision of the gps coordinate
+		float deltaLon = (lon - convert*getLon())*degInt2Rad;
+		float nextLat = lat*degInt2Rad;
+		return atan2(sin(deltaLon)*cos(nextLat), cos(getLat())*sin(nextLat) -
+				sin(getLat())*cos(nextLat)*cos(deltaLon));
+	}
+
+	/**
+	 * Distance to another command
+	 * @param next The command to measure to.
+	 * @return The distance in meters.
+	 */
+	float distanceTo(AP_MavlinkCommand next) {
+			// deltaLat = latLngInt2Radians(next.latInt() - latInt());
+			//		deltaLng = latLngInt2Radians(next.lngInt() - lngInt());
+			//
+			//		cosLat = cos(latRad());
+			//		cosNextLat = cos(next.latRad());
+			//
+			//		sinDeltaLat2 = sin(deltaLat / 2);
+			//		sinDeltaLng2 = sin(deltaLng / 2);
+			//
+			//		float a = sinDeltaLat2 * sinDeltaLat2 + cosLat * cosNextLat
+			//				* sinDeltaLng2 * sinDeltaLng2;
+			//		float c = 2 * atan2(sqrt(a), sqrt(1 - a));
+			//		return rEarth * c;
+	}
+
+	/**
+	 * Distance to a gps coordinate in integer units
+	 * @param lat latitude in degrees E-7
+	 * @param lon longitude in degrees E-7
+	 * @param alt altitude in meters E-3 (millimeters)
+	 * @return The distance in meters.
+	 */
+	float distanceTo(int32_t lat, int32_t lon, int32_t alt) {
+
+	}
 
 	// calculates distance to a location
 	//	float distanceTo(AP_MavlinkCommand next) {

@@ -45,27 +45,7 @@ public:
 	}
 
 	virtual void update() = 0;
-
-	// current command index
-	uint8_t cmdIndex() {
-		return _cmdIndex;
-	}
-
-	// previous command index
-	uint8_t prevCmdIndex() {
-		if (_cmdIndex = 0)
-			return _cmdNum;
-		else
-			return _cmdIndex - 1;
-	}
-
-	// next command index
-	uint8_t nextCmdIndex() {
-		if (_cmdIndex >= _cmdNum - 1)
-			return 0;
-		else
-			return _cmdIndex + 1;
-	}
+	virtual void nextCommand() = 0;
 	float headingCommand;
 	float airSpeedCommand;
 	float groundSpeedCommand;
@@ -139,11 +119,21 @@ public:
 
 		//}
 	}
+	void nextCommand() {
+		// if command index is exceeded, return home and repeat the mission
+		_prevCommand = AP_MavlinkCommand(_cmdIndex);
+		if (_cmdIndex++ > _cmdNum) _cmdIndex = 0;
+		_nextCommand = AP_MavlinkCommand(_cmdIndex);
+	}
+
 	void handleCommand()
 	{
-		// TODO handle commands
+		// TODO handle more commands
+		switch(_nextCommand.getCommand()) {
+		case MAV_CMD_NAV_WAYPOINT:
+			// if within radius, increment
+			break;
 		/*
-		switch(getCommand()) {
 		case MAV_CMD_CONDITION_CHANGE_ALT:
 		case MAV_CMD_CONDITION_DELAY:
 		case MAV_CMD_CONDITION_DISTANCE:
@@ -173,10 +163,12 @@ public:
 		case MAV_CMD_NAV_PATHPLANNING:
 		case MAV_CMD_NAV_RETURN_TO_LAUNCH:
 		case MAV_CMD_NAV_TAKEOFF:
-		case MAV_CMD_NAV_WAYPOINT:
+		*/
+		default:
+			// unhandled command, skip
+			nextCommand();
 			break;
 		}
-		*/
 	}
 private:
 	RangeFinder * _rangeFinderFront;
