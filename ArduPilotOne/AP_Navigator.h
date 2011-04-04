@@ -43,13 +43,9 @@ public:
 	float vN;
 	float vE;
 	float vD;
-<<<<<<< .mine
-	float front;
-=======
 	float pN;
 	float pE;
 	float pD;
->>>>>>> .r103
 	int32_t latInt;
 	int32_t lonInt;
 	int32_t altInt;

@@ -86,8 +86,7 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStrea
 			_compass, rangeFinders);
 #else
 	_hil = new MavlinkComm(&hil,this);
-	_navigator = new DcmNavigator(AP_Navigator::MODE_HIL_CNTL, _adc, _gps, _baro,
-			_compass);
+	_navigator = new DcmNavigator(AP_Navigator::MODE_HIL_CNTL, _adc, _gps, _baro, _compass, rangeFinders);
 #endif
 
 	/*
