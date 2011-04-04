@@ -54,26 +54,26 @@ public:
 	virtual void update(const float & dt) {
 		// read mode switch
 		modeCh->readRadio();
+		//Serial.printf_P(PSTR("normalized mode: %f"), modeCh->getNormalized());
 
-		Serial.printf_P(PSTR("normalized mode: %f"), modeCh->getNormalized());
 		// manual
 		if ( modeCh->getNormalized() > 0 ) {
 			steeringCh->readRadio();
 			throttleCh->readRadio();
-			Serial.println("manual");
+			//Serial.println("manual");
 
 		} else { // auto
 			AP_Controller::update(dt);
-			Serial.println("automode");
+			//Serial.println("automode");
 		}
 
-		Serial.printf("steering pwm :\t");
-		Serial.printf("%7d\t",steeringCh->getPwm());
-		Serial.println();
+//		Serial.printf("steering pwm :\t");
+//		Serial.printf("%7d\t",steeringCh->getPwm());
+//		Serial.println();
 
-		Serial.printf("throttle pwm :\t");
-		Serial.printf("%7d\t",throttleCh->getPwm());
-		Serial.println();
+//		Serial.printf("throttle pwm :\t");
+//		Serial.printf("%7d\t",throttleCh->getPwm());
+//		Serial.println();
 
 		delay(100);
 	}
@@ -96,34 +96,20 @@ void controllerInit() {
 
 class QuadController: public AP_Controller {
 private:
-	//	// state
-	//	AP_Float roll;
-	//	AP_Float airspeed;
-	//	AP_Float velocity;
-	//	AP_Float heading;
-	//
-	//	// servo positions
-	//	AP_Float steering;
-	//	AP_Float throttle;
-	//
-	//	// control variables
-	//	AP_Float headingCommand;
-	//	AP_Float airspeedCommand;
-	//	AP_Float rollCommand;
-	//
+
 	// position variables
 	float commandNorth;
 	float commandEast;
 	float commandDown;
-#define PID_POS_P 0.5
-#define PID_POS_I 0.0
-#define PID_POS_D 1.0
+#define PID_POS_P 1
+#define PID_POS_I 0
+#define PID_POS_D 0
 #define PID_POS_AWU 0
 	float PID_POS_LIM;
 	float PID_POS_LIM_MIN;
-#define PID_POS_Z_P 0.5
-#define PID_POS_Z_I 0.0
-#define PID_POS_Z_D 1.0
+#define PID_POS_Z_P 1
+#define PID_POS_Z_I 0
+#define PID_POS_Z_D 0
 #define PID_POS_Z_AWU 0
 	float PID_POS_Z_LIM;
 	float PID_POS_Z_LIM_MIN;
@@ -134,17 +120,17 @@ private:
 	float commandYaw;
 
 	// attitude variables
-#define PID_ATT_P 0.5
-#define PID_ATT_I 0.0
-#define PID_ATT_D 1.0
+#define PID_ATT_P 1
+#define PID_ATT_I 0
+#define PID_ATT_D 0
 #define PID_ATT_AWU 0
-#define PID_YAWPOS_P 0.5
-#define PID_YAWPOS_I 0.0
-#define PID_YAWPOS_D 1.0
+#define PID_YAWPOS_P 1
+#define PID_YAWPOS_I 0
+#define PID_YAWPOS_D 0
 #define PID_YAWPOS_AWU 0
-#define PID_YAWSPEED_P 0.5
-#define PID_YAWSPEED_I 0.0
-#define PID_YAWSPEED_D 1.0
+#define PID_YAWSPEED_P 1
+#define PID_YAWSPEED_I 0
+#define PID_YAWSPEED_D 0
 #define PID_YAWSPEED_AWU 0
 
 	// mix manual variables
@@ -297,8 +283,6 @@ public:
 		// outputs: (to servo: chLeft, chRight, chFront, chBack)
 		//
 		////
-
-		/*addBlock(new QuadMix(getRc(chRoll, chPitch, chYaw, chThr)));*/
 
 		// Left Motor
 		addBlock(new SumGain(&thrustMix, &one, &rollMix, &one, &yawMix, &one));
