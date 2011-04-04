@@ -74,8 +74,6 @@ public:
 //		Serial.printf("throttle pwm :\t");
 //		Serial.printf("%7d\t",throttleCh->getPwm());
 //		Serial.println();
-
-		delay(100);
 	}
 
 };

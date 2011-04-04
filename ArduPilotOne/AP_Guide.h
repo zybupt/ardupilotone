@@ -25,89 +25,10 @@
 #include <AP_Vector.h>
 #include "defines.h"
 #include "AP_Var_keys.h"
+#include "AP_MavlinkCommand.h"
 
 namespace apo {
 
-class Command {
-private:
-	struct CommandStorage {
-		uint8_t command;
-		uint8_t autocontinue;
-		uint8_t frame;
-		float param1;
-		float param2;
-		float param3;
-		float param4;
-		float x;
-		float y;
-		float z;
-	};
-	AP_VarS<CommandStorage> _data;
-	uint8_t _seq;
-public:
-	/**
-	 * Constructor for loading from memory.
-	 * @param index Start at zero.
-	 */
-	Command(uint8_t index) :
-		_data(k_firstCommand + index) {
-		_data.load();
-		_seq = index;
-	}
-
-	/**
-	 * Constructor for saving from command a mavlink waypoint.
-	 * @param cmd The mavlink_waopint_t structure for the command.
-	 */
-	Command(mavlink_waypoint_t cmd) :
-		_data(k_firstCommand + cmd.seq), _seq(cmd.seq) {
-		_data.get().command = cmd.command;
-		_data.get().autocontinue = cmd.autocontinue;
-		_data.get().frame = cmd.frame;
-		_data.get().param1 = cmd.param1;
-		_data.get().param2 = cmd.param2;
-		_data.get().param3 = cmd.param3;
-		_data.get().param4 = cmd.param4;
-		_data.get().x = cmd.x;
-		_data.get().y = cmd.y;
-		_data.get().z = cmd.z;
-		_data.save();
-	}
-	bool save() {
-		return _data.save();
-	}
-	bool load() {
-		return _data.load();
-	}
-	uint8_t getSeq() {
-		return _seq;
-	}
-	bool getCurrent() {
-		return (currentIndex.get() == _seq);
-	}
-	mavlink_waypoint_t convert() {
-		mavlink_waypoint_t mavCmd;
-		mavCmd.seq = getSeq();
-		mavCmd.command = _data.get().command;
-		mavCmd.frame = _data.get().frame;
-		mavCmd.param1 = _data.get().param1;
-		mavCmd.param2 = _data.get().param2;
-		mavCmd.param3 = _data.get().param3;
-		mavCmd.param4 = _data.get().param4;
-		mavCmd.x = _data.get().x;
-		mavCmd.y = _data.get().y;
-		mavCmd.z = _data.get().z;
-		mavCmd.autocontinue  = _data.get().autocontinue;
-		mavCmd.current = getCurrent();
-		mavCmd.target_component = mavlink_system.compid;
-		mavCmd.target_system = mavlink_system.sysid;
-		return mavCmd;
-	}
-	static AP_Uint8 number;
-	static AP_Uint8 currentIndex;
-};
-AP_Uint8 Command::number = 1;
-AP_Uint8 Command::currentIndex = 1;
 
 /// Guide class
 class AP_Guide {
@@ -119,8 +40,8 @@ public:
 	 */
 	AP_Guide(AP_Navigator * navigator) :
 		_navigator(navigator), headingCommand(0), airSpeedCommand(0),
-				groundSpeedCommand(0), altitudeCommand(0), _prevCommand(0),
-				pNCmd(0), pECmd(0), pDCmd(0), _nextCommand(1) {
+				groundSpeedCommand(0), altitudeCommand(0),
+				pNCmd(0), pECmd(0), pDCmd(0) {
 	}
 
 	virtual void update() = 0;
@@ -145,7 +66,6 @@ public:
 		else
 			return _cmdIndex + 1;
 	}
-
 	float headingCommand;
 	float airSpeedCommand;
 	float groundSpeedCommand;
@@ -153,66 +73,61 @@ public:
 	float pNCmd;
 	float pECmd;
 	float pDCmd;
-
 protected:
 	uint8_t _cmdNum;
 	uint8_t _cmdIndex;
 	AP_Navigator * _navigator;
-	Command _prevCommand;
-	Command _nextCommand;
 };
 
 class MavlinkGuide: public AP_Guide {
 public:
 
 	MavlinkGuide(AP_Navigator * navigator, Vector<RangeFinder *> & rangeFinder) :
-		AP_Guide(navigator)
-	{
-		for (int i = 0;i<rangeFinder.getSize();i++)
-		{
+		AP_Guide(navigator), _prevCommand(0), _nextCommand(1) {
+		for (int i = 0; i < rangeFinder.getSize(); i++) {
 			RangeFinder * rF = rangeFinder[i];
-			if (rF == NULL) continue;
-			if(rF->orientation_x == 1 && rF->orientation_y == 0 && rF->orientation_z == 0)
+			if (rF == NULL)
+				continue;
+			if (rF->orientation_x == 1 && rF->orientation_y == 0
+					&& rF->orientation_z == 0)
 				_rangeFinderFront = rF;
-			else if(rF->orientation_x == -1 && rF->orientation_y == 0 && rF->orientation_z == 0)
+			else if (rF->orientation_x == -1 && rF->orientation_y == 0
+					&& rF->orientation_z == 0)
 				_rangeFinderBack = rF;
-			else if(rF->orientation_x == 0 && rF->orientation_y == 1 && rF->orientation_z == 0)
+			else if (rF->orientation_x == 0 && rF->orientation_y == 1
+					&& rF->orientation_z == 0)
 				_rangeFinderRight = rF;
-			else if(rF->orientation_x == 0 && rF->orientation_y == -1 && rF->orientation_z == 0)
+			else if (rF->orientation_x == 0 && rF->orientation_y == -1
+					&& rF->orientation_z == 0)
 				_rangeFinderLeft = rF;
 
 		}
 	}
 	virtual void update() {
 
+		// command a
+		headingCommand = M_PI;
+		groundSpeedCommand = 1;
 
-		 // command a
-		 headingCommand = M_PI;
-		 groundSpeedCommand = 1;
+		// stop if your going to drive into something in front of you
+		if (_rangeFinderFront && _rangeFinderFront->distance < 30) {
+			airSpeedCommand = 0;
+			groundSpeedCommand = 0;
+		}
+		if (_rangeFinderBack && _rangeFinderBack->distance < 30) {
+			airSpeedCommand = 0;
+			groundSpeedCommand = 0;
+		}
 
-		 // stop if your going to drive into something in front of you
-		 if (_rangeFinderFront && _rangeFinderFront->distance < 30 )
-		 {
-			 airSpeedCommand = 0;
-			 groundSpeedCommand = 0;
-		 }
-		 if (_rangeFinderBack && _rangeFinderBack->distance <30)
-		 {
-			 airSpeedCommand = 0;
-			 groundSpeedCommand = 0;
-		 }
+		if (_rangeFinderLeft && _rangeFinderLeft->distance < 30) {
+			airSpeedCommand = 0;
+			groundSpeedCommand = 0;
+		}
 
-		 if (_rangeFinderLeft && _rangeFinderLeft->distance <30)
-		 {
-			 airSpeedCommand = 0;
-			 groundSpeedCommand = 0;
-		 }
-
-		 if (_rangeFinderRight && _rangeFinderRight->distance <30)
-		 {
-			 airSpeedCommand = 0;
-			 groundSpeedCommand = 0;
-		 }
+		if (_rangeFinderRight && _rangeFinderRight->distance < 30) {
+			airSpeedCommand = 0;
+			groundSpeedCommand = 0;
+		}
 
 		//float dXt = position()->crossTrack(previousWaypoint(),nextWaypoint());
 		//float dAt = position()->alongTrack(previousWaypoint(),nextWaypoint());
@@ -224,12 +139,52 @@ public:
 
 		//}
 	}
+	void handleCommand()
+	{
+		// TODO handle commands
+		/*
+		switch(getCommand()) {
+		case MAV_CMD_CONDITION_CHANGE_ALT:
+		case MAV_CMD_CONDITION_DELAY:
+		case MAV_CMD_CONDITION_DISTANCE:
+		case MAV_CMD_CONDITION_LAST:
+		case MAV_CMD_CONDITION_YAW:
+		case MAV_CMD_DO_CHANGE_SPEED:
+		case MAV_CMD_DO_CONTROL_VIDEO:
+		case MAV_CMD_DO_JUMP:
+		case MAV_CMD_DO_LAST:
+		case MAV_CMD_DO_LAST:
+		case MAV_CMD_DO_REPEAT_RELAY:
+		case MAV_CMD_DO_REPEAT_SERVO:
+		case MAV_CMD_DO_SET_HOME:
+		case MAV_CMD_DO_SET_MODE:
+		case MAV_CMD_DO_SET_PARAMETER:
+		case MAV_CMD_DO_SET_RELAY:
+		case MAV_CMD_DO_SET_SERVO:
+		case MAV_CMD_PREFLIGHT_CALIBRATION:
+		case MAV_CMD_PREFLIGHT_STORAGE:
+		case MAV_CMD_NAV_WAYPOINT:
+		case MAV_CMD_NAV_LAND:
+		case MAV_CMD_NAV_LAST:
+		case MAV_CMD_NAV_LOITER_TIME:
+		case MAV_CMD_NAV_LOITER_TURNS:
+		case MAV_CMD_NAV_LOITER_UNLIM:
+		case MAV_CMD_NAV_ORIENTATION_TARGET:
+		case MAV_CMD_NAV_PATHPLANNING:
+		case MAV_CMD_NAV_RETURN_TO_LAUNCH:
+		case MAV_CMD_NAV_TAKEOFF:
+		case MAV_CMD_NAV_WAYPOINT:
+			break;
+		}
+		*/
+	}
 private:
-
-	 RangeFinder * _rangeFinderFront;
-	 RangeFinder * _rangeFinderBack;
-	 RangeFinder * _rangeFinderLeft;
-	 RangeFinder * _rangeFinderRight;
+	RangeFinder * _rangeFinderFront;
+	RangeFinder * _rangeFinderBack;
+	RangeFinder * _rangeFinderLeft;
+	RangeFinder * _rangeFinderRight;
+	AP_MavlinkCommand _prevCommand;
+	AP_MavlinkCommand _nextCommand;
 };
 
 } // namespace apo

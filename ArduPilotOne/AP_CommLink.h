@@ -21,6 +21,7 @@
 
 #include <AP_Common.h>
 #include "ArduPilotOne.h"
+#include "AP_MavlinkCommand.h"
 
 namespace apo {
 
@@ -244,7 +245,7 @@ public:
 	 */
 	void requestCmds() {
 		// request cmds one by one
-		if (_receivingCmds && _cmdRequestIndex <= Command::number) {
+		if (_receivingCmds && _cmdRequestIndex <= AP_MavlinkCommand::number) {
 			mavlink_msg_waypoint_request_send(_channel, _cmdDestSysId,
 					_cmdDestCompId, _cmdRequestIndex);
 		}
@@ -382,7 +383,7 @@ private:
 
 		// Start sending waypoints
 		mavlink_msg_waypoint_count_send(_channel, msg->sysid, msg->compid,
-				Command::number);
+				AP_MavlinkCommand::number);
 
 		_cmdTimeLastSent = millis();
 		_cmdTimeLastReceived = millis();
@@ -406,7 +407,7 @@ private:
 		if (_checkTarget(packet.target_system, packet.target_component))
 			break;
 
-		Command cmd(packet.seq);
+		AP_MavlinkCommand cmd(packet.seq);
 
 		mavlink_waypoint_t msg = cmd.convert();
 		mavlink_msg_waypoint_send(_channel, _cmdDestSysId, _cmdDestCompId,
@@ -463,8 +464,8 @@ private:
 
 		// clear all waypoints
 		uint8_t type = 0; // ok (0), error(1)
-		Command::number = 0;
-		Command::number.save();
+		AP_MavlinkCommand::number = 0;
+		AP_MavlinkCommand::number.save();
 
 		// send acknowledgement 3 times to makes sure it is received
 		for (int i = 0; i < 3; i++)
@@ -484,9 +485,9 @@ private:
 			break;
 
 		// set current waypoint
-		Command::currentIndex = packet.seq;
-		Command::currentIndex.save();
-		mavlink_msg_waypoint_current_send(_channel, Command::currentIndex);
+		AP_MavlinkCommand::currentIndex = packet.seq;
+		AP_MavlinkCommand::currentIndex.save();
+		mavlink_msg_waypoint_current_send(_channel, AP_MavlinkCommand::currentIndex);
 		break;
 	}
 
@@ -503,8 +504,8 @@ private:
 		if (packet.count > _cmdMax) {
 			packet.count = _cmdMax;
 		}
-		Command::number = packet.count;
-		Command::number.save();
+		AP_MavlinkCommand::number = packet.count;
+		AP_MavlinkCommand::number.save();
 		_cmdTimeLastReceived = millis();
 		_receivingCmds = true;
 		_sendingCmds = false;
@@ -538,10 +539,10 @@ private:
 		}
 
 		// store waypoint
-		Command command(packet);
+		AP_MavlinkCommand command(packet);
 		sendText(SEVERITY_HIGH, PSTR("waypoint stored"));
 		_cmdRequestIndex++;
-		if (_cmdRequestIndex >= Command::number) {
+		if (_cmdRequestIndex >= AP_MavlinkCommand::number) {
 			sendMessage( MAVLINK_MSG_ID_WAYPOINT_ACK);
 			sendText(SEVERITY_LOW, PSTR("waypoint ack sent"));
 		}
