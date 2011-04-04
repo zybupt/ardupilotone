@@ -143,12 +143,16 @@ void ArduPilotOne::callback1(void * data) {
 	 */
 	if (apo->guide())
 		apo->guide()->update();
+
 	/*
 	 * update control laws
 	 */
 	if (apo->controller())
-		apo->controller()->update(1./20.);
-		//apo->controller()->update(1. / apo->subLoops()[1]->dt());
+		apo->controller()->update(1./LOOP_1_RATE);
+	char msg[50];
+	sprintf(msg, "c_hdg: %f, c_thr: %f", apo->guide()->headingCommand, apo->guide()->groundSpeedCommand);
+	apo->gcs()->sendText(AP_CommLink::SEVERITY_LOW, msg);
+	//apo->controller()->update(1. / apo->subLoops()[1]->dt());
 }
 
 void ArduPilotOne::callback2(void * data) {

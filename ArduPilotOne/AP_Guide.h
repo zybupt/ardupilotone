@@ -62,7 +62,9 @@ protected:
 class MavlinkGuide: public AP_Guide {
 public:
 	MavlinkGuide(AP_Navigator * navigator, Vector<RangeFinder *> & rangeFinder) :
-		AP_Guide(navigator), _prevCommand(0), _nextCommand(1) {
+		AP_Guide(navigator), _rangeFinderFront(), _rangeFinderBack(),
+		 _rangeFinderLeft(), _rangeFinderRight(),
+		_prevCommand(0), _nextCommand(1) {
 		for (int i = 0; i < rangeFinder.getSize(); i++) {
 			RangeFinder * rF = rangeFinder[i];
 			if (rF == NULL)
@@ -86,11 +88,15 @@ public:
 	virtual void update() {
 
 		// TODO, setting to a fixed value for testing with the car right now
-		headingCommand = M_PI;
-		groundSpeedCommand = 1;
+		float temp = crossTrack()*-0.001; // crosstrack gain
+		if (temp > M_PI/2) temp = M_PI/2;
+		if (temp < -M_PI/2) temp = -M_PI/2;
+		headingCommand = _prevCommand.bearingTo(_nextCommand) + temp;
+		groundSpeedCommand = 3;
+
 
 		// process mavlink commands
-		handleCommand();
+		//handleCommand();
 
 		// obstacle avoidance overrides
 		// stop if your going to drive into something in front of you
