@@ -54,7 +54,7 @@ public:
 	/**
 	 * Default constructor
 	 */
-	ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStream & hil, AP_ADC * adc,
+	ArduPilotOne(FastSerial * debug, AP_CommLink * gcs, AP_CommLink * hil, AP_ADC * adc,
 			GPS * gps, APM_BMP085_Class * baro, Compass * compass, Vector<RangeFinder*> & rangeFinders);
 
 	/**
@@ -81,8 +81,8 @@ public:
 	AP_Controller * controller() {
 		return _controller;
 	}
-	BetterStream & getDebug() {
-		return _debug;
+	FastSerial & getDebug() {
+		return *(_debug);
 	}
 	AP_CommLink * gcs() {
 		return _gcs;
@@ -144,7 +144,7 @@ private:
 	/**
 	 * Comm ports
 	 */
-	BetterStream & _debug;
+	FastSerial * _debug;
 
 	/**
 	 * Sensors

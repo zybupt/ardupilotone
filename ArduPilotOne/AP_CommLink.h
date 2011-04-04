@@ -35,7 +35,7 @@ public:
 		SEVERITY_LOW, SEVERITY_MED, SEVERITY_HIGH
 	};
 
-	AP_CommLink(BetterStream * link) :
+	AP_CommLink(FastSerial * link) :
 		_link(link) {
 	}
 	virtual void send() = 0;
@@ -48,12 +48,12 @@ public:
 	virtual void requestCmds() = 0;
 
 protected:
-	BetterStream * _link;
+	FastSerial * _link;
 };
 
 class MavlinkComm: public AP_CommLink {
 public:
-	MavlinkComm(BetterStream * link, ArduPilotOne * apo) :
+	MavlinkComm(FastSerial * link, ArduPilotOne * apo) :
 				AP_CommLink(link),
 				_apo(apo),
 

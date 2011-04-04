@@ -224,11 +224,11 @@ public:
 				addBlock(new PidDFB(pidPEKey, PSTR("East"),  vE, PID_POS_P,PID_POS_I,PID_POS_D,PID_POS_AWU));
 				addBlock(new Saturate(PID_POS_LIM_MIN,PID_POS_LIM));
 				addBlock(new Sink(commandEast));
-
-				addBlock(new SumGain(pDCmd,&one,pD,&negativeOne));
-				addBlock(new PidDFB(pidPDKey, PSTR("Down"),  vD, PID_POS_Z_P,PID_POS_Z_I,PID_POS_Z_D,PID_POS_Z_AWU));
-				addBlock(new Saturate(PID_POS_Z_LIM_MIN,PID_POS_Z_LIM));
-				addBlock(new Sink(commandDown));
+//
+//				addBlock(new SumGain(pDCmd,&one,pD,&negativeOne));
+//				addBlock(new PidDFB(pidPDKey, PSTR("Down"),  vD, PID_POS_Z_P,PID_POS_Z_I,PID_POS_Z_D,PID_POS_Z_AWU));
+//				addBlock(new Saturate(PID_POS_Z_LIM_MIN,PID_POS_Z_LIM));
+//				addBlock(new Sink(commandDown));
 
 		////
 		// Bridge between POSITION and ATTITUDE control

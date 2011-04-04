@@ -42,6 +42,7 @@
 /*
  * Local Modules
  */
+#include "AP_HardwareAbstractionLayer.h"
 #include "AP_RcChannel.h"
 #include "AP_Controller.h"
 #include "AP_Navigator.h"
@@ -61,11 +62,11 @@ namespace apo {
 
 class AP_CommLink;
 
-ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStream & hil,
+ArduPilotOne::ArduPilotOne(FastSerial * debug, AP_CommLink * gcs, AP_CommLink * hil,
 		AP_ADC * adc, GPS * gps, APM_BMP085_Class * baro, Compass * compass,
 		Vector<RangeFinder*> & rangeFinders) :
 	Loop(LOOP_0_RATE, callback0, this), _debug(debug),
-			_gcs(new MavlinkComm(&gcs, this)), _hil(NULL), _controller(NULL), _adc(adc),
+			_gcs(gcs), _hil(hil), _controller(NULL), _adc(adc),
 			_gps(gps), _baro(baro), _compass(compass) {
 
 	/*
@@ -85,7 +86,6 @@ ArduPilotOne::ArduPilotOne(BetterStream & debug, BetterStream & gcs, BetterStrea
 	_navigator = new DcmNavigator(AP_Navigator::MODE_LIVE, _adc, _gps, _baro,
 			_compass, rangeFinders);
 #else
-	_hil = new MavlinkComm(&hil,this);
 	_navigator = new DcmNavigator(AP_Navigator::MODE_HIL_CNTL, _adc, _gps, _baro, _compass, rangeFinders);
 #endif
 
@@ -245,16 +245,28 @@ void ArduPilotOne::callback4(void * data) {
 } // namespace apo
 
 void setup() {
+
+	using namespace apo;
+
+	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer;
+
+	/*
+	 * Communications
+	 */
+	Serial.println_P(PSTR("initializing comms"));
 	Serial.begin(57600, 128, 128); // debug
 	Serial1.begin(57600, 128, 128); // gps
 	Serial3.begin(57600, 128, 128); // gcs
+	hal->debug = &Serial;
+	hal->gcs = new MavlinkComm(&Serial3,NULL);
+	hal->hil = new MavlinkComm(&Serial,NULL);
 
 	/*
 	 * Pins
 	 */
-	Serial.println_P(PSTR("settings pin modes"));
+	hal->debug->println_P(PSTR("settings pin modes"));
 	pinMode(A_LED_PIN, OUTPUT); //  extra led
-	pinMode(B_LED_PIN, OUTPUT); //  imu led
+	pinMode(B_LED_PIN, OUTPUT); //  imu ledclass AP_CommLink;
 	pinMode(C_LED_PIN, OUTPUT); //  gps led
 	pinMode(SLIDE_SWITCH_PIN, INPUT);
 	pinMode(PUSHBUTTON_PIN, INPUT);
@@ -263,24 +275,23 @@ void setup() {
 	/*
 	 * Sensor initialization
 	 */
-	Serial.println_P(PSTR("initializing radio"));
+	hal->debug->println_P(PSTR("initializing radio"));
 	APM_RC.Init(); // APM Radio initialization
 
-	Serial.println_P(PSTR("initializing adc"));
-	AP_ADC * adc = new AP_ADC_ADS7844;
-	adc->Init();;
+	hal->debug->println_P(PSTR("initializing adc"));
+	hal->adc =  new AP_ADC_ADS7844;
+	hal->adc->Init();
 
-	Serial.println_P(PSTR("initializing gps"));
-	GPS * gps = new AP_GPS_MTK(&Serial1);
+	hal->debug->println_P(PSTR("initializing gps"));
+	hal->gps = new AP_GPS_MTK(&Serial1);
 
-	Serial.println_P(PSTR("initializing baro"));
-	APM_BMP085_Class * baro = new APM_BMP085_Class;
-	baro->Init();
+	hal->debug->println_P(PSTR("initializing baro"));
+	hal->baro = new APM_BMP085_Class;
+	hal->baro->Init();
 
-	Serial.println_P(PSTR("initializing compass"));
-	delay(1000);
-	Compass * compass = new AP_Compass_HMC5843;
-	compass->init();
+	hal->debug->println_P(PSTR("initializing compass"));
+	hal->compass = new AP_Compass_HMC5843;
+	hal->compass->init();
 
 	/**
 	 * Initialize ultrasonic sensors. If sensors are not plugged in, the navigator will not
@@ -322,8 +333,8 @@ void setup() {
 	 */
 	Serial.println_P(PSTR("initializing ArduPilotOne"));
 	Serial.printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
-	apoGlobal = new apo::ArduPilotOne(Serial, Serial3, Serial, adc,
-		gps, baro, compass, rangeFinders);
+	apoGlobal = new apo::ArduPilotOne(&Serial, hal->gcs, hal->hil, hal->adc,
+		hal->gps, hal->baro, hal->compass, hal->rangeFinders);
 
 }
 
