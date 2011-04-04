@@ -120,7 +120,7 @@ public:
 	AP_Guide(AP_Navigator * navigator) :
 		_navigator(navigator), headingCommand(0), airSpeedCommand(0),
 				groundSpeedCommand(0), altitudeCommand(0), _prevCommand(0),
-				_nextCommand(1) {
+				pNCmd(0), pECmd(0), pDCmd(0), _nextCommand(1) {
 	}
 
 	virtual void update() = 0;
@@ -185,6 +185,10 @@ public:
 	}
 	virtual void update() {
 
+
+		 // command a
+		 headingCommand = M_PI;
+		 groundSpeedCommand = 1;
 
 		 // stop if your going to drive into something in front of you
 		 if (_rangeFinderFront && _rangeFinderFront->distance < 30 )

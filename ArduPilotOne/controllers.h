@@ -43,15 +43,15 @@ public:
 
 		// steering control loop
 		addBlock(new SumGain(headingCommand, &one, heading, &negativeOne));
-		addBlock(new Pid(pidStrKey, PSTR("STR_"), 1, 1, 1, 1, 20));
+		addBlock(new Pid(pidStrKey, PSTR("STR_"), 1, 0, 0, 0, 20));
 		addBlock(new ToServo(steeringCh));
 
 		// throttle control loop
 		addBlock(new SumGain(velocityCommand, &one, velocity, &negativeOne));
-		addBlock(new Pid(pidThrKey, PSTR("THR_"), 1, 1, 1, 1, 20));
+		addBlock(new Pid(pidThrKey, PSTR("THR_"), 1, 0, 0, 0, 20));
 		addBlock(new ToServo(throttleCh));
 	}
-	virtual void update(const double dt) {
+	virtual void update(const float dt) {
 		// read mode switch
 		modeCh->readRadio();
 
@@ -59,28 +59,28 @@ public:
 		if ( modeCh->getPosition() > 0 ) {
 			steeringCh->readRadio();
 			throttleCh->readRadio();
-			//Serial.println("manual");
+			Serial.println("manual");
 
 		} else { // auto
 			AP_Controller::update(dt);
-			//Serial.println("automode");
+			Serial.println("automode");
 		}
 
-		//Serial.printf("steering pwm :\t");
-		//Serial.printf("%7d\t",steeringCh->getPwm());
-		//Serial.println();
+		Serial.printf("steering pwm :\t");
+		Serial.printf("%7d\t",steeringCh->getPwm());
+		Serial.println();
 
-		//Serial.printf("throttle pwm :\t");
-		//Serial.printf("%7d\t",throttleCh->getPwm());
-		//Serial.println();
+		Serial.printf("throttle pwm :\t");
+		Serial.printf("%7d\t",throttleCh->getPwm());
+		Serial.println();
 
-		//delay(100);
+		delay(100);
 	}
 
 };
 
 void controllerInit() {
-	_rc.push_back(new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 7, 45));
+	_rc.push_back(new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 7, 1));
 	_rc.push_back(new AP_RcChannel(k_chStr, PSTR("STR_"), APM_RC, 0, 45));
 	_rc.push_back(new AP_RcChannel(k_chThr, PSTR("THR_"), APM_RC, 1, 100));
 

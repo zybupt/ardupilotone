@@ -116,16 +116,17 @@ void ArduPilotOne::callback0(void * data) {
 void ArduPilotOne::callback1(void * data) {
 	ArduPilotOne * apo = (ArduPilotOne *) data;
 
+#if RUNMODE_TYPE == RUNMODE_LIVE
 	/*
 	 * read compass
 	 */
+
 	if (apo->compass())
 		apo->compass()->read();
-
+#elif RUNMODE_TYPE == RUNMODE_HIL_STATE
 	/*
 	 * hardware in the loop
 	 */
-#if RUNMODE_TYPE == RUNMODE_HIL_STATE
 	if (apo->hil())
 	{
 		// receive message
@@ -138,10 +139,16 @@ void ArduPilotOne::callback1(void * data) {
 	}
 #endif
 	/*
+     * update control laws
+	 */
+	if (apo->guide())
+		apo->guide()->update();
+	/*
 	 * update control laws
 	 */
 	if (apo->controller())
-		apo->controller()->update(1. / apo->subLoops()[1]->dt());
+		apo->controller()->update(1./20.);
+		//apo->controller()->update(1. / apo->subLoops()[1]->dt());
 }
 
 void ArduPilotOne::callback2(void * data) {
