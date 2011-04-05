@@ -8,5 +8,5 @@ fi
 echo -e "sketch entered: >>$sketch<<"
 
 avarice --mkII --capture --jtag usb :4242 &
-gnome-terminal -x avr-gdb /tmp/$sketch.build/$sketch.elf
+gnome-terminal -x avr-gdb ./build/$sketch.build/$sketch.elf
 echo -e '\n\nat the gdb prompt type "target remote localhost:4242"'

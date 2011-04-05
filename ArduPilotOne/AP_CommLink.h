@@ -248,6 +248,7 @@ public:
 	 * request commands one at a time
 	 */
 	void requestCmds() {
+		_hal->debug->printf_P("requesting commands\n");
 		// request cmds one by one
 		if (_receivingCmds && _cmdRequestIndex <= AP_MavlinkCommand::number) {
 			mavlink_msg_waypoint_request_send(_channel, _cmdDestSysId,

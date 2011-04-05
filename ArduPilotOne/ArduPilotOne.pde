@@ -86,7 +86,7 @@ void ArduPilotOne::callback0(void * data) {
 	 * ahrs update
 	 */
 	if (apo->navigator())
-		apo->navigator()->update(apo->dt());
+		apo->navigator()->update(1.0/loop0Rate);
 }
 
 void ArduPilotOne::callback1(void * data) {
@@ -124,9 +124,11 @@ void ArduPilotOne::callback1(void * data) {
 	 */
 	if (apo->controller())
 		apo->controller()->update(1./loop1Rate);
+	/*
 	char msg[50];
 	sprintf(msg, "c_hdg: %f, c_thr: %f", apo->guide()->headingCommand, apo->guide()->groundSpeedCommand);
 	apo->hal()->gcs->sendText(AP_CommLink::SEVERITY_LOW, msg);
+	*/
 	//apo->controller()->update(1. / apo->subLoops()[1]->dt());
 }
 
@@ -178,15 +180,13 @@ void ArduPilotOne::callback2(void * data) {
 	/*
 	 * navigator debug
 	 */
-	/*
 	 if (apo->navigator()) {
-	 apo->getDebug().printf_P(PSTR("roll: %f pitch: %f yaw: %f\t"),
-	 apo->navigator()->roll*rad2deg,
-	 apo->navigator()->pitch*rad2deg,
-	 apo->navigator()->yaw*rad2deg);
+		 apo->hal()->debug->printf_P(PSTR("roll: %f pitch: %f yaw: %f\t"),
+				 apo->navigator()->roll*rad2deg,
+				 apo->navigator()->pitch*rad2deg,
+				 apo->navigator()->yaw*rad2deg);
 	 }
-	 */
-	//apo->getDebug().println();
+	 apo->hal()->debug->println();
 }
 
 void ArduPilotOne::callback3(void * data) {
@@ -231,11 +231,8 @@ void setup() {
 	Serial.begin(57600, 128, 128); // debug
 	Serial1.begin(57600, 128, 128); // gps
 	Serial3.begin(57600, 128, 128); // gcs
-
 	hal->debug = &Serial;
-	hal->debug->println_P(PSTR("initializing comms"));
-	hal->gcs = new MavlinkComm(&Serial3,NULL,NULL,NULL,hal);
-	hal->hil = new MavlinkComm(&Serial,NULL,NULL,NULL,hal);
+	hal->debug->println_P(PSTR("initializing debug line"));
 
 	/*
 	 * Pins
@@ -318,7 +315,12 @@ void setup() {
 	 */
 	AP_Controller * controller = new CarController(k_cntrl,k_pidStr,k_pidThr,navigator,guide,hal);
 
-	hal->debug->println_P(PSTR("initialization complete"));
+	/*
+	 * Initialize Comm Channels
+	 */
+	hal->debug->println_P(PSTR("initializing comm channels"));
+	hal->gcs = new MavlinkComm(&Serial3,navigator,guide,controller,hal);
+	hal->hil = new MavlinkComm(&Serial,navigator,guide,controller,hal);
 
 	/*
 	 * Start the autopilot
@@ -326,7 +328,7 @@ void setup() {
 	Serial.println_P(PSTR("initializing ArduPilotOne"));
 	Serial.printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
 	apoGlobal = new apo::ArduPilotOne(navigator,guide,controller,hal);
-
+	hal->debug->println_P(PSTR("initialization complete"));
 }
 
 void loop() {

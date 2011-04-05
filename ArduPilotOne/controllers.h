@@ -44,17 +44,17 @@ public:
 	virtual void update(const float & dt) {
 		// read mode switch
 		_hal->rc[chMode]->readRadio();
-		_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[chMode]->getNormalized());
+		//_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[chMode]->getNormalized());
 
 		// manual
 		if (_hal->rc[chMode]->getNormalized() > 0) {
 			_hal->rc[chStr]->readRadio();
 			_hal->rc[chThr]->readRadio();
-			_hal->debug->println("manual");
+			//_hal->debug->println("manual");
 
 		} else { // auto
 			AP_Controller::update(dt);
-			_hal->debug->println("automode");
+			//_hal->debug->println("automode");
 		}
 
 		//		Serial.printf("steering pwm :\t");
