@@ -69,14 +69,14 @@ public:
     {
         if (!block)
         {
-            Serial.println("Attempint to add a null block");
+            _hal->debug->println("Attemping to add a null block");
             return;
         }
         if (_blocks.getSize() > 0) 
         {
             if (_blocks[_blocks.getSize()-1] == NULL)
             {
-                Serial.println("Attempted to connect to null block");
+            	_hal->debug->println("Attempted to connect to null block");
                 return;
             }
             else
@@ -299,6 +299,67 @@ private:
     uint8_t _port;
     float & _min;
     float & _max;
+};
+
+/// PID(DFB) block
+class PidDFB: public AP_Controller::Block {
+public:
+	PidDFB(AP_Var::Key key, const prog_char_t * name, float * derivative,
+			float kP = 0.0, float kI = 0.0, float kD = 0.0, float iMax = 0.0) :
+		_group(key, name), _derivative(derivative), _eP(0), _eI(0), _eD(0),
+				_kP(&_group, 1, kP, PSTR("P")), _kI(&_group, 2, kI, PSTR("I")),
+				_kD(&_group, 3, kD, PSTR("D")),
+				_iMax(&_group, 4, iMax, PSTR("IMAX")) {
+		// create output
+		_output.push_back(new float(0.0));
+	}
+
+	virtual void update(const float & dt) {
+		if (_output.getSize() < 1 || (!_input[0]) || (!_output[0]))
+			return;
+
+		// proportional, note must come after derivative
+		// because derivative uses _eP as previous value
+		_eP = input(0);
+
+		// integral
+		_eI += _eP * dt;
+
+		// wind up guard
+		if (_eI > _iMax)
+			_eI = _iMax;
+		else if (_eI < -_iMax)
+			_eI = -_iMax;
+
+		// pid sum
+		output(0) = _kP * _eP + _kI * _eI - _kD * (*_derivative);
+
+		// debug output
+		/*
+		 Serial.println("kP, kI, kD: ");
+		 Serial.print(_kP,5); Serial.print(" ");
+		 Serial.print(_kI,5); Serial.print(" ");
+		 Serial.println(_kD,5);
+		 Serial.print("eP, eI, eD: ");
+		 Serial.print(_eP,5); Serial.print(" ");
+		 Serial.print(_eI,5); Serial.print(" ");
+		 Serial.println(_eD,5);
+		 Serial.print("input: ");
+		 Serial.println(input(0),5);
+		 Serial.print("output: ");
+		 Serial.println(output(0),5);
+		 */
+	}
+private:
+	AP_Var_group _group; /// helps with parameter management
+	AP_Float _eP; /// input
+	AP_Float _eI; /// integral of input
+	AP_Float _eD; /// derivative of input
+	AP_Float _kP; /// proportional gain
+	AP_Float _kI; /// integral gain
+	AP_Float _kD; /// derivative gain
+	AP_Float _iMax; /// integrator saturation
+	float * _derivative; // derivative fed back
 };
 
 } // apo

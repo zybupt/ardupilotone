@@ -11,8 +11,6 @@
 
 namespace apo {
 
-#if VEHICLE_TYPE == VEHICLE_CAR
-
 class CarController: public AP_Controller {
 private:
 	// control mode
@@ -26,7 +24,7 @@ public:
 			AP_Guide * guide, AP_HardwareAbstractionLayer * hal) :
 		AP_Controller(nav, guide, hal), _group(cntrlKey, PSTR("CNTRL_")),
 				_mode(&_group, 1, 0, PSTR("MODE")) {
-		Serial.println_P(PSTR("initializing car controller"));
+		_hal->debug->println_P(PSTR("initializing car controller"));
 
 		// NOTE, if you change this order, change the numbers above
 		_hal->rc.push_back(new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 7, 1));
@@ -46,17 +44,17 @@ public:
 	virtual void update(const float & dt) {
 		// read mode switch
 		_hal->rc[chMode]->readRadio();
-		//Serial.printf_P(PSTR("normalized mode: %f"), modeCh->getNormalized());
+		_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[chMode]->getNormalized());
 
 		// manual
 		if (_hal->rc[chMode]->getNormalized() > 0) {
 			_hal->rc[chStr]->readRadio();
 			_hal->rc[chThr]->readRadio();
-			//Serial.println("manual");
+			_hal->debug->println("manual");
 
 		} else { // auto
 			AP_Controller::update(dt);
-			//Serial.println("automode");
+			_hal->debug->println("automode");
 		}
 
 		//		Serial.printf("steering pwm :\t");
@@ -70,20 +68,7 @@ public:
 
 };
 
-void controllerInit() {
-	//	_rc.push_back(new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 7, 1));
-	//	_rc.push_back(new AP_RcChannel(k_chStr, PSTR("STR_"), APM_RC, 0, 45));
-	//	_rc.push_back(new AP_RcChannel(k_chThr, PSTR("THR_"), APM_RC, 1, 100));
-	//
-	//	_controller = new CarController(k_cntrl, k_pidStr, k_pidThr,
-	//			&(navigator()->yaw), &(navigator()->groundSpeed),
-	//			&guide()->headingCommand, &guide()->groundSpeedCommand, _rc[0],
-	//			_rc[1], _rc[2],navigator(),guide(),NULL);
-
-}
-
-#elif VEHICLE_TYPE == VEHICLE_QUAD
-
+/*
 class QuadController: public AP_Controller {
 private:
 
@@ -321,9 +306,9 @@ void controllerInit() {
 			_rc[0], _rc[1], _rc[2], _rc[3], _rc[4],
 			_rc[5], _rc[6], _rc[7], _rc[8]);
 }
+*/
 
-#elif VEHICLE_TYPE == VEHICLE_PLANE
-
+/*
 class PlaneController : public AP_Controller
 {
 private:
@@ -380,13 +365,8 @@ public:
 		addBlock(new ToServo(getRc(chThr)));
 	}
 };
+*/
 
-void controllerInit()
-{
-	controller = new planeController;
-}
-
-#endif // VEHICLE_TYPE
 ////
 // AP_Controller.h extended: functions for "BRIDGE", "PIDDFB", and "QUADMIX"
 ////
@@ -459,66 +439,6 @@ private:
 	float * _MIX_REMOTE_WEIGHT;
 };
 
-/// PID(DFB) block
-class PidDFB: public AP_Controller::Block {
-public:
-	PidDFB(AP_Var::Key key, const prog_char_t * name, float * derivative,
-			float kP = 0.0, float kI = 0.0, float kD = 0.0, float iMax = 0.0) :
-		_group(key, name), _derivative(derivative), _eP(0), _eI(0), _eD(0),
-				_kP(&_group, 1, kP, PSTR("P")), _kI(&_group, 2, kI, PSTR("I")),
-				_kD(&_group, 3, kD, PSTR("D")),
-				_iMax(&_group, 4, iMax, PSTR("IMAX")) {
-		// create output
-		_output.push_back(new float(0.0));
-	}
-
-	virtual void update(const float & dt) {
-		if (_output.getSize() < 1 || (!_input[0]) || (!_output[0]))
-			return;
-
-		// proportional, note must come after derivative
-		// because derivative uses _eP as previous value
-		_eP = input(0);
-
-		// integral
-		_eI += _eP * dt;
-
-		// wind up guard
-		if (_eI > _iMax)
-			_eI = _iMax;
-		else if (_eI < -_iMax)
-			_eI = -_iMax;
-
-		// pid sum
-		output(0) = _kP * _eP + _kI * _eI - _kD * (*_derivative);
-
-		// debug output
-		/*
-		 Serial.println("kP, kI, kD: ");
-		 Serial.print(_kP,5); Serial.print(" ");
-		 Serial.print(_kI,5); Serial.print(" ");
-		 Serial.println(_kD,5);
-		 Serial.print("eP, eI, eD: ");
-		 Serial.print(_eP,5); Serial.print(" ");
-		 Serial.print(_eI,5); Serial.print(" ");
-		 Serial.println(_eD,5);
-		 Serial.print("input: ");
-		 Serial.println(input(0),5);
-		 Serial.print("output: ");
-		 Serial.println(output(0),5);
-		 */
-	}
-private:
-	AP_Var_group _group; /// helps with parameter management
-	AP_Float _eP; /// input
-	AP_Float _eI; /// integral of input
-	AP_Float _eD; /// derivative of input
-	AP_Float _kP; /// proportional gain
-	AP_Float _kI; /// integral gain
-	AP_Float _kD; /// derivative gain
-	AP_Float _iMax; /// integrator saturation
-	float * _derivative; // derivative fed back
-};
 
 } // namespace apo
 
