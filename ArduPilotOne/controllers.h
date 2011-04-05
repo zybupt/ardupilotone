@@ -6,7 +6,6 @@
 #include "AP_RcChannel.h"
 #include "AP_Var.h"
 #include <avr/pgmspace.h>
-#include "defines.h"
 
 #include "AP_Navigator.h"
 

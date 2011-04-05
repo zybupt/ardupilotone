@@ -24,19 +24,20 @@ namespace apo {
 
 class AP_CommLink;
 
+// enumerations
+enum halMode_t {MODE_LIVE, MODE_HIL_CNTL, MODE_HIL_NAV};
+enum board_t {BOARD_ARDUPILOTMEGA};
+enum vehicle_t {VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE};
+
 class AP_HardwareAbstractionLayer {
 
 public:
-	AP_HardwareAbstractionLayer() :
-		adc(), gps(), baro(), compass(), rangeFinders(),
-				imu(), rc(), gcs(), hil(), debug()
+	AP_HardwareAbstractionLayer(halMode_t mode, board_t board, vehicle_t vehicle) :
+		_mode(mode), _board(board), _vehicle(vehicle), adc(),
+		gps(), baro(), compass(), rangeFinders(),
+		imu(), rc(), gcs(), hil(), debug()
 	{
 	}
-
-	enum mode_t {
-		MODE_LIVE, MODE_HIL_CNTL, MODE_HIL_NAV
-	} mode;
-
 	/**
 	 * Sensors
 	 */
@@ -58,6 +59,17 @@ public:
 	AP_CommLink * gcs;
 	AP_CommLink * hil;
 	FastSerial * debug;
+
+	// accessors
+	halMode_t mode() { return _mode; }
+	board_t board() { return _board; }
+	vehicle_t vehicle() { return _vehicle; }
+
+private:
+	// enumerations
+	halMode_t _mode;
+	board_t _board;
+	vehicle_t _vehicle;
 };
 
 }

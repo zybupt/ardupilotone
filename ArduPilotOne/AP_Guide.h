@@ -23,7 +23,6 @@
 #include "AP_Navigator.h"
 #include <AP_Common.h>
 #include <AP_Vector.h>
-#include "defines.h"
 
 #include "AP_MavlinkCommand.h"
 

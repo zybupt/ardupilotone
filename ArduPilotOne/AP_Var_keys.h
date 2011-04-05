@@ -1,19 +1,13 @@
 #ifndef AP_Var_keys_H
 #define AP_Var_keys_H
 
-#include "config.h"
-
 enum keys {
 	k_config = 0,
 	k_cntrl,
 	k_chMode,
-
-#if VEHICLE_TYPE == VEHICLE_CAR
 	k_pidThr,
 	k_pidStr,
-	k_chThr,
 	k_chStr,
-#elif VEHICLE_TYPE == VEHICLE_QUAD
 	k_pidPN,
 	k_pidPE,
 	k_pidPD,
@@ -29,7 +23,6 @@ enum keys {
 	k_chPitch,
 	k_chYaw,
 	k_chThr,
-#endif // QUAD
 
 	// 200-256 allocated for commands
 	k_firstCommand=200,

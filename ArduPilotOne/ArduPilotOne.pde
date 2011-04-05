@@ -65,17 +65,17 @@ class AP_CommLink;
 
 ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller,
 		AP_HardwareAbstractionLayer * hal) :
-	Loop(LOOP_0_RATE, callback0, this),
+	Loop(loop0Rate, callback0, this),
 			_navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
 
 	/*
 	 * Attach loops
 	 */
 	Serial.println("attaching loops");
-	subLoops().push_back(new Loop(LOOP_1_RATE, callback1, this));
-	subLoops().push_back(new Loop(LOOP_2_RATE, callback2, this));
-	subLoops().push_back(new Loop(LOOP_3_RATE, callback3, this));
-	subLoops().push_back(new Loop(LOOP_4_RATE, callback4, this));
+	subLoops().push_back(new Loop(loop1Rate, callback1, this));
+	subLoops().push_back(new Loop(loop2Rate, callback2, this));
+	subLoops().push_back(new Loop(loop3Rate, callback3, this));
+	subLoops().push_back(new Loop(loop4Rate, callback4, this));
 
 }
 
@@ -92,19 +92,17 @@ void ArduPilotOne::callback0(void * data) {
 void ArduPilotOne::callback1(void * data) {
 	ArduPilotOne * apo = (ArduPilotOne *) data;
 
-
-#if RUNMODE_TYPE == RUNMODE_LIVE
 	/*
 	 * read compass
 	 */
 
-	if (apo->compass())
-		apo->compass()->read();
-#elif RUNMODE_TYPE == RUNMODE_HIL_STATE
+	if (apo->hal()->mode()==MODE_LIVE && apo->hal()->compass)
+		apo->hal()->compass->read();
+
 	/*
 	 * hardware in the loop
 	 */
-	if (apo->hal()->mode!=AP_HardwareAbstractionLayer::MODE_LIVE)
+	if (apo->hal()->mode()!=MODE_LIVE)
 	{
 		// receive message
 		apo->hal()->hil->receive();
@@ -114,7 +112,7 @@ void ArduPilotOne::callback1(void * data) {
 		apo->hal()->hil->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
 		apo->hal()->hil->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
 	}
-#endif
+
 	/*
      * update control laws
 	 */
@@ -125,7 +123,7 @@ void ArduPilotOne::callback1(void * data) {
 	 * update control laws
 	 */
 	if (apo->controller())
-		apo->controller()->update(1./LOOP_1_RATE);
+		apo->controller()->update(1./loop1Rate);
 	char msg[50];
 	sprintf(msg, "c_hdg: %f, c_thr: %f", apo->guide()->headingCommand, apo->guide()->groundSpeedCommand);
 	apo->hal()->gcs->sendText(AP_CommLink::SEVERITY_LOW, msg);
@@ -225,7 +223,7 @@ void setup() {
 
 	using namespace apo;
 
-	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer;
+	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(halMode,board,vehicle);
 
 	/*
 	 * Communications

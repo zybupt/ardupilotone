@@ -19,7 +19,7 @@
 #ifndef ArduPilotOne_H
 #define ArduPilotOne_H
 
-#include "config.h"
+#include "APO_Config.h"
 #include <AP_Loop.h>
 #include "AP_CommLink.h"
 

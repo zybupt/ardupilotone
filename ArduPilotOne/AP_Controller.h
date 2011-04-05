@@ -21,11 +21,7 @@
 
 #include "AP_Navigator.h"
 #include "AP_Guide.h"
-//#include "AP_CommLink.h"
 #include "AP_HardwareAbstractionLayer.h"
-
-
-#include "AP_RcChannel.h" // TODO REMOVE
 
 #include <AP_Common.h>
 #include <AP_Vector.h>

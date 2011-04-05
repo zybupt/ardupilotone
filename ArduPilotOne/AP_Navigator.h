@@ -100,7 +100,7 @@ public:
 				_rangeFinderDown = _hal->rangeFinders[i];
 		}
 
-		if (_hal->mode == AP_HardwareAbstractionLayer::MODE_LIVE) {
+		if (_hal->mode() == MODE_LIVE) {
 			if (_hal->adc)
 				_hal->imu = new AP_IMU_Oilpan(_hal->adc, _imuOffsetAddress);
 			if (_hal->imu && _hal->gps && _hal->compass)
@@ -120,7 +120,7 @@ public:
 
 	}
 	virtual void update(float dt) {
-		if (_hal->mode != AP_HardwareAbstractionLayer::MODE_LIVE)
+		if (_hal->mode() != MODE_LIVE)
 			return;
 
 		/**The altitued is read off the barometer by implementing the following formula:
