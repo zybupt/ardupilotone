@@ -107,7 +107,7 @@ public:
 class ToServo : public AP_Controller::Block
 {
 public:
-    ToServo(AP_RcChannel * ch) : _ch(ch)
+    ToServo(AP_RcChannelSimple * ch) : _ch(ch)
     {
     }
     virtual void update(const float & dt = 0)
@@ -116,12 +116,12 @@ public:
     	//Serial.println("input: "); Serial.println(input(0));
         if (_input.getSize() > 0)
         {
-            _ch->setNormalized(input(0));
+            _ch->setPosition(input(0));
         }
     }
 protected:
     float _position;
-    AP_RcChannel * _ch;
+    AP_RcChannelSimple * _ch;
 };
 
 /// SumGain

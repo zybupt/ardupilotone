@@ -17,7 +17,7 @@ class GPS;
 class APM_BMP085;
 class Compass;
 class BetterStream;
-class AP_RcChannel;
+class AP_RcChannelSimple;
 class RangeFinder;
 
 namespace apo {
@@ -51,7 +51,7 @@ public:
 	/**
 	 * Radio Channels
 	 */
-	Vector<AP_RcChannel *> rc;
+	Vector<AP_RcChannelSimple *> rc;
 
 	/**
 	 * Communication Channels

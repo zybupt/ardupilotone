@@ -134,7 +134,7 @@ public:
 			for (int i = 0; i < 8; i++)
 				ch[i] = 0;
 			for (int i = 0; i < 8 && i < _hal->rc.getSize(); i++)
-				ch[i] = 10000 * _hal->rc[i]->getNormalized();
+				ch[i] = 10000 * _hal->rc[i]->getPosition();
 			mavlink_msg_rc_channels_scaled_send(_channel, ch[0], ch[1], ch[2],
 					ch[3], ch[4], ch[5], ch[6], ch[7], 255);
 			break;
