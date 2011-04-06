@@ -25,16 +25,16 @@ private:
 		float z;
 	};
 	AP_VarS<CommandStorage> _data;
-	uint8_t _seq;
+	uint16_t _seq;
+	//static AP_Var_group _group;
 public:
 	/**
 	 * Constructor for loading from memory.
 	 * @param index Start at zero.
 	 */
-	AP_MavlinkCommand(uint8_t index) :
-		_data(k_firstCommand + index) {
+	AP_MavlinkCommand(uint16_t index) :
+		_seq(index), _data(k_commands+index) {
 		_data.load();
-		_seq = index;
 	}
 
 	/**
@@ -42,7 +42,7 @@ public:
 	 * @param cmd The mavlink_waopint_t structure for the command.
 	 */
 	AP_MavlinkCommand(mavlink_waypoint_t cmd) :
-		_data(k_firstCommand + cmd.seq), _seq(cmd.seq) {
+		_data(k_commands+cmd.seq), _seq(cmd.seq) {
 		setCommand(MAV_CMD(cmd.command));
 		setAutocontinue(cmd.autocontinue);
 		setFrame((MAV_FRAME) cmd.frame);
@@ -54,6 +54,27 @@ public:
 		setY(cmd.y);
 		setZ(cmd.z);
 		_data.save();
+		Serial.println("============================================================");
+		Serial.println("storing new command from mavlink_waypoint_t");
+		Serial.print("key: "); Serial.println(_data.key(),DEC);
+		Serial.print("number: "); Serial.println(cmd.seq,DEC);
+		Serial.print("command: "); Serial.println(getCommand());
+		Serial.print("autocontinue: "); Serial.println(getAutocontinue(),DEC);
+		Serial.print("frame: "); Serial.println(getFrame(),DEC);
+		Serial.print("1000*param1: "); Serial.println(int(1000*getParam1()),DEC);
+		Serial.print("1000*param2: "); Serial.println(int(1000*getParam2()),DEC);
+		Serial.print("1000*param3: "); Serial.println(int(1000*getParam3()),DEC);
+		Serial.print("1000*param4: "); Serial.println(int(1000*getParam4()),DEC);
+		Serial.print("1000*x0: "); Serial.println(int(1000*cmd.x),DEC);
+		Serial.print("1000*y0: "); Serial.println(int(1000*cmd.y),DEC);
+		Serial.print("1000*z0: "); Serial.println(int(1000*cmd.z),DEC);
+		Serial.print("1000*x: "); Serial.println(int(1000*getX()),DEC);
+		Serial.print("1000*y: "); Serial.println(int(1000*getY()),DEC);
+		Serial.print("1000*z: "); Serial.println(int(1000*getZ()),DEC);
+		_data.load();
+		Serial.print("1000*x1: "); Serial.println(int(1000*getX()),DEC);
+		Serial.print("1000*y1: "); Serial.println(int(1000*getY()),DEC);
+		Serial.print("1000*z1: "); Serial.println(int(1000*getZ()),DEC);
 	}
 	bool save() {
 		return _data.save();
@@ -79,49 +100,49 @@ public:
 	void setCommand(MAV_CMD val) {
 		_data.get().command = val;
 	}
-	uint8_t getFrame() {
+	MAV_FRAME getFrame() {
 		return _data.get().frame;
 	}
 	void setFrame(MAV_FRAME val) {
 		_data.get().frame = val;
 	}
-	uint8_t getParam1() {
+	float getParam1() {
 		return _data.get().param1;
 	}
 	void setParam1(float val) {
 		_data.get().param1 = val;
 	}
-	uint8_t getParam2() {
+	float getParam2() {
 		return _data.get().param2;
 	}
 	void setParam2(float val) {
 		_data.get().param2 = val;
 	}
-	uint8_t getParam3() {
+	float getParam3() {
 		return _data.get().param3;
 	}
 	void setParam3(float val) {
 		_data.get().param3 = val;
 	}
-	uint8_t getParam4() {
+	float getParam4() {
 		return _data.get().param4;
 	}
 	void setParam4(float val) {
 		_data.get().param4 = val;
 	}
-	uint8_t getX() {
+	float getX() {
 		return _data.get().x;
 	}
 	void setX(float val) {
 		_data.get().x = val;
 	}
-	uint8_t getY() {
+	float getY() {
 		return _data.get().y;
 	}
 	void setY(float val) {
 		_data.get().y = val;
 	}
-	uint8_t getZ() {
+	float getZ() {
 		return _data.get().z;
 	}
 	void setZ(float val) {
@@ -134,7 +155,7 @@ public:
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
-			return getY();
+			return getX();
 			break;
 		case MAV_FRAME_LOCAL:
 		case MAV_FRAME_MISSION:
@@ -146,7 +167,7 @@ public:
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
-			setY(val);
+			setX(val);
 			break;
 		case MAV_FRAME_LOCAL:
 		case MAV_FRAME_MISSION:
@@ -157,7 +178,7 @@ public:
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
-			return getX();
+			return getY();
 			break;
 		case MAV_FRAME_LOCAL:
 		case MAV_FRAME_MISSION:
@@ -169,7 +190,7 @@ public:
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
-			setX(val);
+			setY(val);
 			break;
 		case MAV_FRAME_LOCAL:
 		case MAV_FRAME_MISSION:
@@ -274,6 +295,11 @@ public:
 	 */
 	float bearingTo(AP_MavlinkCommand next) {
 		float deltaLon = getLon() - next.getLon();
+		/*
+		Serial.print("Lon: "); Serial.println(getLon());
+		Serial.print("nextLon: "); Serial.println(next.getLon());
+		Serial.print("deltaLon * 1e7: "); Serial.println(deltaLon*1e7);
+		*/
 		return atan2(sin(deltaLon)*cos(next.getLat()),
 				cos(getLat())*sin(next.getLat()) -
 				sin(getLat())*cos(next.getLat())*cos(deltaLon));

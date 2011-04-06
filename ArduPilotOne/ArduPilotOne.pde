@@ -188,6 +188,7 @@ void ArduPilotOne::callback2(void * data) {
 	/*
 	 * navigator debug
 	 */
+	/*
 	 if (apo->navigator()) {
 		 apo->hal()->debug->printf_P(PSTR("roll: %f deg\tpitch: %f deg\tyaw: %f deg\n"),
 				 apo->navigator()->roll*rad2deg,
@@ -198,7 +199,7 @@ void ArduPilotOne::callback2(void * data) {
 				 apo->navigator()->lonDeg(),
 				 apo->navigator()->altM());
 	 }
-	 apo->hal()->debug->println();
+	 */
 }
 
 void ArduPilotOne::callback3(void * data) {

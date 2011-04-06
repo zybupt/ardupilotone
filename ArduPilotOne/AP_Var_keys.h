@@ -23,9 +23,8 @@ enum keys {
 	k_chPitch,
 	k_chYaw,
 	k_chThr,
-
-	// 200-256 allocated for commands
-	k_firstCommand=200,
+	// 200-256 reserved for commands
+	k_commands = 200
 };
 
 // max 256 keys

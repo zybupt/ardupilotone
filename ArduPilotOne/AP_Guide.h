@@ -89,13 +89,15 @@ public:
 		//_hal->debug->println_P(PSTR("guide loop"));
 
 		// TODO, setting to a fixed value for testing with the car right now
-		float temp = crossTrack()*-0.001; // crosstrack gain
+		float temp = crossTrack()*0; // crosstrack gain
 		if (temp > 30*M_PI/180) temp = 30*M_PI/180;
 		if (temp < -30*M_PI/180) temp = -30*M_PI/180;
 		float bearing = _prevCommand.bearingTo(_nextCommand);
 		headingCommand = bearing + temp;
+		/*
 		_hal->debug->printf_P(PSTR("bearing: %f cross track: %f command heading: %f\n"),
 				bearing, crossTrack(), headingCommand);
+		*/
 		groundSpeedCommand = 5;
 
 		// TODO : calculate pN,pE,pD from home and gps coordinates

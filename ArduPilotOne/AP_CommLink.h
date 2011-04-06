@@ -319,10 +319,12 @@ private:
 		_navigator->groundSpeed = packet.v;
 		_navigator->airSpeed = packet.v;
 		//_hal->debug->printf_P(PSTR("received hil gps raw packet\n"));
+		/*
 		_hal->debug->printf_P(PSTR("received lat: %f deg\tlon: %f deg\talt: %f m\n"),
 						 packet.lat,
 						 packet.lon,
 						 packet.alt);
+						 */
 		break;
 	}
 
@@ -430,6 +432,7 @@ private:
 		if (_checkTarget(packet.target_system, packet.target_component))
 			break;
 
+		_hal->debug->printf_P(PSTR("sequence: %d\n"),packet.seq);
 		AP_MavlinkCommand cmd(packet.seq);
 
 		mavlink_waypoint_t msg = cmd.convert();
@@ -562,6 +565,11 @@ private:
 			*/
 			break;
 		}
+
+		_hal->debug->printf_P(PSTR("received waypoint x: %f\ty: %f\tz: %f\n"),
+						 packet.x,
+						 packet.y,
+						 packet.z);
 
 		// store waypoint
 		AP_MavlinkCommand command(packet);
