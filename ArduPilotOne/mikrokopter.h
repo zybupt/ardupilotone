@@ -8,6 +8,8 @@
 #ifndef MIKROKOPTER_H_
 #define MIKROKOPTER_H_
 
+#define VEHICLE_MIKROKOPTER
+
 //motor parameters
 #define MOTOR_MAX  1
 #define MOTOR_MIN  0.1

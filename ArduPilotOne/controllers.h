@@ -1,7 +1,6 @@
 #ifndef defaultControllers_H
 #define defaultControllers_H
 
-//#include "ArduPilotOne.h"
 #include "AP_Controller.h"
 #include "AP_RcChannelSimple.h"
 #include "AP_Var.h"
@@ -14,9 +13,9 @@ class CarController: public AP_Controller {
 private:
 	// control mode
 	AP_Var_group _group;AP_Uint8 _mode;
-	static const uint8_t chMode = 0;
-	static const uint8_t chStr = 1;
-	static const uint8_t chThr = 2;
+	enum {
+		CH_MODE = 0, CH_STR, CH_THR
+	};
 public:
 	CarController(AP_Var::Key cntrlKey, AP_Var::Key pidStrKey,
 			AP_Var::Key pidThrKey, AP_Navigator * nav, AP_Guide * guide,
@@ -27,41 +26,41 @@ public:
 
 		// NOTE, if you change this order, change the numbers above
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7, 1));
+				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chStr, PSTR("STR_"), APM_RC, 0, 45));
+				new AP_RcChannelSimple(k_chStr, PSTR("STR_"), APM_RC, 0));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chThr, PSTR("THR_"), APM_RC, 1, 100));
+				new AP_RcChannelSimple(k_chThr, PSTR("THR_"), APM_RC, 1));
 
 		// steering control loop
 		addBlock(
 				new SumGain(&(_guide->headingCommand), &one, &(_nav->yaw),
 						&negativeOne));
 		addBlock(new Pid(pidStrKey, PSTR("STR_"), 1, 0, 0, 0, 20));
-		addBlock(new ToServo(_hal->rc[chMode])); // index depends on order of channels pushed back into _hal->rc
+		addBlock(new ToServo(_hal->rc[CH_STR])); // index depends on order of channels pushed back into _hal->rc
 
 		// throttle control loop
 		addBlock(
 				new SumGain(&(_guide->groundSpeedCommand), &one,
 						&(_nav->groundSpeed), &negativeOne));
 		addBlock(new Pid(pidThrKey, PSTR("THR_"), 0.1, 0, 0, 0, 20));
-		addBlock(new ToServo(_hal->rc[chThr]));
+		addBlock(new ToServo(_hal->rc[CH_THR]));
 	}
 	virtual void update(const float & dt) {
 		// read mode switch
 		//_hal->debug->println_P(PSTR("update loop"));
-		_hal->rc[chMode]->readRadio();
-		//_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[chMode]->getNormalized());
+		_hal->rc[CH_MODE]->setPwm(_hal->rc[CH_MODE]->readRadio());
+		_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[CH_MODE]->getPosition());
 
 		// manual
-		if (_hal->rc[chMode]->getPosition() > 0) {
-			_hal->rc[chStr]->readRadio();
-			_hal->rc[chThr]->readRadio();
-			//_hal->debug->println("manual");
+		if (_hal->rc[CH_MODE]->getPosition() > 0) {
+			_hal->rc[CH_STR]->setPwm(_hal->rc[CH_STR]->readRadio());
+			_hal->rc[CH_THR]->setPwm(_hal->rc[CH_THR]->readRadio());
+			_hal->debug->println("manual");
 
 		} else { // auto
 			AP_Controller::update(dt);
-			//_hal->debug->println("automode");
+			_hal->debug->println("automode");
 		}
 
 		//		Serial.printf("steering pwm :\t");

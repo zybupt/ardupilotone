@@ -2,6 +2,7 @@
 #define APO_Config_H
 
 #include "AP_HardwareAbstractionLayer.h"
+#include "mikrokopter.h"
 
 // Serial 0: debug      /dev/ttyUSB0
 // Serial 1: gps/hil    /dev/ttyUSB1
@@ -18,8 +19,7 @@ apo::halMode_t halMode = apo::MODE_HIL_CNTL;
 apo::board_t board = apo::BOARD_ARDUPILOTMEGA;
 
 // select from, VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE
-apo::vehicle_t vehicle = apo::VEHICLE_QUAD;
-#define CUSTOM_INCLUDES CUSTOM_MIKROKOPTER
+apo::vehicle_t vehicle = apo::VEHICLE_CAR;
 
 //---------ADVANCED SECTION ----------------//
 
