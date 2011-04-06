@@ -19,6 +19,7 @@ apo::board_t board = apo::BOARD_ARDUPILOTMEGA;
 
 // select from, VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE
 apo::vehicle_t vehicle = apo::VEHICLE_QUAD;
+#define CUSTOM_INCLUDES CUSTOM_MIKROKOPTER
 
 //---------ADVANCED SECTION ----------------//
 

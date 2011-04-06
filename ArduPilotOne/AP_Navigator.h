@@ -159,6 +159,12 @@ public:
 				vD = _hal->gps->ground_speed * rot.b.z;
 			}
 
+			// XXX this is just a hack for testing
+			// need to use lat/lon and convert
+			pN += vN*dt;
+			pE += vE*dt;
+			pD += vD*dt;
+
 			/*
 			 * accel/gyro debug
 			 */

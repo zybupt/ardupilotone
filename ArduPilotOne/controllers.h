@@ -69,11 +69,15 @@ public:
 		//		Serial.println();
 
 		//		Serial.printf("throttle pwm :\t");
-		//		Serial.printf("%7d\t",throttleCh->getPwm());
+		//		Serial.pr intf("%7d\t",throttleCh->getPwm());
 		//		Serial.println();
 	}
 
 };
+
+#if CUSTOM_INCLUDES == CUSTOM_MIKROKOPTER
+#include "mikrokopter.h"
+#endif
 
 class QuadController: public AP_Controller {
 public:
@@ -84,7 +88,7 @@ public:
 	 */
 	enum autoChannel_t {
 		CH_MODE = 0, // note scicoslab channels set mode, left, right, front, back order
-		CH_LEFT,     // this enum must match this
+		CH_LEFT, // this enum must match this
 		CH_RIGHT,
 		CH_FRONT,
 		CH_BACK,
@@ -151,13 +155,12 @@ public:
 
 	QuadController(AP_Navigator * nav, AP_Guide * guide,
 			AP_HardwareAbstractionLayer * hal) :
-		AP_Controller(nav, guide, hal), _attitudeTiltMin(0),
-				_attitudeTiltMax(0), _thrustMixMin(0), _thrustMixMax(1),
-				_thrustMixTrim(0.5), _cmdNorthTilt(0), _cmdEastTilt(0),
-				_cmdRoll(0), _cmdPitch(0), _cmdYaw(0),
-				_thrustMix(_thrustMixMin), _rollMix(0), _yawMix(0),
-				_pitchMix(0), _mixOffsetWeight(0), _mixRemoteWeight(0),
-				_attOffsetX(0), _attOffsetY(0), _attOffsetZ(0) {
+		AP_Controller(nav, guide, hal), _thrustMixTrim(THRUST_HOVER_OFFSET),
+				_cmdNorthTilt(0), _cmdEastTilt(0), _cmdRoll(0), _cmdPitch(0),
+				_cmdYaw(0), _thrustMix(0), _rollMix(0), _yawMix(0),
+				_pitchMix(0), _mixOffsetWeight(MIX_OFFSET_WEIGHT),
+				_mixRemoteWeight(MIX_REMOTE_WEIGHT), _attOffsetX(ATT_OFFSET_X),
+				_attOffsetY(ATT_OFFSET_Y), _attOffsetZ(ATT_OFFSET_Z) {
 
 		_hal->rc[CH_MODE]->readRadio();
 		//_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[chMode]->getNormalized());
@@ -197,20 +200,23 @@ public:
 
 		// north position error -> north tilt
 		addBlock(new SumGain(&(_guide->pNCmd), &one, &(_nav->pN), &negativeOne));
-		addBlock(new PidDFB(k_pidPN, PSTR("NORTH_"), &(_nav->vN), 1, 0, 0, 0));
-		addBlock(new Saturate(_attitudeTiltMin, _attitudeTiltMax));
+		addBlock(
+				new PidDFB(k_pidPN, PSTR("NORTH_"), &(_nav->vN), PID_ATT_P,
+						PID_ATT_I, PID_ATT_D, PID_ATT_AWU, PID_POS_LIM));
 		addBlock(new Sink(_cmdNorthTilt));
 
 		// east position error -> east tilt
 		addBlock(new SumGain(&(_guide->pECmd), &one, &(_nav->pE), &negativeOne));
-		addBlock(new PidDFB(k_pidPE, PSTR("EAST_"), &(_nav->vE), 1, 0, 0, 0));
-		addBlock(new Saturate(_attitudeTiltMin, _attitudeTiltMax));
+		addBlock(
+				new PidDFB(k_pidPE, PSTR("EAST_"), &(_nav->vE), PID_ATT_P,
+						PID_ATT_I, PID_ATT_D, PID_ATT_AWU, PID_POS_LIM));
 		addBlock(new Sink(_cmdEastTilt));
 
 		// down error -> -thrust mix
 		addBlock(new SumGain(&(_guide->pDCmd), &one, &(_nav->pD), &negativeOne));
-		addBlock(new PidDFB(k_pidPD, PSTR("DOWN_"), &(_nav->vD), 1, 0, 0, 0));
-		addBlock(new Saturate(_thrustMixMin, _thrustMixMax));
+		addBlock(
+				new PidDFB(k_pidPD, PSTR("DOWN_"), &(_nav->vD), PID_POS_Z_P,
+						PID_POS_Z_I, PID_POS_Z_D, PID_POS_Z_AWU, PID_POS_Z_LIM));
 		addBlock(new Sink(_thrustMix));
 
 		/*
@@ -227,23 +233,28 @@ public:
 		// roll error -> roll mix
 		addBlock(new SumGain(&_cmdRoll, &one, &(_nav->roll), &negativeOne));
 		addBlock(
-				new PidDFB(k_pidRoll, PSTR("ROLL_"), &(_nav->rollRate), 1, 0,
-						0, 0));
+				new PidDFB(k_pidRoll, PSTR("ROLL_"), &(_nav->rollRate),
+						PID_ATT_P, PID_ATT_I, PID_ATT_D, PID_ATT_AWU,
+						PID_ATT_LIM));
 		addBlock(new Sink(_rollMix));
 
 		// pitch error -> pitch mix
 		addBlock(new SumGain(&_cmdPitch, &one, &(_nav->pitch), &negativeOne));
 		addBlock(
-				new PidDFB(k_pidPitch, PSTR("PITCH"), &(_nav->pitchRate), 1, 0,
-						0, 0));
+				new PidDFB(k_pidPitch, PSTR("PITCH_"), &(_nav->pitchRate),
+						PID_ATT_P, PID_ATT_I, PID_ATT_D, PID_ATT_AWU,
+						PID_ATT_LIM));
 		addBlock(new Sink(_pitchMix));
 
 		// yaw error -> yaw mix
 		addBlock(new SumGain(&_cmdYaw, &one, &(_nav->yaw), &negativeOne));
 		addBlock(
-				new PidDFB(k_pidYawRate, PSTR("YAWRATE"), &(_nav->yawRate), 1,
-						0, 0, 0));
-		addBlock(new Pid(k_pidYaw, PSTR("YAW"), 1, 0, 0, 0));
+				new PidDFB(k_pidYawRate, PSTR("YAWRATE_"), &(_nav->yawRate),
+						PID_YAWSPEED_P, PID_YAWSPEED_I, PID_YAWSPEED_D,
+						PID_YAWSPEED_AWU, PID_YAWSPEED_LIM));
+		addBlock(
+				new Pid(k_pidYaw, PSTR("YAW_"), PID_YAWPOS_P, PID_YAWPOS_I,
+						PID_YAWPOS_D, PID_YAWPOS_AWU, PID_YAWPOS_LIM));
 		addBlock(new Sink(_yawMix));
 
 		/*
@@ -259,44 +270,44 @@ public:
 		// left
 		addBlock(
 				new SumGain(&_thrustMix, &one, &_rollMix, &one, &_yawMix, &one));
-		addBlock(new Saturate(_thrustMixMin, _thrustMixMax));
 		addBlock(new ToServo(_hal->rc[CH_LEFT]));
 
 		// right
 		addBlock(
 				new SumGain(&_thrustMix, &one, &_rollMix, &negativeOne,
 						&_yawMix, &one));
-		addBlock(new Saturate(_thrustMixMin, _thrustMixMax));
 		addBlock(new ToServo(_hal->rc[CH_RIGHT]));
 
 		// front
 		addBlock(
 				new SumGain(&_thrustMix, &one, &_pitchMix, &one, &_yawMix,
 						&negativeOne));
-		addBlock(new Saturate(_thrustMixMin, _thrustMixMax));
 		addBlock(new ToServo(_hal->rc[CH_FRONT]));
 
 		// back
 		addBlock(
 				new SumGain(&_thrustMix, &one, &_pitchMix, &negativeOne,
 						&_yawMix, &negativeOne));
-		addBlock(new Saturate(_thrustMixMin, _thrustMixMax));
 		addBlock(new ToServo(_hal->rc[CH_BACK]));
 	}
 	virtual void update(const float & dt) {
 		AP_Controller::update(dt);
-		_hal->debug->printf_P(PSTR("Position Loop: North, East, Down: %f %f %f\n"), _cmdNorthTilt,_cmdEastTilt, _thrustMix);
-		_hal->debug->printf_P(PSTR("Attitude Loop: RollMix, PitchMix, YawMix: %f %f %f\n"), _rollMix,_pitchMix, _yawMix);
-		_hal->debug->printf_P(PSTR("Thrust Trim: _thrustMix: %f\n"), _thrustMix);
-		_hal->debug->printf_P(PSTR("CH_LEFT, CH_RIGHT, CH_FRONT, CH_BACK: %f %f %f %f\n"),
-				_hal->rc[CH_LEFT]->getPosition(), _hal->rc[CH_RIGHT]->getPosition(), _hal->rc[CH_FRONT]->getPosition(), _hal->rc[CH_BACK]->getPosition());
+		_hal->debug->printf_P(
+				PSTR("Position Loop: North, East, Down: %f %f %f\n"),
+				_cmdNorthTilt, _cmdEastTilt, _thrustMix);
+		_hal->debug->printf_P(
+				PSTR("Attitude Loop: RollMix, PitchMix, YawMix: %f %f %f\n"),
+				_rollMix, _pitchMix, _yawMix);
+		_hal->debug->printf_P(PSTR("thrustMixTrim: %f thrustMix: %f\n"), _thrustMixTrim, _thrustMix);
+		_hal->debug->printf_P(
+				PSTR("CH_LEFT, CH_RIGHT, CH_FRONT, CH_BACK: %f %f %f %f\n"),
+				_hal->rc[CH_LEFT]->getPosition(),
+				_hal->rc[CH_RIGHT]->getPosition(),
+				_hal->rc[CH_FRONT]->getPosition(),
+				_hal->rc[CH_BACK]->getPosition());
 	}
 private:
 
-	float _attitudeTiltMin;
-	float _attitudeTiltMax;
-	float _thrustMixMin;
-	float _thrustMixMax;
 	float _thrustMixTrim;
 
 	float _cmdNorthTilt;

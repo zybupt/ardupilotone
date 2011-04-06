@@ -101,7 +101,7 @@ public:
 	}
 
 	void sendMessage(uint8_t id, uint32_t param = 0) {
-		_hal->debug->printf_P(PSTR("send message\n"));
+		//_hal->debug->printf_P(PSTR("send message\n"));
 
 		// if number of channels exceeded return
 		if (_channel == MAVLINK_COMM_NB_HIGH)
@@ -181,7 +181,7 @@ public:
 	} // send message
 
 	virtual void receive() {
-		_hal->debug->printf_P(PSTR("receive\n"));
+		//_hal->debug->printf_P(PSTR("receive\n"));
 		// if number of channels exceeded return
 		//
 		if (_channel == MAVLINK_COMM_NB_HIGH)
@@ -226,7 +226,7 @@ public:
 	 * sends parameters one at a time
 	 */
 	void sendParameters() {
-		_hal->debug->printf_P(PSTR("send parameters\n"));
+		//_hal->debug->printf_P(PSTR("send parameters\n"));
 		// Check to see if we are sending parameters
 		while (NULL != _queuedParameter) {
 			AP_Var *vp;
@@ -257,7 +257,7 @@ public:
 	 * request commands one at a time
 	 */
 	void requestCmds() {
-		_hal->debug->printf_P(PSTR("requesting commands\n"));
+		//_hal->debug->printf_P(PSTR("requesting commands\n"));
 		// request cmds one by one
 		if (_receivingCmds && _cmdRequestIndex <= AP_MavlinkCommand::number) {
 			mavlink_msg_waypoint_request_send(_channel, _cmdDestSysId,
@@ -298,7 +298,7 @@ private:
 	void _handleMessage(mavlink_message_t * msg) {
 
 		switch (msg->msgid) {
-		_hal->debug->printf_P(PSTR("message received: %d"), msg->msgid);
+		//_hal->debug->printf_P(PSTR("message received: %d"), msg->msgid);
 
 	case MAVLINK_MSG_ID_GPS_RAW: {
 		// decode
@@ -311,6 +311,7 @@ private:
 		_navigator->yaw = packet.hdg;
 		_navigator->groundSpeed = packet.v;
 		_navigator->airSpeed = packet.v;
+		//_hal->debug->printf_P(PSTR("received hil gps raw packet\n"));
 		break;
 	}
 
@@ -326,6 +327,7 @@ private:
 		_navigator->rollRate = packet.rollspeed;
 		_navigator->pitchRate = packet.pitchspeed;
 		_navigator->yawRate = packet.yawspeed;
+		//_hal->debug->printf_P(PSTR("received hil attitude packet\n"));
 		break;
 	}
 

@@ -95,6 +95,10 @@ public:
 		headingCommand = _prevCommand.bearingTo(_nextCommand) + temp;
 		groundSpeedCommand = 3;
 
+		pNCmd = 1;
+		pECmd = 2;
+		pDCmd = -3;
+
 
 		// process mavlink commands
 		//handleCommand();
