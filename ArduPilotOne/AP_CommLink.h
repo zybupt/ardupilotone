@@ -432,7 +432,7 @@ private:
 		if (_checkTarget(packet.target_system, packet.target_component))
 			break;
 
-		_hal->debug->printf_P(PSTR("sequence: %d\n"),packet.seq);
+		//_hal->debug->printf_P(PSTR("sequence: %d\n"),packet.seq);
 		AP_MavlinkCommand cmd(packet.seq);
 
 		mavlink_waypoint_t msg = cmd.convert();

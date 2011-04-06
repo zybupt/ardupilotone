@@ -54,6 +54,7 @@ public:
 		setY(cmd.y);
 		setZ(cmd.z);
 		_data.save();
+		/*
 		Serial.println("============================================================");
 		Serial.println("storing new command from mavlink_waypoint_t");
 		Serial.print("key: "); Serial.println(_data.key(),DEC);
@@ -71,10 +72,13 @@ public:
 		Serial.print("1000*x: "); Serial.println(int(1000*getX()),DEC);
 		Serial.print("1000*y: "); Serial.println(int(1000*getY()),DEC);
 		Serial.print("1000*z: "); Serial.println(int(1000*getZ()),DEC);
+		*/
 		_data.load();
+		/*
 		Serial.print("1000*x1: "); Serial.println(int(1000*getX()),DEC);
 		Serial.print("1000*y1: "); Serial.println(int(1000*getY()),DEC);
 		Serial.print("1000*z1: "); Serial.println(int(1000*getZ()),DEC);
+		*/
 	}
 	bool save() {
 		return _data.save();
