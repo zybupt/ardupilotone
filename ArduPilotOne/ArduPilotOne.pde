@@ -275,6 +275,7 @@ void setup() {
 	 * In set_orientation, it is defind as (front/back,left/right,down,up)
 	 */
 
+	/*
 	hal->debug->println_P(PSTR("initializing front range finder"));
 	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 	hal->rangeFinders[0]->init(0);
@@ -299,6 +300,7 @@ void setup() {
 	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 	hal->rangeFinders[4]->init(4);
 	hal->rangeFinders[4]->set_orientation(0,0,1);
+	*/
 
 	/*
 	 * Navigator
@@ -313,7 +315,15 @@ void setup() {
 	/*
 	 * Controller Initialization
 	 */
-	AP_Controller * controller = new CarController(k_cntrl,k_pidStr,k_pidThr,navigator,guide,hal);
+	AP_Controller * controller = NULL;
+	switch(vehicle)
+	{
+	case VEHICLE_CAR:
+		controller = new CarController(k_cntrl,k_pidStr,k_pidThr,navigator,guide,hal);
+		break;
+	case VEHICLE_QUAD:
+		controller = new QuadController(navigator,guide,hal);
+	}
 
 	/*
 	 * Initialize Comm Channels

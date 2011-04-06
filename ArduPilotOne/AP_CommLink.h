@@ -152,7 +152,7 @@ public:
 		}
 
 		case MAVLINK_MSG_ID_WAYPOINT_ACK: {
-			sendText(SEVERITY_LOW, PSTR("waypoint ack"));
+			//sendText(SEVERITY_LOW, PSTR("waypoint ack"));
 
 			// decode
 			mavlink_waypoint_ack_t packet;
@@ -328,7 +328,7 @@ private:
 			break;
 
 		// do action
-		sendText(SEVERITY_LOW, PSTR("action received"));
+		//sendText(SEVERITY_LOW, PSTR("action received"));
 		switch (packet.action) {
 
 		case MAV_ACTION_STORAGE_READ:
@@ -374,7 +374,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_REQUEST_LIST: {
-		sendText(SEVERITY_LOW, PSTR("waypoint request list"));
+		//sendText(SEVERITY_LOW, PSTR("waypoint request list"));
 
 		// decode
 		mavlink_waypoint_request_list_t packet;
@@ -396,7 +396,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_REQUEST: {
-		sendText(SEVERITY_LOW, PSTR("waypoint request"));
+		//sendText(SEVERITY_LOW, PSTR("waypoint request"));
 
 		// Check if sending waypiont
 		if (!_sendingCmds)
@@ -422,7 +422,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_ACK: {
-		sendText(SEVERITY_LOW, PSTR("waypoint ack"));
+		//sendText(SEVERITY_LOW, PSTR("waypoint ack"));
 
 		// decode
 		mavlink_waypoint_ack_t packet;
@@ -439,7 +439,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: {
-		sendText(SEVERITY_LOW, PSTR("param request list"));
+		//sendText(SEVERITY_LOW, PSTR("param request list"));
 
 		// decode
 		mavlink_param_request_list_t packet;
@@ -455,7 +455,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_CLEAR_ALL: {
-		sendText(SEVERITY_LOW, PSTR("waypoint clear all"));
+		//sendText(SEVERITY_LOW, PSTR("waypoint clear all"));
 
 		// decode
 		mavlink_waypoint_clear_all_t packet;
@@ -477,7 +477,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_SET_CURRENT: {
-		sendText(SEVERITY_LOW, PSTR("waypoint set current"));
+		//sendText(SEVERITY_LOW, PSTR("waypoint set current"));
 
 		// decode
 		mavlink_waypoint_set_current_t packet;
@@ -493,7 +493,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_COUNT: {
-		sendText(SEVERITY_LOW, PSTR("waypoint count"));
+		//sendText(SEVERITY_LOW, PSTR("waypoint count"));
 
 		// decode
 		mavlink_waypoint_count_t packet;
@@ -515,11 +515,11 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT: {
-		sendText(SEVERITY_LOW, PSTR("waypoint"));
+		//sendText(SEVERITY_LOW, PSTR("waypoint"));
 
 		// Check if receiving waypiont
 		if (!_receivingCmds) {
-			sendText(SEVERITY_HIGH, PSTR("not receiving commands"));
+			//sendText(SEVERITY_HIGH, PSTR("not receiving commands"));
 			break;
 		}
 
@@ -531,28 +531,30 @@ private:
 
 		// check if this is the requested waypoint
 		if (packet.seq != _cmdRequestIndex) {
+			/*
 			char msg[50];
 			sprintf(msg,
 					"waypoint request out of sequence: (packet) %d / %d (ap)",
 					packet.seq, _cmdRequestIndex);
 			sendText(SEVERITY_HIGH, msg);
+			*/
 			break;
 		}
 
 		// store waypoint
 		AP_MavlinkCommand command(packet);
-		sendText(SEVERITY_HIGH, PSTR("waypoint stored"));
+		//sendText(SEVERITY_HIGH, PSTR("waypoint stored"));
 		_cmdRequestIndex++;
 		if (_cmdRequestIndex >= AP_MavlinkCommand::number) {
 			sendMessage( MAVLINK_MSG_ID_WAYPOINT_ACK);
-			sendText(SEVERITY_LOW, PSTR("waypoint ack sent"));
+			//sendText(SEVERITY_LOW, PSTR("waypoint ack sent"));
 		}
 		_cmdTimeLastReceived = millis();
 		break;
 	}
 
 	case MAVLINK_MSG_ID_PARAM_SET: {
-		sendText(SEVERITY_LOW, PSTR("param set"));
+		//sendText(SEVERITY_LOW, PSTR("param set"));
 		AP_Var *vp;
 		AP_Meta_class::Type_id var_type;
 
@@ -661,16 +663,18 @@ private:
 
 	// check the target
 	uint8_t _checkTarget(uint8_t sysid, uint8_t compid) {
+		/*
 		char msg[50];
 		sprintf(msg, "target = %d / %d\tcomp = %d / %d", sysid,
 				mavlink_system.sysid, compid, mavlink_system.compid);
 		sendText(SEVERITY_LOW, msg);
+		*/
 		if (sysid != mavlink_system.sysid) {
-			sendText(SEVERITY_LOW, PSTR("system id mismatch"));
+			//sendText(SEVERITY_LOW, PSTR("system id mismatch"));
 			return 1;
 
 		} else if (compid != mavlink_system.compid) {
-			sendText(SEVERITY_LOW, PSTR("component id mismatch"));
+			//sendText(SEVERITY_LOW, PSTR("component id mismatch"));
 			return 0; // XXX currently not receiving correct compid from gcs
 
 		} else {

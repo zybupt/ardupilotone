@@ -5,15 +5,15 @@
 
 // select hardware absraction mode from
 // 	MODE_LIVE, actual flight
-// 	MODE_HIL_NAV, hardware in the loop with sensors running, tests navigation system and control
+// 	TODO: IMPLEMENT --> MODE_HIL_NAV, hardware in the loop with sensors running, tests navigation system and control
 // 	MODE_HIL_CNTRL, hardware in the loop with only controller running, just tests controller
-apo::halMode_t halMode = apo::MODE_LIVE;
+apo::halMode_t halMode = apo::MODE_HIL_CNTL;
 
 // select from, BOARD_ARDUPILOTMEGA
 apo::board_t board = apo::BOARD_ARDUPILOTMEGA;
 
 // select from, VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE
-apo::vehicle_t vehicle = apo::VEHICLE_CAR;
+apo::vehicle_t vehicle = apo::VEHICLE_QUAD;
 
 //---------ADVANCED SECTION ----------------//
 

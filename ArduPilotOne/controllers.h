@@ -68,55 +68,156 @@ public:
 
 };
 
+class QuadController : public AP_Controller {
+public:
+
+	/**
+	 * note that these are not the controller radio channel numbers, they are just
+	 * unique keys so they can be reaccessed from the hal rc vector
+	 */
+	enum channel_t {
+		CH_MODE = 0,
+		CH_LEFT,
+		CH_RIGHT,
+		CH_FRONT,
+		CH_BACK
+	};
+
+	class Bridge : public Block {
+	public:
+		Bridge(QuadController * controller) : _controller(controller)
+		{
+		}
+		virtual void update(const float & dt) {
+			_controller->_attitudeTiltMax = 1;
+		}
+	private:
+		QuadController * _controller;
+	};
+
+	QuadController(AP_Navigator * nav, AP_Guide * guide, AP_HardwareAbstractionLayer * hal) : AP_Controller(nav,guide,hal)
+	{
+		/*
+		 * allocate radio channels
+		 */
+		_hal->rc.push_back(new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 7, 45));
+		_hal->rc.push_back(new AP_RcChannel(k_chLeft, PSTR("LEFT_"), APM_RC, 0, 1));
+		_hal->rc.push_back(new AP_RcChannel(k_chRight, PSTR("RIGHT_"), APM_RC, 1, 1));
+		_hal->rc.push_back(new AP_RcChannel(k_chFront, PSTR("FRONT_"), APM_RC, 2, 1));
+		_hal->rc.push_back(new AP_RcChannel(k_chBack, PSTR("BACK_"), APM_RC, 3, 1));
+
+		/*
+		 * position loop
+		 */
+
+		// north position error -> north tilt
+		addBlock(new SumGain(&(_guide->pNCmd), &one, &(_nav->pN), &negativeOne));
+		addBlock(new PidDFB(k_pidPN, PSTR("NORTH_"), &(_nav->vN), 1, 0, 0, 0));
+		addBlock(new Saturate(_attitudeTiltMin, _attitudeTiltMax));
+		addBlock(new Sink(_cmdNorthTilt));
+
+		// east position error -> east tilt
+		addBlock(new SumGain(&(_guide->pECmd), &one, &(_nav->pE), &negativeOne));
+		addBlock(new PidDFB(k_pidPE, PSTR("EAST_"), &(_nav->vE), 1, 0, 0, 0));
+		addBlock(new Saturate(_attitudeTiltMin, _attitudeTiltMax));
+		addBlock(new Sink(_cmdEastTilt));
+
+		// down error -> -thrust mix
+		addBlock(new SumGain(&(_guide->pDCmd), &one, &(_nav->pD), &negativeOne));
+		addBlock(new PidDFB(k_pidPD, PSTR("DOWN_"), &(_nav->vD), 1, 0, 0, 0));
+		addBlock(new Saturate(_thrustMixMin, _thrustMixMax));
+		addBlock(new Sink(_thrustMix));
+
+		/*
+		 * bridge, rotation of north/east tilt to body frame
+		 * manual control mixing
+		 * trim thrust mix for hover
+		 */
+		addBlock(new Bridge(this));
+
+		/*
+		 * attitude loop
+		 */
+
+		// roll error -> roll mix
+		addBlock(new SumGain(&_cmdRoll, &one, &(_nav->roll), &negativeOne));
+		addBlock(new PidDFB(k_pidRoll, PSTR("ROLL_"), &(_nav->rollRate), 1, 0, 0, 0));
+		addBlock(new Sink(_rollMix));
+
+		// pitch error -> pitch mix
+		addBlock(new SumGain(&_cmdPitch, &one, &(_nav->pitch), &negativeOne));
+		addBlock(new PidDFB(k_pidPitch, PSTR("PITCH"), &(_nav->pitchRate), 1, 0, 0, 0));
+		addBlock(new Sink(_pitchMix));
+
+		// yaw error -> yaw mix
+		addBlock(new SumGain(&_cmdYaw,&one,&(_nav->yaw),&negativeOne));
+		addBlock(new PidDFB(k_pidYawRate, PSTR("YAWRATE"), &(_nav->yawRate), 1, 0, 0, 0));
+		addBlock(new Pid(k_pidYaw, PSTR("YAW"), 1, 0, 0 , 0));
+		addBlock(new Sink(_yawMix));
+
+		/*
+		 * thrust trim
+		 */
+		addBlock(new SumGain(&_thrustMixTrim,&one,&_thrustMix,&one));
+		addBlock(new Sink(_thrustMix));
+
+		/*
+		 * motor mix
+		 */
+
+		// left
+		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &one,&_yawMix, &one));
+		addBlock(new Saturate(_thrustMixMin,_thrustMixMax));
+		addBlock(new ToServo(_hal->rc[CH_LEFT]));
+
+		// right
+		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &negativeOne,&_yawMix, &one));
+		addBlock(new Saturate(_thrustMixMin,_thrustMixMax));
+		addBlock(new ToServo(_hal->rc[CH_RIGHT]));
+
+		// front
+		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &one,&_yawMix, &negativeOne));
+		addBlock(new Saturate(_thrustMixMin,_thrustMixMax));
+		addBlock(new ToServo(_hal->rc[CH_FRONT]));
+
+		// back
+		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &negativeOne,&_yawMix, &negativeOne));
+		addBlock(new Saturate(_thrustMixMin,_thrustMixMax));
+		addBlock(new ToServo(_hal->rc[CH_BACK]));
+}
+private:
+
+	static float _attitudeTiltMin;
+	static float _attitudeTiltMax;
+	static float _thrustMixMin;
+	static float _thrustMixMax;
+	static float _thrustMixTrim;
+
+	float _cmdNorthTilt;
+	float _cmdEastTilt;
+
+	float _cmdRoll;
+	float _cmdPitch;
+	float _cmdYaw;
+
+	float _thrustMix;
+	float _rollMix;
+	float _yawMix;
+	float _pitchMix;
+};
+float QuadController::_attitudeTiltMin = -1;
+float QuadController::_attitudeTiltMax = 1;
+float QuadController::_thrustMixMin = -1;
+float QuadController::_thrustMixMax = -1;
+float QuadController::_thrustMixTrim = 0.5;
+
 /*
 class QuadController: public AP_Controller {
 private:
-
-	// position variables
-	float commandNorth;
-	float commandEast;
-	float commandDown;
-#define PID_POS_P 1
-#define PID_POS_I 0
-#define PID_POS_D 0
-#define PID_POS_AWU 0
-	float PID_POS_LIM;
-	float PID_POS_LIM_MIN;
-#define PID_POS_Z_P 1
-#define PID_POS_Z_I 0
-#define PID_POS_Z_D 0
-#define PID_POS_Z_AWU 0
-	float PID_POS_Z_LIM;
-	float PID_POS_Z_LIM_MIN;
-
 	// bridge variables
 	float commandRoll;
 	float commandPitch;
 	float commandYaw;
-
-	// attitude variables
-#define PID_ATT_P 1
-#define PID_ATT_I 0
-#define PID_ATT_D 0
-#define PID_ATT_AWU 0
-#define PID_YAWPOS_P 1
-#define PID_YAWPOS_I 0
-#define PID_YAWPOS_D 0
-#define PID_YAWPOS_AWU 0
-#define PID_YAWSPEED_P 1
-#define PID_YAWSPEED_I 0
-#define PID_YAWSPEED_D 0
-#define PID_YAWSPEED_AWU 0
-
-	// mix manual variables
-#define MIX_REMOTE_WEIGHT 0
-#define MIX_OFFSET_WEIGHT 0
-#define ATT_OFFSET_X 0
-#define ATT_OFFSET_Y 0
-#define ATT_OFFSET_Z 0
-
-	// QUAD controller output
-#define THRUST_HOVER_OFFSET 0
 
 	// mix variables
 	float thrustMix;
@@ -124,42 +225,17 @@ private:
 	float yawMix;
 	float pitchMix;
 
-	// motor mix saturation
-	float motorMin;
-	float motorMax;
-	onst float * heading,
-	const float * velocity, const float * headingCommand,
-	const float * velocityCommand, AP_RcChannel * modeCh,
-	AP_RcChannel * steeringCh, AP_RcChannel *
 	// motor channels
-	AP_RcChannel * chMode;
-	AP_RcChannel * chLeft;
-	AP_RcChannel * chRight;
-	AP_RcChannel * chFront;
-	AP_RcChannel * chBack;
-	AP_RcChannel * chRoll;
-	AP_RcChannel * chPitch;
-	AP_RcChannel * chYaw;
-	AP_RcChannel * chThr;
+//	AP_RcChannel * chMode;
+//	AP_RcChannel * chLeft;
+//	AP_RcChannel * chRight;
+//	AP_RcChannel * chFront;
+//	AP_RcChannel * chBack;
+//	AP_RcChannel * chRoll;
+//	AP_RcChannel * chPitch;
+//	AP_RcChannel * chYaw;
+//	AP_RcChannel * chThr;
 
-	// command variables
-	float * pNCmd;
-	float * pN;
-	float * vN;
-	float * pECmd;
-	float * pE;
-	float * vE;
-	float * pDCmd;
-	float * pD;
-	float * vD;
-
-	// feedback variables
-	const float * roll;
-	const float * pitch;
-	const float * yaw;
-	float * rollRate;
-	float * pitchRate;
-	float * yawRate;
 
 public:
 	QuadController(AP_Var::Key cntrlKey,
@@ -167,21 +243,7 @@ public:
 			AP_Var::Key chRollKey, AP_Var::Key chPitchKey, AP_Var::Key chYawKey, AP_Var::Key chThrKey,
 			AP_Var::Key pidPNKey, AP_Var::Key pidPEKey, AP_Var::Key pidPDKey,
 			AP_Var::Key pidRollKey, AP_Var::Key pidPitchKey, AP_Var::Key pidYawRateKey, AP_Var::Key pidYawKey,
-			const float * velocity, const float * velocityCommand,
-			const float * heading, const float * headingCommand,
-			const float * roll, const float * pitch, const float * yaw,
-			float * rollrate, float * pitchRate, float * yawRate,
-			float * pNCmd, float * pN, float * vN,
-			float * pECmd, float * pE, float * vE,
-			float * pDCmd, float * pD, float * vD,
-			AP_RcChannel * chMode, AP_RcChannel * chLeft,
-			AP_RcChannel * chRight, AP_RcChannel * chFront,
-			AP_RcChannel * chBack, AP_RcChannel * chRoll,
-			AP_RcChannel * chPitch, AP_RcChannel * chYaw,
-			AP_RcChannel * chThr) :
-	chLeft(chLeft), chRight(chRight), chFront(chFront),
-	chBack(chBack), chRoll(chRoll), chPitch(chPitch),
-	chYaw(chYaw), chThr(chThr)
+			aP_Navigator * nav, AP_Guide * guide, AP_HardwareAbstractionLayer * hal) : _navigator(nav), AP
 	{
 		Serial.println_P(PSTR("initializing quad controller"));
 
@@ -372,55 +434,62 @@ public:
 ////
 
 /// Bridge Block
+/**
+ * Bridge between POSITION and ATTITUDE control
+ *
+ * inputs:  commandNorth, commandEast, thrustMix, commandYaw
+ * outputs: commandRoll, commandPitch, commandYaw, thrustMix
+ */
+/*
 class Bridge: public AP_Controller::Block {
 public:
-	Bridge(float * commandNorth, float * commandEast, float * commandDown,
-			float * commandYaw) :
-		_cNorth(commandNorth), _cEast(commandEast), _cDown(commandDown),
-				_cYaw(commandYaw) {
-		_output.push_back(new float(0.0));
-		_output.push_back(new float(0.0));
-		_output.push_back(new float(0.0));
-		_output.push_back(new float(0.0));
+	// TODO switch to quad controller if needed
+	Bridge(AP_Controller * controller) :
+		_controller(controller)
+	{
 	}
 	virtual void update(const float & dt) {
-		// multiply (commandNorth * gain negativeOne, commandEast * gain one
-		//			 commandDown  * gain negativeOne, commandYaw  * gain one)
-		(*_cNorth) = (-1) * (*_cNorth);
-		(*_cDown) = (-1) * (*_cDown);
+
+		// inputs
+		//_controller->commandNorthTilt;
+		//_controller->commandEastTilt;
+		//_controller->commandThrustMix;
+		//_controller->commandYawMix;
+
+		// float yaw = _controller->_nav->yaw;
+
 		// "transform-to-body"
-		float trigSin = sin((*_cYaw) * (-1));
-		float trigCos = cos((*_cYaw) * (-1));
-		float commandPitch = (*_cEast) * trigCos - (*_cNorth) * trigSin;
-		float commandRoll = (*_cEast) * trigSin + (*_cNorth) * trigCos;
+		{
+			float trigSin = sin(_controller->_nav->yaw);
+			float trigCos = cos(_controller->_nav->yaw);
+			_controller->commandPitch = _controller->commandEastTilt * trigCos +
+					_controller->commandNorthTilt * trigSin;
+			_controller->commandRoll =  _controller->commandEastTilt * trigSin -
+					_controller->commandNorthTilt * trigCos;
+			// note that the north tilt is negative of the pitch
+		}
 
 		// "thrust-trim-adjust"
-		float thrustMix = (*_cDown);
-		if (fabs(commandRoll) > 0.5) {
-			thrustMix = thrustMix * 1.13949393;
+		if (fabs(_controller->commandRoll) > 0.5) {
+			_controller->thrustMix *= 1.13949393;
 		} else {
-			thrustMix = thrustMix / cos(commandRoll);
+			_controller->thrustMix /= cos(_controller->commandRoll);
 		}
-		if (fabs(commandPitch) > 0.5) {
-			thrustMix = thrustMix * 1.13949393;
+		if (fabs(_controller->commandPitch) > 0.5) {
+			_controller->thrustMix *= 1.13949393;
 		} else {
-			thrustMix = thrustMix / cos(commandPitch);
+			_controller->thrustMix /= cos(_controller->commandPitch);
 		}
 
 		// "mix manual"
-		commandRoll -= (*_ATT_OFFSET_X) * (*_MIX_OFFSET_WEIGHT);
-		commandPitch -= (*_ATT_OFFSET_Y) * (*_MIX_OFFSET_WEIGHT);
-		thrustMix -= (*_ATT_OFFSET_Z) * (*_MIX_OFFSET_WEIGHT);
+		_controller->commandRoll -= _ATT_OFFSET_X * _MIX_OFFSET_WEIGHT;
+		_controller->commandPitch -= _ATT_OFFSET_Y * _MIX_OFFSET_WEIGHT;
+		_controller->thrustMix -= _ATT_OFFSET_Z * _MIX_OFFSET_WEIGHT;
 
-		commandRoll += (_chRoll ->getPosition()) * (*_MIX_REMOTE_WEIGHT);
-		commandPitch += (_chPitch->getPosition()) * (*_MIX_REMOTE_WEIGHT);
-		(*_cYaw) += (_chYaw ->getPosition()) * (*_MIX_REMOTE_WEIGHT);
-		thrustMix += (_chThr ->getPosition()) * (*_MIX_REMOTE_WEIGHT);
-
-		output(0) = commandRoll;
-		output(1) = commandPitch;
-		output(2) = (*_cYaw);
-		output(3) = thrustMix;
+		_controller->commandRoll += _controller->hal->rc[CH_ROLL]->getPosition() * _MIX_REMOTE_WEIGHT;
+		_controller->commandPitch += _controller->hal->rc[CH_PITCH]->getPosition() * _MIX_REMOTE_WEIGHT;
+		_controller->commandYaw += _controller->hal->rc[CH_YAW]->getPosition() * _MIX_REMOTE_WEIGHT;
+		_controller->thrustMix += _controller->hal->rc[CH_THR]->getPosition() * _MIX_REMOTE_WEIGHT;
 	}
 private:
 	float * _cNorth;
@@ -431,13 +500,10 @@ private:
 	AP_RcChannel * _chPitch;
 	AP_RcChannel * _chYaw;
 	AP_RcChannel * _chThr;
-	float * _ATT_OFFSET_X;
-	float * _ATT_OFFSET_Y;
-	float * _ATT_OFFSET_Z;
-	float * _ATT_OFFSET_WEIGHT;
-	float * _MIX_OFFSET_WEIGHT;
-	float * _MIX_REMOTE_WEIGHT;
+	AP_Controller * _controller;
+
 };
+*/
 
 
 } // namespace apo

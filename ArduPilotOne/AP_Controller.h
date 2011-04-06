@@ -119,7 +119,7 @@ public:
             _ch->setNormalized(input(0));
         }
     }
-private:
+protected:
     float _position;
     AP_RcChannel * _ch;
 };
@@ -171,7 +171,7 @@ public:
         output(0) = sum;
     }
     float gain(int i) { return *(_gain[i]); }
-private:
+protected:
     Vector<const float *> _gain;
 };
 
@@ -244,11 +244,11 @@ public:
         Serial.println(output(0),5);
         */
     }
-private:
+protected:
     AP_Var_group _group; /// helps with parameter management
-    AP_Float _eP; /// input
-    AP_Float _eI; /// integral of input
-    AP_Float _eD; /// derivative of input
+    float _eP; /// input
+    float _eI; /// integral of input
+    float _eD; /// derivative of input
     AP_Float _kP; /// proportional gain
     AP_Float _kI; /// integral gain
     AP_Float _kD; /// derivative gain
@@ -271,7 +271,7 @@ public:
     	//Serial.println("input: "); Serial.println(input(0));
         _var = input(_port); 
     }
-private:
+protected:
     float & _var;
     uint8_t _port;
 };
@@ -295,7 +295,7 @@ public:
         if (u<_min) u = _min;
         output(_port) = u;
     }
-private:
+protected:
     uint8_t _port;
     float & _min;
     float & _max;
@@ -350,11 +350,11 @@ public:
 		 Serial.println(output(0),5);
 		 */
 	}
-private:
+protected:
 	AP_Var_group _group; /// helps with parameter management
-	AP_Float _eP; /// input
-	AP_Float _eI; /// integral of input
-	AP_Float _eD; /// derivative of input
+	float _eP; /// input
+	float _eI; /// integral of input
+	float _eD; /// derivative of input
 	AP_Float _kP; /// proportional gain
 	AP_Float _kI; /// integral gain
 	AP_Float _kD; /// derivative gain
