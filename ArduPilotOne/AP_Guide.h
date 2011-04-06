@@ -86,7 +86,7 @@ public:
 	}
 
 	virtual void update() {
-		_hal->debug->println_P(PSTR("guide loop"));
+		//_hal->debug->println_P(PSTR("guide loop"));
 
 		// TODO, setting to a fixed value for testing with the car right now
 		float temp = crossTrack()*-0.001; // crosstrack gain

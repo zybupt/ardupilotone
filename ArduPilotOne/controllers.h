@@ -49,7 +49,7 @@ public:
 	}
 	virtual void update(const float & dt) {
 		// read mode switch
-		_hal->debug->println_P(PSTR("update loop"));
+		//_hal->debug->println_P(PSTR("update loop"));
 		_hal->rc[chMode]->readRadio();
 		//_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[chMode]->getNormalized());
 
@@ -106,12 +106,12 @@ public:
 		virtual void update(const float & dt) {
 			// "transform-to-body"
 			{
-				float trigSin = sin(_controller->_nav->yaw);
-				float trigCos = cos(_controller->_nav->yaw);
+				float trigSin = sin(-_controller->_nav->yaw);
+				float trigCos = cos(-_controller->_nav->yaw);
 				_controller->_cmdPitch = _controller->_cmdEastTilt * trigCos
-						+ _controller->_cmdNorthTilt * trigSin;
-				_controller->_cmdRoll = _controller->_cmdEastTilt * trigSin
-						- _controller->_cmdNorthTilt * trigCos;
+						- _controller->_cmdNorthTilt * trigSin;
+				_controller->_cmdRoll = -_controller->_cmdEastTilt * trigSin
+						+ _controller->_cmdNorthTilt * trigCos;
 				// note that the north tilt is negative of the pitch
 			}
 
@@ -128,7 +128,7 @@ public:
 			}
 
 			// "mix manual"
-
+			/*
 			_controller->_cmdRoll -= _controller->_attOffsetX
 					* _controller->_mixOffsetWeight;
 			_controller->_cmdPitch -= _controller->_attOffsetY
@@ -148,6 +148,7 @@ public:
 			_controller->_thrustMix
 					+= _controller->_hal->rc[CH_THRUST]->getPosition()
 							* _controller->_mixRemoteWeight;
+							*/
 		}
 	private:
 		QuadController * _controller;
@@ -260,7 +261,11 @@ public:
 		/*
 		 * thrust trim
 		 */
-		addBlock(new SumGain(&_thrustMixTrim, &one, &_thrustMix, &one));
+
+		// note that the position D -> thrust -1 gain is applied here to the
+		// thrust mix
+		addBlock(new SumGain(&_thrustMixTrim, &one, &_thrustMix, &negativeOne));
+		//addBlock(new SumGain(&_thrustMix, &negativeOne)); // XXX, this is wrong but sorta works, why?
 		addBlock(new Sink(_thrustMix));
 
 		/*
@@ -292,6 +297,7 @@ public:
 	}
 	virtual void update(const float & dt) {
 		AP_Controller::update(dt);
+		/*
 		_hal->debug->printf_P(
 				PSTR("Position Loop: North, East, Down: %f %f %f\n"),
 				_cmdNorthTilt, _cmdEastTilt, _thrustMix);
@@ -305,6 +311,7 @@ public:
 				_hal->rc[CH_RIGHT]->getPosition(),
 				_hal->rc[CH_FRONT]->getPosition(),
 				_hal->rc[CH_BACK]->getPosition());
+		*/
 	}
 private:
 

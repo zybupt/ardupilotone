@@ -105,8 +105,8 @@ public:
 	}
 	virtual void update(const float & dt = 0) {
 		//Serial.println("calling to servo update");
-		Serial.println("input: ");
-		Serial.println(input(0));
+		//Serial.println("input: ");
+		//Serial.println(input(0));
 		if (_input.getSize() > 0) {
 			_ch->setPosition(input(0));
 		}
@@ -149,6 +149,8 @@ public:
 		// create output
 		_output.push_back(new float(0.0));
 	}
+	// doesn't connect, it is a source
+	virtual void connect(Block * block) {}
 	void add(const float * var, const float * gain) {
 		_input.push_back(var);
 		_gain.push_back(gain);

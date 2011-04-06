@@ -70,7 +70,7 @@ AP_RcChannelSimple::setPwm(uint16_t pwm)
 	if (_pwm > pwmMax) _pwm = pwmMax;
 	if (_pwm < pwmMin) _pwm = pwmMin;
 
-	Serial.print("ch: "); Serial.print(ch); Serial.print(" pwm: "); Serial.println(pwm);
+	//Serial.print("ch: "); Serial.print(ch); Serial.print(" pwm: "); Serial.println(pwm);
 	_rc.OutputCh(ch,_pwm);
 }
 

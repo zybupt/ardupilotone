@@ -126,7 +126,7 @@ void ArduPilotOne::callback1(void * data) {
 	 */
 	if (apo->controller())
 	{
-		apo->hal()->debug->println_P(PSTR("updating controller"));
+		//apo->hal()->debug->println_P(PSTR("updating controller"));
 		apo->controller()->update(1./loop1Rate);
 	}
 	/*
