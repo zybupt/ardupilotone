@@ -127,9 +127,16 @@ public:
 
 		case MAVLINK_MSG_ID_GLOBAL_POSITION: {
 			mavlink_msg_global_position_int_send(_channel,
-					_navigator->latInt, _navigator->lonInt,
-					_navigator->altInt * 10, _navigator->vN,
+					_navigator->latDeg(), _navigator->lonDeg(),
+					_navigator->altM(), _navigator->vN,
 					_navigator->vE, _navigator->vD);
+			break;
+		}
+
+		case MAVLINK_MSG_ID_GPS_RAW: {
+			mavlink_msg_gps_raw_send(_channel,timeStamp,3,
+					_navigator->latDeg(), _navigator->lonDeg(),_navigator->altM(), 0,0,
+					_navigator->groundSpeed,_navigator->yaw*180/M_PI);
 			break;
 		}
 
@@ -305,13 +312,17 @@ private:
 		mavlink_gps_raw_t packet;
 		mavlink_msg_gps_raw_decode(msg, &packet);
 
-		_navigator->latInt = packet.lat;
-		_navigator->lonInt = packet.lon;
-		_navigator->altInt = packet.alt;
-		_navigator->yaw = packet.hdg;
+		_navigator->setLatDeg(packet.lat);
+		_navigator->setLonDeg(packet.lon);
+		_navigator->setAlt(packet.alt);
+		//_navigator->yaw = packet.hdg*M_PI/180;
 		_navigator->groundSpeed = packet.v;
 		_navigator->airSpeed = packet.v;
 		//_hal->debug->printf_P(PSTR("received hil gps raw packet\n"));
+		_hal->debug->printf_P(PSTR("received lat: %f deg\tlon: %f deg\talt: %f m\n"),
+						 packet.lat,
+						 packet.lon,
+						 packet.alt);
 		break;
 	}
 

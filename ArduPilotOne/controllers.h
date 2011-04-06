@@ -50,17 +50,17 @@ public:
 		// read mode switch
 		//_hal->debug->println_P(PSTR("update loop"));
 		_hal->rc[CH_MODE]->setPwm(_hal->rc[CH_MODE]->readRadio());
-		_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[CH_MODE]->getPosition());
+		//_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[CH_MODE]->getPosition());
 
 		// manual
 		if (_hal->rc[CH_MODE]->getPosition() > 0) {
 			_hal->rc[CH_STR]->setPwm(_hal->rc[CH_STR]->readRadio());
 			_hal->rc[CH_THR]->setPwm(_hal->rc[CH_THR]->readRadio());
-			_hal->debug->println("manual");
+			//_hal->debug->println("manual");
 
 		} else { // auto
 			AP_Controller::update(dt);
-			_hal->debug->println("automode");
+			//_hal->debug->println("automode");
 		}
 
 		//		Serial.printf("steering pwm :\t");

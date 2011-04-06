@@ -90,11 +90,15 @@ public:
 
 		// TODO, setting to a fixed value for testing with the car right now
 		float temp = crossTrack()*-0.001; // crosstrack gain
-		if (temp > M_PI/2) temp = M_PI/2;
-		if (temp < -M_PI/2) temp = -M_PI/2;
-		headingCommand = _prevCommand.bearingTo(_nextCommand) + temp;
-		groundSpeedCommand = 3;
+		if (temp > 30*M_PI/180) temp = 30*M_PI/180;
+		if (temp < -30*M_PI/180) temp = -30*M_PI/180;
+		float bearing = _prevCommand.bearingTo(_nextCommand);
+		headingCommand = bearing + temp;
+		_hal->debug->printf_P(PSTR("bearing: %f cross track: %f command heading: %f\n"),
+				bearing, crossTrack(), headingCommand);
+		groundSpeedCommand = 5;
 
+		// TODO : calculate pN,pE,pD from home and gps coordinates
 		pNCmd = 1;
 		pECmd = 2;
 		pDCmd = -3;
@@ -127,8 +131,8 @@ public:
 
 	//calculates cross track of a current location
 	float crossTrack() {
-		float d = _prevCommand.distanceTo(_navigator->latInt,_navigator->lonInt);
-		float bCurrent = _prevCommand.bearingTo(_navigator->latInt,_navigator->lonInt);
+		float d = _prevCommand.distanceTo(_navigator->latDegInt,_navigator->lonDegInt);
+		float bCurrent = _prevCommand.bearingTo(_navigator->latDegInt,_navigator->lonDegInt);
 		float bNext = _prevCommand.bearingTo(_nextCommand);
 		return asin(sin(d/rEarth) * sin(bCurrent - bNext)) * rEarth;
 	}
@@ -136,7 +140,7 @@ public:
 	// calculates along  track distance of a current location
 	float alongTrack() {
 		float dXt = crossTrack();
-		float d = _prevCommand.distanceTo(_navigator->latInt,_navigator->lonInt);
+		float d = _prevCommand.distanceTo(_navigator->latDegInt,_navigator->lonDegInt);
 		return acos(cos(d / rEarth) / cos(dXt / rEarth)) * rEarth;
 	}
 
@@ -154,7 +158,7 @@ public:
 		case MAV_CMD_NAV_WAYPOINT:
 		{
 			// if within radius, increment
-			float d = _prevCommand.distanceTo(_navigator->latInt,_navigator->lonInt);
+			float d = _prevCommand.distanceTo(_navigator->latDegInt,_navigator->lonDegInt);
 			if (d < _nextCommand.getRadius())
 			{
 				nextCommand();

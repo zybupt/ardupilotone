@@ -97,21 +97,15 @@ void ArduPilotOne::callback1(void * data) {
 	/*
 	 * read compass
 	 */
-
 	if (apo->hal()->mode()==MODE_LIVE && apo->hal()->compass)
 		apo->hal()->compass->read();
 
 	/*
 	 * hardware in the loop
 	 */
-	if (apo->hal()->mode()!=MODE_LIVE)
+	if (apo->hal()->hil && apo->hal()->mode()!=MODE_LIVE)
 	{
-		// receive message
 		apo->hal()->hil->receive();
-
-		// send messages
-		apo->hal()->hil->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
-		apo->hal()->hil->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
 		apo->hal()->hil->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
 	}
 
@@ -129,6 +123,18 @@ void ArduPilotOne::callback1(void * data) {
 		//apo->hal()->debug->println_P(PSTR("updating controller"));
 		apo->controller()->update(1./loop1Rate);
 	}
+
+	/*
+	 * send telemetry
+	 */
+	if (apo->hal()->gcs) {
+		// send messages
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
+	}
+
 	/*
 	char msg[50];
 	sprintf(msg, "c_hdg: %f, c_thr: %f", apo->guide()->headingCommand, apo->guide()->groundSpeedCommand);
@@ -172,12 +178,6 @@ void ArduPilotOne::callback2(void * data) {
 	 */
 	if (apo->hal()->gcs) {
 		// send messages
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
-
-		// send messages
 		apo->hal()->gcs->requestCmds();
 		apo->hal()->gcs->sendParameters();
 
@@ -189,10 +189,14 @@ void ArduPilotOne::callback2(void * data) {
 	 * navigator debug
 	 */
 	 if (apo->navigator()) {
-		 apo->hal()->debug->printf_P(PSTR("roll: %f pitch: %f yaw: %f\t"),
+		 apo->hal()->debug->printf_P(PSTR("roll: %f deg\tpitch: %f deg\tyaw: %f deg\n"),
 				 apo->navigator()->roll*rad2deg,
 				 apo->navigator()->pitch*rad2deg,
 				 apo->navigator()->yaw*rad2deg);
+		 apo->hal()->debug->printf_P(PSTR("lat: %f deg\tlon: %f deg\talt: %f deg\n"),
+				 apo->navigator()->latDeg(),
+				 apo->navigator()->lonDeg(),
+				 apo->navigator()->altM());
 	 }
 	 apo->hal()->debug->println();
 }

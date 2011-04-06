@@ -32,38 +32,60 @@ public:
 	}
 	virtual void calibrate() = 0;
 	virtual void update(float dt) = 0;
-	float roll;
-	float rollRate;
-	float pitch;
-	float pitchRate;
-	float yaw;
-	float yawRate;
-	float airSpeed;
-	float groundSpeed;
-	float vN;
-	float vE;
-	float vD;
-	float pN;
-	float pE;
-	float pD;
-	int32_t latInt;
-	int32_t lonInt;
-	int32_t altInt;
-	float lat() {
-		return latInt / 1e7;
+	float roll; // rad
+	float rollRate; //rad
+	float pitch; // rad
+	float pitchRate; // rad/s
+	float yaw; // rad
+	float yawRate; // rad/s
+	float airSpeed; // m/s
+	float groundSpeed; // m/s
+	float vN; // m/s
+	float vE; // m/s
+	float vD; // m/s
+	float pN; // m from home
+	float pE; // m from home
+	float pD; // m from home
+	int32_t latDegInt; // deg * 1e7
+	int32_t lonDegInt; // deg * 1e7
+	int32_t altInt; // deg * 1e7
+	// get latitude, degrees
+	float latRad() {
+		return latDegInt / 1e7 * M_PI/180;
 	}
-	float lon() {
-		return lonInt / 1e7;
+	// get latitude, degrees
+	float latDeg() {
+		return latDegInt / 1e7;
 	}
-	float alt() {
+	// get longitude, rad
+	float lonRad() {
+		return lonDegInt / 1e7 * M_PI/180;
+	}
+	// get longitude, degrees
+	float lonDeg() {
+		return lonDegInt / 1e7;
+	}
+	// get altitude, m
+	float altM() {
 		return altInt / 1e3;
 	}
-	void setLat(float lat) {
-		latInt = 1e7 * lat;
+	// set latitude, rad
+	void setLatRad(float lat) {
+		latDegInt = 1e7 * lat * 180/M_PI;
 	}
-	void setLon(float lon) {
-		lonInt = 1e7 * lon;
+	// set latitude, degrees
+	void setLatDeg(float lat) {
+		latDegInt = 1e7 * lat;
 	}
+	// longitude, rad
+	void setLonRad(float lon) {
+		lonDegInt = 1e7 * lon * 180/M_PI;
+	}
+	// longitude, degrees
+	void setLonDeg(float lon) {
+		lonDegInt = 1e7 * lon;
+	}
+	// altitude, m
 	void setAlt(float alt) {
 		altInt = 1e3 * alt;
 	}
