@@ -49,6 +49,7 @@ public:
 	}
 	virtual void update(const float & dt) {
 		// read mode switch
+		_hal->debug->println_P(PSTR("update loop"));
 		_hal->rc[chMode]->readRadio();
 		//_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[chMode]->getNormalized());
 
@@ -270,6 +271,14 @@ public:
 						&_yawMix, &negativeOne));
 		addBlock(new Saturate(_thrustMixMin, _thrustMixMax));
 		addBlock(new ToServo(_hal->rc[CH_BACK]));
+	}
+	virtual void update(const float & dt) {
+		AP_Controller::update(dt);
+		_hal->debug->printf_P(PSTR("Position Loop: North, East, Down: %f %f %f\n"), _cmdNorthTilt,_cmdEastTilt, _thrustMix);
+		_hal->debug->printf_P(PSTR("Attitude Loop: RollMix, PitchMix, YawMix: %f %f %f\n"), _rollMix,_pitchMix, _yawMix);
+		_hal->debug->printf_P(PSTR("Thrust Trim: _thrustMix: %f\n"), _thrustMix);
+		_hal->debug->printf_P(PSTR("CH_LEFT, CH_RIGHT, CH_FRONT, CH_BACK: %f %f %f %f\n"),
+				_hal->rc[CH_LEFT]->getPosition(), _hal->rc[CH_RIGHT]->getPosition(), _hal->rc[CH_FRONT]->getPosition(), _hal->rc[CH_BACK]->getPosition());
 	}
 private:
 

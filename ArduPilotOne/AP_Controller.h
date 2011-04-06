@@ -113,7 +113,7 @@ public:
     virtual void update(const float & dt = 0)
     {
     	//Serial.println("calling to servo update");
-    	//Serial.println("input: "); Serial.println(input(0));
+    	Serial.println("input: "); Serial.println(input(0));
         if (_input.getSize() > 0)
         {
             _ch->setPosition(input(0));

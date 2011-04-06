@@ -130,6 +130,7 @@ public:
 		 *in a search engine for more information.
 		 *altInt contains the altitude in meters.
 		 */
+		_hal->debug->println_P(PSTR("nav loop"));
 		if (_hal->baro) {
 
 			if (_rangeFinderDown != NULL && _rangeFinderDown->distance <= 695)

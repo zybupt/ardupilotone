@@ -81,6 +81,7 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 
 void ArduPilotOne::callback0(void * data) {
 	ArduPilotOne * apo = (ArduPilotOne *) data;
+	//apo->hal()->debug->println_P(PSTR("callback 0"));
 
 	/*
 	 * ahrs update
@@ -91,6 +92,7 @@ void ArduPilotOne::callback0(void * data) {
 
 void ArduPilotOne::callback1(void * data) {
 	ArduPilotOne * apo = (ArduPilotOne *) data;
+	//apo->hal()->debug->println_P(PSTR("callback 1"));
 
 	/*
 	 * read compass
@@ -123,7 +125,10 @@ void ArduPilotOne::callback1(void * data) {
 	 * update control laws
 	 */
 	if (apo->controller())
+	{
+		apo->hal()->debug->println_P(PSTR("updating controller"));
 		apo->controller()->update(1./loop1Rate);
+	}
 	/*
 	char msg[50];
 	sprintf(msg, "c_hdg: %f, c_thr: %f", apo->guide()->headingCommand, apo->guide()->groundSpeedCommand);
@@ -134,18 +139,23 @@ void ArduPilotOne::callback1(void * data) {
 
 void ArduPilotOne::callback2(void * data) {
 	ArduPilotOne * apo = (ArduPilotOne *) data;
+	//apo->hal()->debug->println_P(PSTR("callback 2"));
 
 	/*
 	 * compass correction for ahrs
 	 */
 	if (apo->hal()->compass)
+	{
+		apo->hal()->debug->printf_P(PSTR("compass\n"));
 		apo->hal()->compass->calculate(apo->navigator()->roll,
 				apo->navigator()->pitch);
+	}
 
 	/*
 	 * read gps and correct position
 	 */
 	if (apo->hal()->gps) {
+		apo->hal()->debug->printf_P(PSTR("gps\n"));
 		apo->hal()->gps->update();
 
 		// debug
@@ -160,8 +170,6 @@ void ArduPilotOne::callback2(void * data) {
 	/*
 	 * handle ground control station communication
 	 */
-	{
-	}
 	if (apo->hal()->gcs) {
 		// send messages
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
@@ -191,6 +199,7 @@ void ArduPilotOne::callback2(void * data) {
 
 void ArduPilotOne::callback3(void * data) {
 	ArduPilotOne * apo = (ArduPilotOne *) data;
+	//apo->hal()->debug->println_P(PSTR("callback 3"));
 
 	/*
 	 * send heartbeat
@@ -215,6 +224,7 @@ void ArduPilotOne::callback3(void * data) {
 
 void ArduPilotOne::callback4(void * data) {
 	ArduPilotOne * apo = (ArduPilotOne *) data;
+	//apo->hal()->debug->println_P(PSTR("callback 4"));
 }
 
 } // namespace apo
@@ -229,10 +239,12 @@ void setup() {
 	 * Communications
 	 */
 	Serial.begin(57600, 128, 128); // debug
-	Serial1.begin(57600, 128, 128); // gps
 	Serial3.begin(57600, 128, 128); // gcs
+
 	hal->debug = &Serial;
 	hal->debug->println_P(PSTR("initializing debug line"));
+	hal->debug->println_P(PSTR("initializing radio"));
+	APM_RC.Init(); // APM Radio initialization
 
 	/*
 	 * Pins
@@ -248,59 +260,59 @@ void setup() {
 	/*
 	 * Sensor initialization
 	 */
-	hal->debug->println_P(PSTR("initializing radio"));
-	APM_RC.Init(); // APM Radio initialization
+	if (hal->mode()==MODE_LIVE)
+	{
+		hal->debug->println_P(PSTR("initializing adc"));
+		hal->adc =  new AP_ADC_ADS7844;
+		hal->adc->Init();
 
-	hal->debug->println_P(PSTR("initializing adc"));
-	hal->adc =  new AP_ADC_ADS7844;
-	hal->adc->Init();
+		hal->debug->println_P(PSTR("initializing gps"));
+		hal->gps = new AP_GPS_MTK(&Serial1);
 
-	hal->debug->println_P(PSTR("initializing gps"));
-	hal->gps = new AP_GPS_MTK(&Serial1);
+		hal->debug->println_P(PSTR("initializing baro"));
+		hal->baro = new APM_BMP085_Class;
+		hal->baro->Init();
 
-	hal->debug->println_P(PSTR("initializing baro"));
-	hal->baro = new APM_BMP085_Class;
-	hal->baro->Init();
+		hal->debug->println_P(PSTR("initializing compass"));
+		hal->compass = new AP_Compass_HMC5843;
+		hal->compass->init();
 
-	hal->debug->println_P(PSTR("initializing compass"));
-	hal->compass = new AP_Compass_HMC5843;
-	hal->compass->init();
+		/**
+		 * Initialize ultrasonic sensors. If sensors are not plugged in, the navigator will not
+		 * initialize them and NULL will be assigned to those corresponding pointers.
+		 * On detecting NULL assigned to any ultrasonic sensor, its corresponding block of code
+		 * will not be executed by the navigator.
+		 * The coordinate system is assigned by the right hand screw rule with the thumb pointing down.
+		 * In set_orientation, it is defind as (front/back,left/right,down,up)
+		 */
 
-	/**
-	 * Initialize ultrasonic sensors. If sensors are not plugged in, the navigator will not
-	 * initialize them and NULL will be assigned to those corresponding pointers.
-	 * On detecting NULL assigned to any ultrasonic sensor, its corresponding block of code
-	 * will not be executed by the navigator.
-	 * The coordinate system is assigned by the right hand screw rule with the thumb pointing down.
-	 * In set_orientation, it is defind as (front/back,left/right,down,up)
-	 */
+		/*
+		hal->debug->println_P(PSTR("initializing front range finder"));
+		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+		hal->rangeFinders[0]->init(0);
+		hal->rangeFinders[0]->set_orientation(1,0,0);
 
-	/*
-	hal->debug->println_P(PSTR("initializing front range finder"));
-	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	hal->rangeFinders[0]->init(0);
-	hal->rangeFinders[0]->set_orientation(1,0,0);
+		hal->debug->println_P(PSTR("initializing back range finder"));
+		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+		hal->rangeFinders[1]->init(1);
+		hal->rangeFinders[1]->set_orientation(-1,0,0);
 
-	hal->debug->println_P(PSTR("initializing back range finder"));
-	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	hal->rangeFinders[1]->init(1);
-	hal->rangeFinders[1]->set_orientation(-1,0,0);
+		hal->debug->println_P(PSTR("initializing right range finder"));
+		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+		hal->rangeFinders[2]->init(2);
+		hal->rangeFinders[2]->set_orientation(0,1,0);
 
-	hal->debug->println_P(PSTR("initializing right range finder"));
-	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	hal->rangeFinders[2]->init(2);
-	hal->rangeFinders[2]->set_orientation(0,1,0);
+		hal->debug->println_P(PSTR("initializing left range finder"));
+		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+		hal->rangeFinders[3]->init(3);
+		hal->rangeFinders[3]->set_orientation(0,-1,0);
 
-	hal->debug->println_P(PSTR("initializing left range finder"));
-	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	hal->rangeFinders[3]->init(3);
-	hal->rangeFinders[3]->set_orientation(0,-1,0);
-
-	hal->debug->println_P(PSTR("initializing down range finder"));
-	hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
-	hal->rangeFinders[4]->init(4);
-	hal->rangeFinders[4]->set_orientation(0,0,1);
-	*/
+		hal->debug->println_P(PSTR("initializing down range finder"));
+		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
+		hal->rangeFinders[4]->init(4);
+		hal->rangeFinders[4]->set_orientation(0,0,1);
+		*/
+	}
 
 	/*
 	 * Navigator
@@ -323,6 +335,7 @@ void setup() {
 		break;
 	case VEHICLE_QUAD:
 		controller = new QuadController(navigator,guide,hal);
+		break;
 	}
 
 	/*
@@ -330,7 +343,15 @@ void setup() {
 	 */
 	hal->debug->println_P(PSTR("initializing comm channels"));
 	hal->gcs = new MavlinkComm(&Serial3,navigator,guide,controller,hal);
-	hal->hil = new MavlinkComm(&Serial,navigator,guide,controller,hal);
+	if (hal->mode()==MODE_LIVE) {
+		Serial1.begin(38400, 128, 16); // gps
+	} else { // hil
+		Serial1.begin(57600, 128, 128);
+		hal->hil = new MavlinkComm(&Serial1,navigator,guide,controller,hal);
+	}
+	Serial.println("debug line");
+	Serial1.println("gps/hil line");
+	Serial3.println("gcs line");
 
 	/*
 	 * Start the autopilot

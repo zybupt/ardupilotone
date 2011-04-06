@@ -25,7 +25,7 @@ namespace apo {
 class AP_CommLink;
 
 // enumerations
-enum halMode_t {MODE_LIVE, MODE_HIL_CNTL, MODE_HIL_NAV};
+enum halMode_t {MODE_LIVE, MODE_HIL_CNTL, /*MODE_HIL_NAV*/};
 enum board_t {BOARD_ARDUPILOTMEGA};
 enum vehicle_t {VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE};
 

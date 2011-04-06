@@ -23,7 +23,12 @@
 #include "ArduPilotOne.h"
 #include "AP_MavlinkCommand.h"
 
+
 namespace apo {
+
+enum {
+	SEVERITY_LOW, SEVERITY_MED, SEVERITY_HIGH
+};
 
 // forward declarations
 class ArduPilotOne;
@@ -31,9 +36,6 @@ class ArduPilotOne;
 /// CommLink class
 class AP_CommLink {
 public:
-	enum {
-		SEVERITY_LOW, SEVERITY_MED, SEVERITY_HIGH
-	};
 
 	AP_CommLink(FastSerial * link, AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller, AP_HardwareAbstractionLayer * hal) :
 		_link(link), _navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
@@ -99,6 +101,8 @@ public:
 	}
 
 	void sendMessage(uint8_t id, uint32_t param = 0) {
+		_hal->debug->printf_P(PSTR("send message\n"));
+
 		// if number of channels exceeded return
 		if (_channel == MAVLINK_COMM_NB_HIGH)
 			return;
@@ -152,7 +156,7 @@ public:
 		}
 
 		case MAVLINK_MSG_ID_WAYPOINT_ACK: {
-			//sendText(SEVERITY_LOW, PSTR("waypoint ack"));
+			sendText(SEVERITY_LOW, PSTR("waypoint ack"));
 
 			// decode
 			mavlink_waypoint_ack_t packet;
@@ -174,6 +178,7 @@ public:
 	} // send message
 
 	virtual void receive() {
+		_hal->debug->printf_P(PSTR("receive\n"));
 		// if number of channels exceeded return
 		//
 		if (_channel == MAVLINK_COMM_NB_HIGH)
@@ -218,6 +223,7 @@ public:
 	 * sends parameters one at a time
 	 */
 	void sendParameters() {
+		_hal->debug->printf_P(PSTR("send parameters\n"));
 		// Check to see if we are sending parameters
 		while (NULL != _queuedParameter) {
 			AP_Var *vp;
@@ -248,7 +254,7 @@ public:
 	 * request commands one at a time
 	 */
 	void requestCmds() {
-		_hal->debug->printf_P("requesting commands\n");
+		_hal->debug->printf_P(PSTR("requesting commands\n"));
 		// request cmds one by one
 		if (_receivingCmds && _cmdRequestIndex <= AP_MavlinkCommand::number) {
 			mavlink_msg_waypoint_request_send(_channel, _cmdDestSysId,
@@ -328,7 +334,7 @@ private:
 			break;
 
 		// do action
-		//sendText(SEVERITY_LOW, PSTR("action received"));
+		sendText(SEVERITY_LOW, PSTR("action received"));
 		switch (packet.action) {
 
 		case MAV_ACTION_STORAGE_READ:
@@ -374,7 +380,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_REQUEST_LIST: {
-		//sendText(SEVERITY_LOW, PSTR("waypoint request list"));
+		sendText(SEVERITY_LOW, PSTR("waypoint request list"));
 
 		// decode
 		mavlink_waypoint_request_list_t packet;
@@ -396,7 +402,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_REQUEST: {
-		//sendText(SEVERITY_LOW, PSTR("waypoint request"));
+		sendText(SEVERITY_LOW, PSTR("waypoint request"));
 
 		// Check if sending waypiont
 		if (!_sendingCmds)
@@ -422,7 +428,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_ACK: {
-		//sendText(SEVERITY_LOW, PSTR("waypoint ack"));
+		sendText(SEVERITY_LOW, PSTR("waypoint ack"));
 
 		// decode
 		mavlink_waypoint_ack_t packet;
@@ -439,7 +445,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: {
-		//sendText(SEVERITY_LOW, PSTR("param request list"));
+		sendText(SEVERITY_LOW, PSTR("param request list"));
 
 		// decode
 		mavlink_param_request_list_t packet;
@@ -455,7 +461,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_CLEAR_ALL: {
-		//sendText(SEVERITY_LOW, PSTR("waypoint clear all"));
+		sendText(SEVERITY_LOW, PSTR("waypoint clear all"));
 
 		// decode
 		mavlink_waypoint_clear_all_t packet;
@@ -477,7 +483,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_SET_CURRENT: {
-		//sendText(SEVERITY_LOW, PSTR("waypoint set current"));
+		sendText(SEVERITY_LOW, PSTR("waypoint set current"));
 
 		// decode
 		mavlink_waypoint_set_current_t packet;
@@ -493,7 +499,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT_COUNT: {
-		//sendText(SEVERITY_LOW, PSTR("waypoint count"));
+		sendText(SEVERITY_LOW, PSTR("waypoint count"));
 
 		// decode
 		mavlink_waypoint_count_t packet;
@@ -515,7 +521,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_WAYPOINT: {
-		//sendText(SEVERITY_LOW, PSTR("waypoint"));
+		sendText(SEVERITY_LOW, PSTR("waypoint"));
 
 		// Check if receiving waypiont
 		if (!_receivingCmds) {
@@ -554,7 +560,7 @@ private:
 	}
 
 	case MAVLINK_MSG_ID_PARAM_SET: {
-		//sendText(SEVERITY_LOW, PSTR("param set"));
+		sendText(SEVERITY_LOW, PSTR("param set"));
 		AP_Var *vp;
 		AP_Meta_class::Type_id var_type;
 

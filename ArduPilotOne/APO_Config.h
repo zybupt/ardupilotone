@@ -3,6 +3,11 @@
 
 #include "AP_HardwareAbstractionLayer.h"
 
+// Serial 0: debug      /dev/ttyUSB0
+// Serial 1: gps/hil    /dev/ttyUSB1
+// Serial 2: gcs        /dev/ttyUSB2
+
+
 // select hardware absraction mode from
 // 	MODE_LIVE, actual flight
 // 	TODO: IMPLEMENT --> MODE_HIL_NAV, hardware in the loop with sensors running, tests navigation system and control
