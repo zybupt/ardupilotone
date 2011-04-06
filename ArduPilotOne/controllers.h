@@ -83,15 +83,15 @@ public:
 	 * unique keys so they can be reaccessed from the hal rc vector
 	 */
 	enum autoChannel_t {
-		CH_MODE = 0,
+		CH_MODE = 0, // note scicoslab channels set mode, left, right, front, back order
+		CH_LEFT,     // this enum must match this
+		CH_RIGHT,
+		CH_FRONT,
+		CH_BACK,
 		CH_ROLL,
 		CH_PITCH,
 		CH_YAW,
-		CH_THRUST,
-		CH_LEFT,
-		CH_RIGHT,
-		CH_FRONT,
-		CH_BACK
+		CH_THRUST
 	};
 
 	class Bridge: public Block {
@@ -158,27 +158,38 @@ public:
 				_thrustMix(_thrustMixMin), _rollMix(0), _yawMix(0),
 				_pitchMix(0), _mixOffsetWeight(0), _mixRemoteWeight(0),
 				_attOffsetX(0), _attOffsetY(0), _attOffsetZ(0) {
+
+		_hal->rc[CH_MODE]->readRadio();
+		//_hal->debug->printf_P(PSTR("normalized mode: %f"), _hal->rc[chMode]->getNormalized());
+
+		// manual
+		if (_hal->rc[CH_MODE]->getPosition() > 0) {
+			_mixRemoteWeight = 1;
+		} else { // auto
+			_mixRemoteWeight = 0;
+		}
+
 		/*
 		 * allocate radio channels
 		 */
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7, 45));
+				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chRoll, PSTR("ROLL_"), APM_RC, 0, 1));
+				new AP_RcChannelSimple(k_chRoll, PSTR("ROLL_"), APM_RC, 0));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chPitch, PSTR("PITCH_"), APM_RC, 1, 1));
+				new AP_RcChannelSimple(k_chPitch, PSTR("PITCH_"), APM_RC, 1));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chYaw, PSTR("YAW_"), APM_RC, 2, 1));
+				new AP_RcChannelSimple(k_chYaw, PSTR("YAW_"), APM_RC, 2));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chThr, PSTR("THRUST_"), APM_RC, 3, 1));
+				new AP_RcChannelSimple(k_chThr, PSTR("THRUST_"), APM_RC, 3));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chLeft, PSTR("LEFT_"), APM_RC, 0, 1));
+				new AP_RcChannelSimple(k_chLeft, PSTR("LEFT_"), APM_RC, 0));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chRight, PSTR("RIGHT_"), APM_RC, 1, 1));
+				new AP_RcChannelSimple(k_chRight, PSTR("RIGHT_"), APM_RC, 1));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chFront, PSTR("FRONT_"), APM_RC, 2, 1));
+				new AP_RcChannelSimple(k_chFront, PSTR("FRONT_"), APM_RC, 2));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chBack, PSTR("BACK_"), APM_RC, 3, 1));
+				new AP_RcChannelSimple(k_chBack, PSTR("BACK_"), APM_RC, 3));
 
 		/*
 		 * position loop

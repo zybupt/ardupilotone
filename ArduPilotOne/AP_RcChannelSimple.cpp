@@ -13,6 +13,7 @@
 #include <avr/eeprom.h>
 #include "AP_RcChannelSimple.h"
 #include <AP_Common.h>
+#include <HardwareSerial.h>
 
 AP_RcChannelSimple::AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name, APM_RC_Class & rc, const uint8_t & ch,
 			const uint16_t & pwmMin, 
@@ -63,12 +64,13 @@ AP_RcChannelSimple::setPwm(uint16_t pwm)
 
 	// apply deadzone
 	_pwm = (abs(_pwm - pwmNeutral) < pwmDeadZone) ? uint16_t(pwmNeutral) : _pwm;
+	//Serial.printf("pwm after deadzone: %d\n", _pwm);
 
 	// apply saturation
 	if (_pwm > pwmMax) _pwm = pwmMax;
 	if (_pwm < pwmMin) _pwm = pwmMin;
 
-	//Serial.printf("pwm after deadzone: %d\n", _pwm);
+	Serial.print("ch: "); Serial.print(ch); Serial.print(" pwm: "); Serial.println(pwm);
 	_rc.OutputCh(ch,_pwm);
 }
 
