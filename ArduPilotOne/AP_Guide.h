@@ -102,6 +102,7 @@ public:
 		{
 			AP_MavlinkCommand home(0);
 			headingCommand = -home.bearingTo(_navigator->getLat_degInt(),_navigator->getLon_degInt());
+			_hal->debug->printf_P(PSTR("going home: bearing: %f\n"),headingCommand);
 		}
 		else
 		{
@@ -109,9 +110,9 @@ public:
 					_navigator->getLat_degInt(),_navigator->getLon_degInt())*0; // crosstrack gain
 			if (temp > 30*deg2Rad) temp = 30*deg2Rad;
 			if (temp < -30*deg2Rad) temp = -30*deg2Rad;
-			float bearing = previousCommand.bearingTo(command);
+			float bearing = -previousCommand.bearingTo(command);
 			headingCommand = bearing + temp;
-			_hal->debug->printf_P(PSTR("bearing: %f cross track: %f command heading: %f\n"),
+			_hal->debug->printf_P(PSTR("navigating: bearing: %f cross track: %f command heading: %f\n"),
 					bearing, AP_MavlinkCommand::crossTrack(previousCommand,command,
 							_navigator->getLat_degInt(),_navigator->getLon_degInt()), headingCommand);
 		}
