@@ -23,8 +23,8 @@
 #include "AP_Navigator.h"
 #include <AP_Common.h>
 #include <AP_Vector.h>
-
 #include "AP_MavlinkCommand.h"
+#include "constants.h"
 
 namespace apo {
 
@@ -63,37 +63,8 @@ class MavlinkGuide: public AP_Guide {
 public:
 	MavlinkGuide(AP_Navigator * navigator, AP_HardwareAbstractionLayer * hal) :
 		AP_Guide(navigator,hal),_rangeFinderFront(), _rangeFinderBack(),
-		 _rangeFinderLeft(), _rangeFinderRight(),
-		_prevCommand(0), _nextCommand(1) {
-
-		// previous waypoint default
-		/*
-		_prevCommand.setCommand(MAV_CMD_NAV_WAYPOINT);
-		_prevCommand.setFrame(MAV_FRAME_GLOBAL);
-		_prevCommand.setAlt(0);
-		_prevCommand.setLat(0);
-		_prevCommand.setLon(0);
-		_prevCommand.setAutocontinue(true);
-		_prevCommand.setParam1(0);
-		_prevCommand.setParam2(0);
-		_prevCommand.setParam3(0);
-		_prevCommand.setParam4(0);
-		*/
-
-		// next waypoint default
-		/*
-		_prevCommand.setCommand(MAV_CMD_NAV_WAYPOINT);
-		_prevCommand.setFrame(MAV_FRAME_GLOBAL);
-		_prevCommand.setAlt(0);
-		_prevCommand.setLat(0);
-		_prevCommand.setLon(1);
-		_prevCommand.setAutocontinue(true);
-		_prevCommand.setParam1(0);
-		_prevCommand.setParam2(0);
-		_prevCommand.setParam3(0);
-		_prevCommand.setParam4(0);
-		*/
-
+		 _rangeFinderLeft(), _rangeFinderRight()
+	{
 
 		for (int i = 0; i < _hal->rangeFinders.getSize(); i++) {
 			RangeFinder * rF = _hal->rangeFinders[i];
@@ -105,7 +76,7 @@ public:
 			else if (rF->orientation_x == -1 && rF->orientation_y == 0
 					&& rF->orientation_z == 0)
 				_rangeFinderBack = rF;
-			else if (rF->orientation_x == 0 && rF->orientation_y == 1
+			else if (rF->orientation_x == 0      && rF->orientation_y == 1
 					&& rF->orientation_z == 0)
 				_rangeFinderRight = rF;
 			else if (rF->orientation_x == 0 && rF->orientation_y == -1
@@ -116,16 +87,35 @@ public:
 	}
 
 	virtual void update() {
-		//_hal->debug->println_P(PSTR("guide loop"));
+		_hal->debug->printf_P(PSTR("guide loop, number: %d, current index: %d, previous index: %d\n"),
+				AP_MavlinkCommand::number.get(),
+				AP_MavlinkCommand::currentIndex.get(),
+				AP_MavlinkCommand::previousIndex());
 
-		// TODO, setting to a fixed value for testing with the car right now
-		float temp = crossTrack()*0; // crosstrack gain
-		if (temp > 30*M_PI/180) temp = 30*M_PI/180;
-		if (temp < -30*M_PI/180) temp = -30*M_PI/180;
-		float bearing = _prevCommand.bearingTo(_nextCommand);
-		headingCommand = bearing + temp;
-		_hal->debug->printf_P(PSTR("bearing: %f cross track: %f command heading: %f\n"),
-				bearing, crossTrack(), headingCommand);
+
+		AP_MavlinkCommand command = AP_MavlinkCommand(AP_MavlinkCommand::currentIndex);
+		AP_MavlinkCommand previousCommand = AP_MavlinkCommand(AP_MavlinkCommand::previousIndex());
+
+		// if we don't have enough waypoint for cross track calcs
+		// go home
+		if (AP_MavlinkCommand::number == 1)
+		{
+			AP_MavlinkCommand home(0);
+			headingCommand = -home.bearingTo(_navigator->getLat_degInt(),_navigator->getLon_degInt());
+		}
+		else
+		{
+			float temp = AP_MavlinkCommand::crossTrack(previousCommand,command,
+					_navigator->getLat_degInt(),_navigator->getLon_degInt())*0; // crosstrack gain
+			if (temp > 30*deg2Rad) temp = 30*deg2Rad;
+			if (temp < -30*deg2Rad) temp = -30*deg2Rad;
+			float bearing = previousCommand.bearingTo(command);
+			headingCommand = bearing + temp;
+			_hal->debug->printf_P(PSTR("bearing: %f cross track: %f command heading: %f\n"),
+					bearing, AP_MavlinkCommand::crossTrack(previousCommand,command,
+							_navigator->getLat_degInt(),_navigator->getLon_degInt()), headingCommand);
+		}
+
 		groundSpeedCommand = 5;
 
 		// TODO : calculate pN,pE,pD from home and gps coordinates
@@ -159,37 +149,19 @@ public:
 		}
 	}
 
-	//calculates cross track of a current location
-	float crossTrack() {
-		float d = _prevCommand.distanceTo(_navigator->latDegInt,_navigator->lonDegInt);
-		float bCurrent = _prevCommand.bearingTo(_navigator->latDegInt,_navigator->lonDegInt);
-		float bNext = _prevCommand.bearingTo(_nextCommand);
-		return asin(sin(d/rEarth) * sin(bCurrent - bNext)) * rEarth;
-	}
-
-	// calculates along  track distance of a current location
-	float alongTrack() {
-		float dXt = crossTrack();
-		float d = _prevCommand.distanceTo(_navigator->latDegInt,_navigator->lonDegInt);
-		return acos(cos(d / rEarth) / cos(dXt / rEarth)) * rEarth;
-	}
-
 	void nextCommand() {
-		// if command index is exceeded, return home and repeat the mission
-		_prevCommand = AP_MavlinkCommand(_cmdIndex);
-		if (_cmdIndex++ > _cmdNum) _cmdIndex = 0;
-		_nextCommand = AP_MavlinkCommand(_cmdIndex);
+		AP_MavlinkCommand::nextCommand();
 	}
 
-	void handleCommand()
+	void handleCommand(AP_MavlinkCommand command, AP_MavlinkCommand previousCommand)
 	{
 		// TODO handle more commands
-		switch(_nextCommand.getCommand()) {
+		switch(command.getCommand()) {
 		case MAV_CMD_NAV_WAYPOINT:
 		{
 			// if within radius, increment
-			float d = _prevCommand.distanceTo(_navigator->latDegInt,_navigator->lonDegInt);
-			if (d < _nextCommand.getRadius())
+			float d = previousCommand.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt());
+			if (d < command.getRadius())
 			{
 				nextCommand();
 			}
@@ -236,8 +208,6 @@ private:
 	RangeFinder * _rangeFinderBack;
 	RangeFinder * _rangeFinderLeft;
 	RangeFinder * _rangeFinderRight;
-	AP_MavlinkCommand _prevCommand;
-	AP_MavlinkCommand _nextCommand;
 };
 float AP_Guide::rEarth = 6371000;
 

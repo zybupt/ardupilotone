@@ -71,25 +71,31 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	/*
 	 * Look for valid initial state
 	 */
-	AP_MavlinkCommand home(0);
 	while (1) {
 		delay(1000);
 		if (hal->mode() == MODE_LIVE) {
-			hal->debug->println_P(PSTR("waiting for gps to initialize"));
-			if (!(hal->gps) | (hal->gps->fix)) {
-				// set navigator position
+			if (!(hal->gps) | (hal->gps->status() == GPS::GPS_OK)) {
+				_hal->gps->update();
+				_navigator->update(0);
 				break;
 			}
+			else hal->debug->println_P(PSTR("waiting for gps to initialize"));
 		} else if(hal->mode() == MODE_HIL_CNTL){ // hil
-			hal->hil->receive();
-			home.setAlt(_navigator->altInt);
-			break;
+			_hal->hil->receive();
+			if (_navigator->getTimeStamp() != 0)
+			{
+				break;
+			}
+			else hal->debug->println_P(PSTR("waiting for hil packet"));
 		}
 	}
-
-
-	home.setLat(_navigator->latDeg()); // units
-	home.setLon(_navigator->lonDeg());
+	AP_MavlinkCommand home(0);
+	home.setAlt(_navigator->getAlt());
+	home.setLat(_navigator->getLat());
+	home.setLon(_navigator->getLon());
+	home.save();
+	_hal->debug->printf_P(PSTR("home lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
+	delay(5000);
 
 	/*
 	 * Attach loops
@@ -177,8 +183,8 @@ void ArduPilotOne::callback2(void * data) {
 	if (apo->hal()->compass)
 	{
 		apo->hal()->debug->printf_P(PSTR("compass\n"));
-		apo->hal()->compass->calculate(apo->navigator()->roll,
-				apo->navigator()->pitch);
+		apo->hal()->compass->calculate(apo->navigator()->getRoll(),
+				apo->navigator()->getPitch());
 	}
 
 	/*
@@ -261,6 +267,11 @@ void ArduPilotOne::callback4(void * data) {
 void setup() {
 
 	using namespace apo;
+
+	/*
+	 * Load all parameters
+	 */
+	AP_Var::load_all();
 
 	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(halMode,board,vehicle);
 
@@ -378,15 +389,12 @@ void setup() {
 		Serial1.begin(57600, 128, 128);
 		hal->hil = new MavlinkComm(&Serial1,navigator,guide,controller,hal);
 	}
-	Serial.println("debug line");
-	Serial1.println("gps/hil line");
-	Serial3.println("gcs line");
 
 	/*
 	 * Start the autopilot
 	 */
-	Serial.println_P(PSTR("initializing ArduPilotOne"));
-	Serial.printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
+	hal->debug->printf_P(PSTR("initializing ArduPilotOne\n"));
+	hal->debug->printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
 	apoGlobal = new apo::ArduPilotOne(navigator,guide,controller,hal);
 }
 

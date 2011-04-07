@@ -16,6 +16,7 @@ private:
 	enum {
 		CH_MODE = 0, CH_STR, CH_THR
 	};
+	float headingCommand, yaw, groundSpeed, groundSpeedCommand;
 public:
 	CarController(AP_Var::Key cntrlKey, AP_Var::Key pidStrKey,
 			AP_Var::Key pidThrKey, AP_Navigator * nav, AP_Guide * guide,
@@ -34,15 +35,15 @@ public:
 
 		// steering control loop
 		addBlock(
-				new SumGain(&(_guide->headingCommand), &one, &(_nav->yaw),
+				new SumGain(&(headingCommand), &one, &(yaw),
 						&negativeOne));
 		addBlock(new Pid(pidStrKey, PSTR("STR_"), 1, 0, 0, 0, 20));
 		addBlock(new ToServo(_hal->rc[CH_STR])); // index depends on order of channels pushed back into _hal->rc
 
 		// throttle control loop
 		addBlock(
-				new SumGain(&(_guide->groundSpeedCommand), &one,
-						&(_nav->groundSpeed), &negativeOne));
+				new SumGain(&groundSpeedCommand, &one, &groundSpeed,
+						&negativeOne));
 		addBlock(new Pid(pidThrKey, PSTR("THR_"), 0.1, 0, 0, 0, 20));
 		addBlock(new ToServo(_hal->rc[CH_THR]));
 	}
@@ -59,6 +60,10 @@ public:
 			//_hal->debug->println("manual");
 
 		} else { // auto
+			headingCommand = _guide->headingCommand;
+			yaw = _nav->getYaw();
+			groundSpeed = _nav->getGroundSpeed();
+			groundSpeedCommand = _guide->groundSpeedCommand;
 			AP_Controller::update(dt);
 			//_hal->debug->println("automode");
 		}

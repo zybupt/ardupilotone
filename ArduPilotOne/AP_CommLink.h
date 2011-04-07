@@ -119,24 +119,24 @@ public:
 
 		case MAVLINK_MSG_ID_ATTITUDE: {
 			mavlink_msg_attitude_send(_channel, timeStamp,
-					_navigator->roll, _navigator->pitch,
-					_navigator->yaw, _navigator->rollRate,
-					_navigator->pitchRate, _navigator->yawRate);
+					_navigator->getRoll(), _navigator->getPitch(),
+					_navigator->getYaw(), _navigator->getRollRate(),
+					_navigator->getPitchRate(), _navigator->getYawRate());
 			break;
 		}
 
 		case MAVLINK_MSG_ID_GLOBAL_POSITION: {
 			mavlink_msg_global_position_int_send(_channel,
-					_navigator->latDeg(), _navigator->lonDeg(),
-					_navigator->altM(), _navigator->vN,
-					_navigator->vE, _navigator->vD);
+					_navigator->getLat()*rad2Deg, _navigator->getLon()*rad2Deg,
+					_navigator->getAlt(), _navigator->getVN(),
+					_navigator->getVE(), _navigator->getVD());
 			break;
 		}
 
 		case MAVLINK_MSG_ID_GPS_RAW: {
 			mavlink_msg_gps_raw_send(_channel,timeStamp,3,
-					_navigator->latDeg(), _navigator->lonDeg(),_navigator->altM(), 0,0,
-					_navigator->groundSpeed,_navigator->yaw*180/M_PI);
+					_navigator->getLat()*rad2Deg, _navigator->getLon()*rad2Deg,_navigator->getAlt(), 0,0,
+					_navigator->getGroundSpeed(),_navigator->getYaw()*180/M_PI);
 			break;
 		}
 
@@ -304,6 +304,8 @@ private:
 
 	void _handleMessage(mavlink_message_t * msg) {
 
+	uint32_t timeStamp = micros();
+
 		switch (msg->msgid) {
 		//_hal->debug->printf_P(PSTR("message received: %d"), msg->msgid);
 
@@ -312,12 +314,12 @@ private:
 		mavlink_gps_raw_t packet;
 		mavlink_msg_gps_raw_decode(msg, &packet);
 
-		_navigator->setLatDeg(packet.lat);
-		_navigator->setLonDeg(packet.lon);
+		_navigator->setLat(packet.lat*deg2Rad);
+		_navigator->setLon(packet.lon*deg2Rad);
 		_navigator->setAlt(packet.alt);
-		//_navigator->yaw = packet.hdg*M_PI/180;
-		_navigator->groundSpeed = packet.v;
-		_navigator->airSpeed = packet.v;
+		//_navigator->setYaw(packet.hdg*M_PI/180);
+		_navigator->setGroundSpeed(packet.v);
+		_navigator->setAirSpeed(packet.v);
 		//_hal->debug->printf_P(PSTR("received hil gps raw packet\n"));
 		/*
 		_hal->debug->printf_P(PSTR("received lat: %f deg\tlon: %f deg\talt: %f m\n"),
@@ -334,12 +336,13 @@ private:
 		mavlink_msg_attitude_decode(msg, &packet);
 
 		// set dcm hil sensor
-		_navigator->roll = packet.roll;
-		_navigator->pitch = packet.pitch;
-		_navigator->yaw = packet.yaw;
-		_navigator->rollRate = packet.rollspeed;
-		_navigator->pitchRate = packet.pitchspeed;
-		_navigator->yawRate = packet.yawspeed;
+		_navigator->setTimeStamp(timeStamp);
+		_navigator->setRoll(packet.roll);
+		_navigator->setPitch(packet.pitch);
+		_navigator->setYaw(packet.yaw);
+		_navigator->setRollRate(packet.rollspeed);
+		_navigator->setPitchRate(packet.pitchspeed);
+		_navigator->setYawRate(packet.yawspeed);
 		//_hal->debug->printf_P(PSTR("received hil attitude packet\n"));
 		break;
 	}
@@ -490,8 +493,8 @@ private:
 
 		// clear all waypoints
 		uint8_t type = 0; // ok (0), error(1)
-		AP_MavlinkCommand::number = 0;
-		AP_MavlinkCommand::number.save();
+		AP_MavlinkCommand::number.set_and_save(0);
+		AP_MavlinkCommand::currentIndex.set_and_save(0);
 
 		// send acknowledgement 3 times to makes sure it is received
 		for (int i = 0; i < 3; i++)
@@ -530,8 +533,7 @@ private:
 		if (packet.count > _cmdMax) {
 			packet.count = _cmdMax;
 		}
-		AP_MavlinkCommand::number = packet.count;
-		AP_MavlinkCommand::number.save();
+		AP_MavlinkCommand::number.set_and_save(packet.count);
 		_cmdTimeLastReceived = millis();
 		_receivingCmds = true;
 		_sendingCmds = false;

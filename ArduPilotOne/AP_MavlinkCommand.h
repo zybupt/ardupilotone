@@ -9,6 +9,7 @@
 #define AP_MAVLINKCOMMAND_H_
 
 #include "AP_Var_keys.h"
+#include "constants.h"
 
 class AP_MavlinkCommand {
 private:
@@ -155,7 +156,7 @@ public:
 	bool getCurrent() {
 		return (currentIndex.get() == getSeq());
 	}
-	float getLat() {
+	float getLatDeg() {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
@@ -167,7 +168,7 @@ public:
 			break;
 		}
 	}
-	void setLat(float val) {
+	void setLatDeg(float val) {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
@@ -178,7 +179,7 @@ public:
 			break;
 		}
 	}
-	float getLon() {
+	float getLonDeg() {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
@@ -190,7 +191,7 @@ public:
 			break;
 		}
 	}
-	void setLon(float val) {
+	void setLonDeg(float val) {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
@@ -200,6 +201,30 @@ public:
 		case MAV_FRAME_MISSION:
 			break;
 		}
+	}
+	void setLon(float val) {
+		setLonDeg(val*rad2Deg);
+	}
+	void setLon_degInt(int32_t val) {
+		setLonDeg(val/1.0e7);
+	}
+	void setLat_degInt(int32_t val) {
+		setLatDeg(val/1.0e7);
+	}
+	int32_t getLon_degInt() {
+		getLonDeg()*1e7;
+	}
+	int32_t getLat_degInt() {
+		getLatDeg()*1e7;
+	}
+	float getLon() {
+		return getLonDeg()*deg2Rad;
+	}
+	float getLat() {
+		return getLatDeg()*deg2Rad;
+	}
+	void setLat(float val) {
+		setLatDeg(val*rad2Deg);
 	}
 	float getAlt() {
 		switch (getFrame()) {
@@ -225,7 +250,7 @@ public:
 			setZ(val);
 			break;
 		case MAV_FRAME_LOCAL:
-			setZ(val - AP_MavlinkCommand(0).getLon());
+			setZ(val - AP_MavlinkCommand(0).getLonDeg());
 			break;
 		case MAV_FRAME_MISSION:
 			break;
@@ -255,11 +280,11 @@ public:
 	void setRelAlt(float val) {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
-		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
-			setX(val);
+			setZ(val + AP_MavlinkCommand(0).getAlt());
 			break;
+		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
 		case MAV_FRAME_LOCAL:
-			setX(val + AP_MavlinkCommand(0).getLon());
+			setZ(val);
 			break;
 		case MAV_FRAME_MISSION:
 			break;
@@ -268,6 +293,10 @@ public:
 
 	float getRadius() {
 		return getParam2();
+	}
+
+	void setRadius(float val) {
+		setParam2(val);
 	}
 
 	/**
@@ -301,7 +330,7 @@ public:
 		float deltaLon = getLon() - next.getLon();
 		Serial.print("Lon: "); Serial.println(getLon());
 		Serial.print("nextLon: "); Serial.println(next.getLon());
-		Serial.print("deltaLon * 1e7: "); Serial.println(deltaLon*1e7);
+		Serial.print("deltaLonDeg * 1e7: "); Serial.println(deltaLon*rad2DegInt);
 		return atan2(sin(deltaLon)*cos(next.getLat()),
 				cos(getLat())*sin(next.getLat()) -
 				sin(getLat())*cos(next.getLat())*cos(deltaLon));
@@ -309,14 +338,14 @@ public:
 
 	/**
 	 * Bearing form this command to a gps coordinate in integer units
-	 * @param lat latitude in degrees E-7
-	 * @param lon longitude in degrees E-7
+	 * @param latDegInt latitude in degrees E-7
+	 * @param lonDegInt longitude in degrees E-7
 	 * @return
 	 */
-	float bearingTo(int32_t lat, int32_t lon) {
+	float bearingTo(int32_t latDegInt, int32_t lonDegInt) {
 		// have to be careful to maintain the precision of the gps coordinate
-		float deltaLon = (lon - rad2DegInt*getLon())/rad2DegInt;
-		float nextLat = lat/rad2DegInt;
+		float deltaLon = (lonDegInt - getLon_degInt())*degInt2Rad;
+		float nextLat = latDegInt*degInt2Rad;
 		return atan2(sin(deltaLon)*cos(nextLat), cos(getLat())*sin(nextLat) -
 				sin(getLat())*cos(nextLat)*cos(deltaLon));
 	}
@@ -337,17 +366,46 @@ public:
 
 	/**
 	 * Distance to a gps coordinate in integer units
-	 * @param lat latitude in degrees E-7
-	 * @param lon longitude in degrees E-7
+	 * @param latDegInt latitude in degrees E-7
+	 * @param lonDegInt longitude in degrees E-7
 	 * @return The distance in meters.
 	 */
-	float distanceTo(int32_t lat, int32_t lon) {
-		float sinDeltaLat2 = sin((lat - rad2DegInt*getLat())/rad2DegInt/2);
-		float sinDeltaLon2 = sin((lon - rad2DegInt*getLon())/rad2DegInt/2);
+	float distanceTo(int32_t lat_degInt, int32_t lon_degInt) {
+		float sinDeltaLat2 = sin((lat_degInt - getLat_degInt())*degInt2Rad/2);
+		float sinDeltaLon2 = sin((lon_degInt - getLon_degInt())*degInt2Rad/2);
 		float a = sinDeltaLat2*sinDeltaLat2 +
-				cos(getLat())*cos(lat/rad2DegInt)*sinDeltaLon2*sinDeltaLon2;
+				cos(getLat())*cos(lat_degInt*degInt2Rad)*sinDeltaLon2*sinDeltaLon2;
 		float c = 2*atan2(sqrt(a),sqrt(1-a));
 		return rEarth*c;
+	}
+
+	static uint8_t previousIndex() {
+		// find previous waypoint, TODO, handle non-nav commands
+		int16_t prevIndex = int16_t(currentIndex) -1 ;
+		if (prevIndex < 0) prevIndex = 0;
+		return (uint8_t)prevIndex;
+	}
+
+	static void nextCommand() {
+		// find previous waypoint, TODO, handle non-nav commands
+		int16_t nextIndex = int16_t(currentIndex) + 1 ;
+		if (nextIndex > number) nextIndex = 0;
+		currentIndex = (uint8_t) nextIndex;
+	}
+
+	//calculates cross track of a current location
+	static float crossTrack(AP_MavlinkCommand previous, AP_MavlinkCommand current, int32_t lat_degInt, int32_t lon_degInt) {
+		float d = previous.distanceTo(lat_degInt,lon_degInt);
+		float bCurrent = previous.bearingTo(lat_degInt,lon_degInt);
+		float bNext = previous.bearingTo(current);
+		return asin(sin(d/rEarth) * sin(bCurrent - bNext)) * rEarth;
+	}
+
+	// calculates along  track distance of a current location
+	static float alongTrack(AP_MavlinkCommand previous, AP_MavlinkCommand current, int32_t lat_degInt, int32_t lon_degInt) {
+		float dXt = crossTrack(previous,current,lat_degInt,lon_degInt);
+		float d = previous.distanceTo(lat_degInt,lon_degInt);
+		return acos(cos(d / rEarth) / cos(dXt / rEarth)) * rEarth;
 	}
 
 	static AP_Uint8 number;
@@ -358,7 +416,7 @@ public:
 	static float rad2DegInt;
 };
 AP_Uint8 AP_MavlinkCommand::number = 1;
-AP_Uint8 AP_MavlinkCommand::currentIndex = 1;
+AP_Uint8 AP_MavlinkCommand::currentIndex = 0;
 float AP_MavlinkCommand::rad2DegInt = 1e7*rad2Deg;
 float AP_MavlinkCommand::rad2Deg = 180/M_PI;
 float AP_MavlinkCommand::rEarth = 6371000;
