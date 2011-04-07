@@ -19,7 +19,7 @@ apo::halMode_t halMode = apo::MODE_HIL_CNTL;
 apo::board_t board = apo::BOARD_ARDUPILOTMEGA;
 
 // select from, VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE
-apo::vehicle_t vehicle = apo::VEHICLE_CAR;
+apo::vehicle_t vehicle = apo::VEHICLE_QUAD;
 
 //---------ADVANCED SECTION ----------------//
 

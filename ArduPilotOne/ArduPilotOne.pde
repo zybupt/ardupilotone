@@ -71,6 +71,7 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	/*
 	 * Look for valid initial state
 	 */
+	AP_MavlinkCommand home(0);
 	while (1) {
 		delay(1000);
 		if (hal->mode() == MODE_LIVE) {
@@ -79,14 +80,16 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 				// set navigator position
 				break;
 			}
-		} else { // hil
+		} else if(hal->mode() == MODE_HIL_CNTL){ // hil
 			hal->hil->receive();
+			home.setAlt(_navigator->altInt);
 			break;
-			//if (_navigator->latRad()!=0) break;
 		}
 	}
-	AP_MavlinkCommand home(0);
-	home.setLat(_navigator->latRad()); // units
+
+
+	home.setLat(_navigator->latDeg()); // units
+	home.setLon(_navigator->lonDeg());
 
 	/*
 	 * Attach loops

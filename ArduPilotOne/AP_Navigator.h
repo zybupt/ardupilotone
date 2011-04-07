@@ -21,6 +21,8 @@
 
 #include "AP_HardwareAbstractionLayer.h"
 #include "AP_IMU.h"
+#include "AP_MavlinkCommand.h"
+#include "constants.h"
 
 namespace apo {
 
@@ -181,11 +183,13 @@ public:
 				vD = _hal->gps->ground_speed * rot.b.z;
 			}
 
-			// XXX this is just a hack for testing
+
 			// need to use lat/lon and convert
-			pN += vN*dt;
-			pE += vE*dt;
-			pD += vD*dt;
+
+			AP_MavlinkCommand home(0);
+			pN = (latDeg() - home.getLat())/rEarth;
+			pE = (lonDeg() - home.getLon())*cos(home.getLat())/rEarth;
+			pD = -(altM() - home.getAlt());
 
 			/*
 			 * accel/gyro debug

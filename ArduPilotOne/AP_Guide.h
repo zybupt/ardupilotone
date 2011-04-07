@@ -101,9 +101,9 @@ public:
 		groundSpeedCommand = 5;
 
 		// TODO : calculate pN,pE,pD from home and gps coordinates
-		pNCmd = 1;
-		pECmd = 2;
-		pDCmd = -3;
+		pNCmd = 0;
+		pECmd = 0;
+		pDCmd = 0;
 
 
 		// process mavlink commands
