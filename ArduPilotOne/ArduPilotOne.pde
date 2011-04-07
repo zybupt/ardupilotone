@@ -69,6 +69,26 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 			_navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
 
 	/*
+	 * Look for valid initial state
+	 */
+	while (1) {
+		delay(1000);
+		if (hal->mode() == MODE_LIVE) {
+			hal->debug->println_P(PSTR("waiting for gps to initialize"));
+			if (!(hal->gps) | (hal->gps->fix)) {
+				// set navigator position
+				break;
+			}
+		} else { // hil
+			hal->hil->receive();
+			break;
+			//if (_navigator->latRad()!=0) break;
+		}
+	}
+	AP_MavlinkCommand home(0);
+	home.setLat(_navigator->latRad()); // units
+
+	/*
 	 * Attach loops
 	 */
 	Serial.println("attaching loops");
@@ -77,6 +97,7 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	subLoops().push_back(new Loop(loop3Rate, callback3, this));
 	subLoops().push_back(new Loop(loop4Rate, callback4, this));
 
+	hal->debug->println_P(PSTR("initialization complete"));
 }
 
 void ArduPilotOne::callback0(void * data) {
@@ -364,7 +385,6 @@ void setup() {
 	Serial.println_P(PSTR("initializing ArduPilotOne"));
 	Serial.printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
 	apoGlobal = new apo::ArduPilotOne(navigator,guide,controller,hal);
-	hal->debug->println_P(PSTR("initialization complete"));
 }
 
 void loop() {
