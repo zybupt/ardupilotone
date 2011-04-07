@@ -65,6 +65,36 @@ public:
 		AP_Guide(navigator,hal),_rangeFinderFront(), _rangeFinderBack(),
 		 _rangeFinderLeft(), _rangeFinderRight(),
 		_prevCommand(0), _nextCommand(1) {
+
+		// previous waypoint default
+		/*
+		_prevCommand.setCommand(MAV_CMD_NAV_WAYPOINT);
+		_prevCommand.setFrame(MAV_FRAME_GLOBAL);
+		_prevCommand.setAlt(0);
+		_prevCommand.setLat(0);
+		_prevCommand.setLon(0);
+		_prevCommand.setAutocontinue(true);
+		_prevCommand.setParam1(0);
+		_prevCommand.setParam2(0);
+		_prevCommand.setParam3(0);
+		_prevCommand.setParam4(0);
+		*/
+
+		// next waypoint default
+		/*
+		_prevCommand.setCommand(MAV_CMD_NAV_WAYPOINT);
+		_prevCommand.setFrame(MAV_FRAME_GLOBAL);
+		_prevCommand.setAlt(0);
+		_prevCommand.setLat(0);
+		_prevCommand.setLon(1);
+		_prevCommand.setAutocontinue(true);
+		_prevCommand.setParam1(0);
+		_prevCommand.setParam2(0);
+		_prevCommand.setParam3(0);
+		_prevCommand.setParam4(0);
+		*/
+
+
 		for (int i = 0; i < _hal->rangeFinders.getSize(); i++) {
 			RangeFinder * rF = _hal->rangeFinders[i];
 			if (rF == NULL)
@@ -94,10 +124,8 @@ public:
 		if (temp < -30*M_PI/180) temp = -30*M_PI/180;
 		float bearing = _prevCommand.bearingTo(_nextCommand);
 		headingCommand = bearing + temp;
-		/*
 		_hal->debug->printf_P(PSTR("bearing: %f cross track: %f command heading: %f\n"),
 				bearing, crossTrack(), headingCommand);
-		*/
 		groundSpeedCommand = 5;
 
 		// TODO : calculate pN,pE,pD from home and gps coordinates

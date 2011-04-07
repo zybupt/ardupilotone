@@ -299,11 +299,9 @@ public:
 	 */
 	float bearingTo(AP_MavlinkCommand next) {
 		float deltaLon = getLon() - next.getLon();
-		/*
 		Serial.print("Lon: "); Serial.println(getLon());
 		Serial.print("nextLon: "); Serial.println(next.getLon());
 		Serial.print("deltaLon * 1e7: "); Serial.println(deltaLon*1e7);
-		*/
 		return atan2(sin(deltaLon)*cos(next.getLat()),
 				cos(getLat())*sin(next.getLat()) -
 				sin(getLat())*cos(next.getLat())*cos(deltaLon));
