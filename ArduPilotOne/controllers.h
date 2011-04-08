@@ -156,7 +156,7 @@ public:
 		addBlock(new Sink(_cmdNorthTilt));
 
 		// east position error -> east tilt
-		addBlock(new SumGain(&(_guide->pECmd), &one, &(pE), &negativeOne));
+		addBlock(new SumGain(&(_guide->pECmd), &one, &(pE), &positiveOne));
 		addBlock(
 				new PidDFB(k_pidPE, PSTR("EAST_"), &(vE), PID_POS_P, PID_POS_I,
 						PID_POS_D, PID_POS_AWU, PID_POS_LIM));
@@ -200,6 +200,8 @@ public:
 				new PidDFB(k_pidYawRate, PSTR("YAWRATE_"), &(yawRate),
 						PID_YAWSPEED_P, PID_YAWSPEED_I, PID_YAWSPEED_D,
 						PID_YAWSPEED_AWU, PID_YAWSPEED_LIM));
+
+
 		addBlock(
 				new Pid(k_pidYaw, PSTR("YAW_"), PID_YAWPOS_P, PID_YAWPOS_I,
 						PID_YAWPOS_D, PID_YAWPOS_AWU, PID_YAWPOS_LIM));
@@ -220,114 +222,115 @@ public:
 		 */
 
 		// left
-		addBlock(new SumGain(&_thrustMix, &one)); //&_rollMix, &one, &_yawMix, &one));
+		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &one, &_yawMix, &one));
 		addBlock(new ToServo(_hal->rc[CH_LEFT]));
 
 		// right
-		addBlock(new SumGain(&_thrustMix, &one)); //&_rollMix, &negativeOne,
-		//&_yawMix, &one));
+		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &negativeOne,
+		&_yawMix, &one));
 		addBlock(new ToServo(_hal->rc[CH_RIGHT]));
 
 		// front
-		addBlock(new SumGain(&_thrustMix, &one)); // &_pitchMix, &one, &_yawMix,
-		//&negativeOne));
+		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &one, &_yawMix,
+		&negativeOne));
 		addBlock(new ToServo(_hal->rc[CH_FRONT]));
 
 		// back
-		addBlock(new SumGain(&_thrustMix, &one)); //&_pitchMix, &negativeOne,
-		//&_yawMix, &negativeOne));
+		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &negativeOne,
+		&_yawMix, &negativeOne));
 		addBlock(new ToServo(_hal->rc[CH_BACK]));
 
-		addBlock(new SumGain(&_thrustMix, &one));
-		addBlock(new ToServo(_hal->rc[CH_LEFT]));
+//		addBlock(new SumGain(&_thrustMix, &one));
+//		addBlock(new ToServo(_hal->rc[CH_LEFT]));
 	}
 
 	virtual void update(const float & dt) {
 
-		/*
-		 * position loop
-		 */
-		// north position error -> north tilt
+			/*
+			 * position loop
+			 */
+			// north position error -> north tilt
 
-		pN = _nav->getPN();
-		pE = _nav->getPE();
-		pD = _nav->getD();
+			pN = _nav->getPN();
+			pE = _nav->getPE();
+			pD = _nav->getD();
 
-		vN = _nav->getVN();
-		vE = _nav->getVE();
-		vD = _nav->getVD();
+			vN = _nav->getVN();
+			vE = _nav->getVE();
+			vD = _nav->getVD();
 
-		roll = _nav->getRoll();
-		pitch = _nav->getPitch();
-		yaw = _nav->getYaw();
-
-		pitchRate = _nav->getPitchRate();
-		rollRate = _nav->getRollRate();
-		yawRate = _nav->getYawRate();
-
-		_hal->rc[CH_THRUST]->setPwm(_hal->rc[CH_THRUST]->readRadio());
-		_thrustMix = _hal->rc[CH_THRUST]->getPosition();
-		_hal->debug->printf_P(PSTR("thrustMix: %f\n"), _thrustMix);
-
-		// read mode switch
-		//_hal->debug->println_P(PSTR("update loop"));
-		_hal->rc[CH_MODE]->setPwm(_hal->rc[CH_MODE]->readRadio());
-		_hal->debug->printf_P(PSTR("normalized mode: %f\n"),
-				_hal->rc[CH_MODE]->getPosition());
-
-		// manual
-		if (_hal->rc[CH_MODE]->getPosition() > 0) {
-
-			// read and set pwm
-			_hal->rc[CH_PITCH]->setPwm(_hal->rc[CH_PITCH]->readRadio());
-			_hal->rc[CH_ROLL]->setPwm(_hal->rc[CH_ROLL]->readRadio());
-			_hal->rc[CH_YAW]->setPwm(_hal->rc[CH_YAW]->readRadio());
-			_hal->rc[CH_THRUST]->setPwm(_hal->rc[CH_THRUST]->readRadio());
-
-			// read position
-			_cmdPitch = _hal->rc[CH_PITCH]->getPosition();
-			_cmdRoll = _hal->rc[CH_ROLL]->getPosition();
-			_cmdYaw = _hal->rc[CH_YAW]->getPosition();
-			_thrustMix = _hal->rc[CH_THRUST]->getPosition();
-
-			_mixRemoteWeight = 1;
-			_hal->debug->println("manual");
-		} else { // auto
-
-			headingCommand = _guide->headingCommand;
-			if (headingCommand > 180 * deg2Rad)
-				headingCommand -= 360 * deg2Rad;
-			if (headingCommand < -180 * deg2Rad)
-				headingCommand += 360 * deg2Rad;
+			roll = _nav->getRoll();
+			pitch = _nav->getPitch();
 			yaw = _nav->getYaw();
-			groundSpeed = _nav->getGroundSpeed();
-			groundSpeedCommand = _guide->groundSpeedCommand;
-			AP_Controller::update(dt);
-			//_hal->debug->println("automode");
+
+			pitchRate = _nav->getPitchRate();
+			rollRate = _nav->getRollRate();
+			yawRate = _nav->getYawRate();
+
+			_hal->rc[CH_THRUST]->setPwm(_hal->rc[CH_THRUST]->readRadio());
+			_thrustMix = _hal->rc[CH_THRUST]->getPosition();
+			_hal->debug->printf_P(PSTR("thrustMix: %f\n"), _thrustMix);
+
+			// read mode switch
+			//_hal->debug->println_P(PSTR("update loop"));
+			_hal->rc[CH_MODE]->setPwm(_hal->rc[CH_MODE]->readRadio());
+			_hal->debug->printf_P(PSTR("normalized mode: %f\n"),
+					_hal->rc[CH_MODE]->getPosition());
+
+			// manual
+			if (_hal->rc[CH_MODE]->getPosition() > 0) {
+
+				// read and set pwm
+				_hal->rc[CH_PITCH]->setPwm(_hal->rc[CH_PITCH]->readRadio());
+				_hal->rc[CH_ROLL]->setPwm(_hal->rc[CH_ROLL]->readRadio());
+				_hal->rc[CH_YAW]->setPwm(_hal->rc[CH_YAW]->readRadio());
+				_hal->rc[CH_THRUST]->setPwm(_hal->rc[CH_THRUST]->readRadio());
+
+				// read position
+				_cmdPitch = _hal->rc[CH_PITCH]->getPosition();
+				_cmdRoll = _hal->rc[CH_ROLL]->getPosition();
+				_cmdYaw = _hal->rc[CH_YAW]->getPosition();
+				_thrustMix = _hal->rc[CH_THRUST]->getPosition();
+
+				_mixRemoteWeight = 1;
+				//_hal->debug->println("manual");
+			} else { // auto
+
+				headingCommand = _guide->headingCommand;
+				if (headingCommand > 180 * deg2Rad)
+					headingCommand -= 360 * deg2Rad;
+				if (headingCommand < -180 * deg2Rad)
+					headingCommand += 360 * deg2Rad;
+				yaw = _nav->getYaw();
+				groundSpeed = _nav->getGroundSpeed();
+				groundSpeedCommand = _guide->groundSpeedCommand;
+				AP_Controller::update(dt);
+				_mixRemoteWeight = 0;
+				//_hal->debug->println("automode");
+
+			}
+
+			_hal->debug->printf_P(
+					PSTR("Position Loop: NorthTilt, EastTilt, ThrustMix: %f %f %f\n"),
+					_cmdNorthTilt, _cmdEastTilt, _thrustMix);
+			_hal->debug->printf_P(
+					PSTR("Position Loop: North, East, Down: %f %f %f\n"), pN,
+					pE, pD);
+			_hal->debug->printf_P(
+					PSTR("Attitude Loop: RollMix, PitchMix, YawMix: %f %f %f\n"),
+					_rollMix, _pitchMix, _yawMix);
+
+			_hal->debug->printf_P(PSTR("thrustMixTrim: %f thrustMix: %f\n"),
+					_thrustMixTrim, _thrustMix);
+
+			_hal->debug->printf_P(
+					PSTR("CH_LEFT, CH_RIGHT, CH_FRONT, CH_BACK: %f %f %f %f\n"),
+					_hal->rc[CH_LEFT]->getPosition(),
+					_hal->rc[CH_RIGHT]->getPosition(),
+					_hal->rc[CH_FRONT]->getPosition(),
+					_hal->rc[CH_BACK]->getPosition());
 
 		}
-
-		_hal->debug->printf_P(
-				PSTR("Position Loop: NorthTilt, EastTilt, ThrustMix: %f %f %f\n"),
-				_cmdNorthTilt, _cmdEastTilt, _thrustMix);
-		_hal->debug->printf_P(
-				PSTR("Position Loop: North, East, Down: %f %f %f\n"), pN,
-				pE, pD);
-		_hal->debug->printf_P(
-				PSTR("Attitude Loop: RollMix, PitchMix, YawMix: %f %f %f\n"),
-				_rollMix, _pitchMix, _yawMix);
-
-		_hal->debug->printf_P(PSTR("thrustMixTrim: %f thrustMix: %f\n"),
-				_thrustMixTrim, _thrustMix);
-
-		_hal->debug->printf_P(
-				PSTR("CH_LEFT, CH_RIGHT, CH_FRONT, CH_BACK: %f %f %f %f\n"),
-				_hal->rc[CH_LEFT]->getPosition(),
-				_hal->rc[CH_RIGHT]->getPosition(),
-				_hal->rc[CH_FRONT]->getPosition(),
-				_hal->rc[CH_BACK]->getPosition());
-
-	}
 
 	void initialize() {
 		//-----------------------------------------------------------------

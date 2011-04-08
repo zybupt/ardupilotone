@@ -33,6 +33,7 @@ namespace apo {
 const float one = 1.0;
 const float zero = 0.0;
 const float negativeOne = -1.0;
+const float positiveOne = 1.0;
 
 /// Controller class
 class AP_Controller {
