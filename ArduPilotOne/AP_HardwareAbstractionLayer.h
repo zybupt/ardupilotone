@@ -8,9 +8,15 @@
 #ifndef AP_HARDWAREABSTRACTIONLAYER_H_
 #define AP_HARDWAREABSTRACTIONLAYER_H_
 
-/**
- * DO NOT INCLUDE ANY HEADERS HERE!
- */
+#include "AP_ADC.h"
+#include "AP_IMU.h"
+#include "AP_GPS.h"
+#include "APM_BMP085.h"
+#include "AP_Compass.h"
+#include "AP_Common.h"
+#include "AP_RcChannelSimple.h"
+#include "AP_RangeFinder.h"
+
 class AP_ADC;
 class IMU;
 class GPS;

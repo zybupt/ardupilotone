@@ -28,6 +28,7 @@
 
 namespace apo {
 
+
 /// Guide class
 class AP_Guide {
 public:
@@ -166,6 +167,7 @@ public:
 
 	void nextCommand() {
 		AP_MavlinkCommand::nextCommand();
+		//_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 
 	void handleCommand(AP_MavlinkCommand command,

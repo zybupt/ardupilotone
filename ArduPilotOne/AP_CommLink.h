@@ -19,10 +19,8 @@
 #ifndef AP_CommLink_H
 #define AP_CommLink_H
 
-#include <AP_Common.h>
-#include "ArduPilotOne.h"
+#include "AP_HardwareAbstractionLayer.h"
 #include "AP_MavlinkCommand.h"
-
 
 namespace apo {
 
@@ -31,7 +29,8 @@ enum {
 };
 
 // forward declarations
-class ArduPilotOne;
+//class ArduPilotOne;
+//class AP_Controller;
 
 /// CommLink class
 class AP_CommLink {
@@ -167,8 +166,6 @@ public:
 
 		case MAVLINK_MSG_ID_WAYPOINT_ACK: {
 			sendText(SEVERITY_LOW, PSTR("waypoint ack"));
-
-			// decode
 			mavlink_waypoint_ack_t packet;
 			uint8_t type = 0; // ok (0), error(1)
 			mavlink_msg_waypoint_ack_send(_channel, _cmdDestSysId,
@@ -178,6 +175,12 @@ public:
 			_receivingCmds = false;
 			break;
 		}
+
+		case MAVLINK_MSG_ID_WAYPOINT_CURRENT: {
+			mavlink_msg_waypoint_current_send(_channel,AP_MavlinkCommand::currentIndex);
+			break;
+		}
+
 		default: {
 			char msg[50];
 			sprintf(msg, "autopilot sending unknown command with id: %d", id);

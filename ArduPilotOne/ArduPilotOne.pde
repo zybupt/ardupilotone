@@ -61,7 +61,7 @@ apo::ArduPilotOne * apoGlobal = NULL;
 
 namespace apo {
 
-class AP_CommLink;
+class AP_HardwareAbstractionLayer;
 
 ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller,
 		AP_HardwareAbstractionLayer * hal) :
@@ -196,7 +196,7 @@ void ArduPilotOne::callback2(void * data) {
 	 */
 	if (apo->hal()->compass)
 	{
-		apo->hal()->debug->printf_P(PSTR("compass\n"));
+		//apo->hal()->debug->printf_P(PSTR("compass\n"));
 		apo->hal()->compass->calculate(apo->navigator()->getRoll(),
 				apo->navigator()->getPitch());
 	}
@@ -205,7 +205,7 @@ void ArduPilotOne::callback2(void * data) {
 	 * read gps and correct position
 	 */
 	if (apo->hal()->gps) {
-		apo->hal()->debug->printf_P(PSTR("gps\n"));
+		//apo->hal()->debug->printf_P(PSTR("gps\n"));
 		apo->hal()->gps->update();
 
 		// debug
@@ -232,18 +232,16 @@ void ArduPilotOne::callback2(void * data) {
 	/*
 	 * navigator debug
 	 */
-	/*
 	 if (apo->navigator()) {
 		 apo->hal()->debug->printf_P(PSTR("roll: %f deg\tpitch: %f deg\tyaw: %f deg\n"),
-				 apo->navigator()->roll*rad2deg,
-				 apo->navigator()->pitch*rad2deg,
-				 apo->navigator()->yaw*rad2deg);
-		 apo->hal()->debug->printf_P(PSTR("lat: %f deg\tlon: %f deg\talt: %f deg\n"),
-				 apo->navigator()->latDeg(),
-				 apo->navigator()->lonDeg(),
-				 apo->navigator()->altM());
+				 apo->navigator()->getRoll()*rad2Deg,
+				 apo->navigator()->getPitch()*rad2Deg,
+				 apo->navigator()->getYaw()*rad2Deg);
+		 apo->hal()->debug->printf_P(PSTR("lat: %f deg\tlon: %f deg\talt: %f m\n"),
+				 apo->navigator()->getLat()*rad2Deg,
+				 apo->navigator()->getLon()*rad2Deg,
+				 apo->navigator()->getAlt());
 	 }
-	 */
 }
 
 void ArduPilotOne::callback3(void * data) {
@@ -330,10 +328,12 @@ void setup() {
 		hal->adc =  new AP_ADC_ADS7844;
 		hal->adc->Init();
 
+		/*
 		hal->debug->println_P(PSTR("initializing gps"));
 		AP_GPS_Auto gpsDriver(&Serial1,&(hal->gps));
 		hal->gps = &gpsDriver;
 		hal->gps->init();
+		*/
 
 		hal->debug->println_P(PSTR("initializing baro"));
 		hal->baro = new APM_BMP085_Class;

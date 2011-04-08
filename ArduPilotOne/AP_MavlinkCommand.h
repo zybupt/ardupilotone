@@ -403,7 +403,7 @@ public:
 	static uint8_t previousIndex() {
 		// find previous waypoint, TODO, handle non-nav commands
 		int16_t prevIndex = int16_t(currentIndex) -1 ;
-		if (prevIndex < 0) prevIndex = 0;
+		if (prevIndex < 0) prevIndex = number-1;
 		return (uint8_t)prevIndex;
 	}
 

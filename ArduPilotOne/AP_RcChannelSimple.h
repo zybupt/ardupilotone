@@ -7,9 +7,9 @@
 #define AP_RcChannelSimple_h
 
 #include <stdint.h>
-#include <APM_RC.h>
 #include <AP_Common.h>
 #include <AP_Var.h>
+#include "APM_RC.h"
 
 /// @class	AP_RcChannelSimple
 /// @brief	Object managing one RC channel

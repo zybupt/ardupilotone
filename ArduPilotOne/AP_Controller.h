@@ -22,11 +22,8 @@
 #include "AP_Navigator.h"
 #include "AP_Guide.h"
 #include "AP_HardwareAbstractionLayer.h"
-
-#include <AP_Common.h>
 #include <AP_Vector.h>
 #include <AP_Var.h>
-#include <APM_RC.h>
 
 namespace apo {
 

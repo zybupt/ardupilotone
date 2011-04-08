@@ -20,7 +20,6 @@
 #define AP_Navigator_H
 
 #include "AP_HardwareAbstractionLayer.h"
-#include "AP_IMU.h"
 #include "AP_MavlinkCommand.h"
 #include "constants.h"
 
@@ -78,7 +77,7 @@ public:
         return _alt_intM;
     }
 
-    int32_t getAlt() const
+    float getAlt() const
     {
         return _alt_intM / scale_m;
     }
@@ -330,7 +329,7 @@ public:
 		 *in a search engine for more information.
 		 *altInt contains the altitude in meters.
 		 */
-		_hal->debug->println_P(PSTR("nav loop"));
+		//_hal->debug->println_P(PSTR("nav loop"));
 		if (_hal->baro) {
 
 			if (_rangeFinderDown != NULL && _rangeFinderDown->distance <= 695)
@@ -372,14 +371,10 @@ public:
 			/*
 			 * accel/gyro debug
 			 */
-			/*
-			 Vector3f accel = _hal->imu()->get_accel();
-			 Vector3f gyro = _hal->imu()->get_gyro();
+			 Vector3f accel = _hal->imu->get_accel();
+			 Vector3f gyro = _hal->imu->get_gyro();
 			 Serial.printf_P(PSTR("accel: %f %f %f gyro: %f %f %f\n"),
 			 accel.x,accel.y,accel.z,gyro.x,gyro.y,gyro.z);
-			 }
-			 */
-
 		}
 	}
 };

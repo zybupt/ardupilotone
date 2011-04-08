@@ -2,7 +2,7 @@
 #define defaultControllers_H
 
 #include "AP_Controller.h"
-#include "AP_RcChannelSimple.h"
+#include "AP_HardwareAbstractionLayer.h"
 #include "AP_Var.h"
 #include <avr/pgmspace.h>
 #include "AP_Navigator.h"
