@@ -82,11 +82,19 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 			else hal->debug->println_P(PSTR("waiting for gps to initialize"));
 		} else if(hal->mode() == MODE_HIL_CNTL){ // hil
 			_hal->hil->receive();
-			if (_navigator->getTimeStamp() != 0)
+			if (_navigator->getTimeStamp() == 0)
 			{
 				break;
 			}
-			else hal->debug->println_P(PSTR("waiting for hil packet"));
+			else {
+				// give hil a chance to send some packets
+				for (int i=0;i<5;i++) {
+					hal->debug->println_P(PSTR("reading initial hil packets"));
+					delay(1000);
+				}
+				break;
+			}
+			hal->debug->println_P(PSTR("waiting for hil packet"));
 		}
 	}
 	AP_MavlinkCommand home(0);
