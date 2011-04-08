@@ -357,11 +357,13 @@ public:
 				setVN(_hal->gps->ground_speed * rot.b.x);
 				setVE(_hal->gps->ground_speed * rot.b.y);
 				setVE(_hal->gps->ground_speed * rot.b.z);
+				setLat_degInt(_hal->gps->latitude);
+				setLon_degInt(_hal->gps->longitude);
+				setAlt_intM(_hal->gps->altitude*10);
 			}
 
 
 			// need to use lat/lon and convert
-
 			AP_MavlinkCommand home(0);
 			setPN((getLat() - home.getLat())/rEarth);
 			setPE((getLon() - home.getLon())*cos(home.getLat())/rEarth);
