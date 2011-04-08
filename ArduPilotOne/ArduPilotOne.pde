@@ -68,6 +68,8 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	Loop(loop0Rate, callback0, this),
 			_navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
 
+	uint32_t timeStart = millis();
+
 	/*
 	 * Look for valid initial state
 	 */
@@ -79,9 +81,13 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 				if (hal->gps->status() == GPS::GPS_OK) {
 					_navigator->update(0);
 					break;
+				} else if (millis() - timeStart > 60000) { // start anyway in 1 minute
+					hal->gcs->sendText(SEVERITY_LOW,PSTR("run w/o gps status, in 5 s"));
+					delay(5000);
 				} else {
 					hal->debug->println_P(PSTR("waiting for gps to initialize"));
 					hal->gcs->sendText(SEVERITY_LOW,PSTR("waiting for gps to initialize"));
+					hal->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
 				}
 			} else { // no gps, can skip
 				break;
@@ -319,12 +325,10 @@ void setup() {
 		hal->adc =  new AP_ADC_ADS7844;
 		hal->adc->Init();
 
-		/*
 		hal->debug->println_P(PSTR("initializing gps"));
 		AP_GPS_Auto gpsDriver(&Serial1,&(hal->gps));
 		hal->gps = &gpsDriver;
 		hal->gps->init();
-		*/
 
 		hal->debug->println_P(PSTR("initializing baro"));
 		hal->baro = new APM_BMP085_Class;
