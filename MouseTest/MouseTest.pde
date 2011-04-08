@@ -9,12 +9,42 @@
 //
 // mouse_init - initialises the serial port for communication with the mouse sensor
 //
+
+void cspc() {
+  Serial.print(", ");
+}
+
+void Log_Write_PID(byte num_PID, int P, int I,int D, int output)
+{
+  DataFlash.WriteByte(HEAD_BYTE1);
+  DataFlash.WriteByte(HEAD_BYTE2);
+  DataFlash.WriteByte(LOG_PID_MSG);
+  DataFlash.WriteByte(num_PID);
+  DataFlash.WriteInt(P);
+  DataFlash.WriteInt(I);
+  DataFlash.WriteInt(D);
+  DataFlash.WriteInt(output);
+  DataFlash.WriteByte(END_BYTE);
+}
+
+float readEEPROM(int address) {
+  union floatStore {
+    byte floatByte[4];
+    float floatVal;
+  } floatOut;
+
+  for (int i = 0; i < 4; i++)
+    floatOut.floatByte[i] = EEPROM.read(address + i);
+  return floatOut.floatVal;
+}
+
+
 void mouse_init()
 {
     MOUSE_SERIAL.begin(MOUSE_SERIAL_BAUD);
 
     // load values from EEPROM
-    KP_MOUSE_ROLL = readEEPROM(KP_MOUSE_ROLL_ADR);            // 1 cm change in horizontal position will cause this angular change (in degrees)
+    KP_MOUSE_ROLL = readEEPROM.(KP_MOUSE_ROLL_ADR);            // 1 cm change in horizontal position will cause this angular change (in degrees)
     KI_MOUSE_ROLL = readEEPROM(KI_MOUSE_ROLL_ADR);
     KD_MOUSE_ROLL = readEEPROM(KD_MOUSE_ROLL_ADR);
     KP_MOUSE_PITCH = readEEPROM(KP_MOUSE_PITCH_ADR);              // 1 cm change in horizontal position will cause this angular change (in degrees)
