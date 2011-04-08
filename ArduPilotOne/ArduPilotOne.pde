@@ -79,14 +79,17 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 				_navigator->update(0);
 				break;
 			}
-			else hal->debug->println_P(PSTR("waiting for gps to initialize"));
+			else {
+				hal->debug->println_P(PSTR("waiting for gps to initialize"));
+				hal->gcs->sendText(SEVERITY_LOW,PSTR("waiting for gps to initialize"));
+			}
 		} else if(hal->mode() == MODE_HIL_CNTL){ // hil
 			_hal->hil->receive();
-			if (_navigator->getTimeStamp() != 0)
-			{
+			if (_navigator->getTimeStamp() != 0) {
 				// give hil a chance to send some packets
 				for (int i=0;i<5;i++) {
 					hal->debug->println_P(PSTR("reading initial hil packets"));
+					hal->gcs->sendText(SEVERITY_LOW,PSTR("reading initial hil packets"));
 					delay(1000);
 				}
 				break;
@@ -102,6 +105,7 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	_hal->debug->printf_P(PSTR("home before load lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
 	home.load();
 	_hal->debug->printf_P(PSTR("home after load lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
+	hal->gcs->sendText(SEVERITY_LOW,PSTR("start in 5 seconds"));
 	delay(5000);
 
 	/*

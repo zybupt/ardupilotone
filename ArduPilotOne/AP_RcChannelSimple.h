@@ -21,8 +21,8 @@ public:
 	AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name, APM_RC_Class & rc, const uint8_t & ch,
 			const uint16_t & pwmMin=1200, 
 			const uint16_t & pwmNeutral=1500, const uint16_t & pwmMax=1800,
-			const uint16_t & pwmDeadZone=10,
-			const bool & filter=false, const bool & reverse=false);
+			const uint16_t & pwmDeadZone=1,
+			const bool & filter=true, const bool & reverse=false);
 
 	// configuration
 	AP_Uint8 ch;
