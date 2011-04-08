@@ -37,14 +37,14 @@ public:
 		addBlock(
 				new SumGain(&(headingCommand), &one, &(yaw),
 						&negativeOne));
-		addBlock(new Pid(pidStrKey, PSTR("STR_"), 1, 0, 0, 0, 20));
+		addBlock(new Pid(pidStrKey, PSTR("STR_"), 0.5, 0, 0, 0, 10));
 		addBlock(new ToServo(_hal->rc[CH_STR])); // index depends on order of channels pushed back into _hal->rc
 
 		// throttle control loop
 		addBlock(
 				new SumGain(&groundSpeedCommand, &one, &groundSpeed,
 						&negativeOne));
-		addBlock(new Pid(pidThrKey, PSTR("THR_"), 0.1, 0, 0, 0, 20));
+		addBlock(new Pid(pidThrKey, PSTR("THR_"), 0.1, 0, 0, 0, 10));
 		addBlock(new ToServo(_hal->rc[CH_THR]));
 	}
 	virtual void update(const float & dt) {
@@ -61,6 +61,8 @@ public:
 
 		} else { // auto
 			headingCommand = _guide->headingCommand;
+			if (headingCommand > 180*deg2Rad) headingCommand -= 360*deg2Rad;
+			if (headingCommand < -180*deg2Rad) headingCommand += 360*deg2Rad;
 			yaw = _nav->getYaw();
 			groundSpeed = _nav->getGroundSpeed();
 			groundSpeedCommand = _guide->groundSpeedCommand;

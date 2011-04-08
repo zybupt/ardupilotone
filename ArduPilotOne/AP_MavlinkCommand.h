@@ -36,6 +36,7 @@ public:
 	AP_MavlinkCommand(uint16_t index) :
 		_seq(index), _data(k_commands+index) {
 		_data.load();
+		//Serial.print("x: "); Serial.println(_data.get().x);
 	}
 
 	/**
@@ -164,6 +165,7 @@ public:
 			break;
 		case MAV_FRAME_LOCAL:
 		case MAV_FRAME_MISSION:
+		default:
 			return 0;
 			break;
 		}
@@ -176,6 +178,7 @@ public:
 			break;
 		case MAV_FRAME_LOCAL:
 		case MAV_FRAME_MISSION:
+		default:
 			break;
 		}
 	}
@@ -187,6 +190,7 @@ public:
 			break;
 		case MAV_FRAME_LOCAL:
 		case MAV_FRAME_MISSION:
+		default:
 			return 0;
 			break;
 		}
@@ -199,6 +203,7 @@ public:
 			break;
 		case MAV_FRAME_LOCAL:
 		case MAV_FRAME_MISSION:
+		default:
 			break;
 		}
 	}
@@ -212,10 +217,10 @@ public:
 		setLatDeg(val/1.0e7);
 	}
 	int32_t getLon_degInt() {
-		getLonDeg()*1e7;
+		return getLonDeg()*1e7;
 	}
 	int32_t getLat_degInt() {
-		getLatDeg()*1e7;
+		return getLatDeg()*1e7;
 	}
 	float getLon() {
 		return getLonDeg()*deg2Rad;
@@ -236,6 +241,7 @@ public:
 			return getZ() + AP_MavlinkCommand(0).getAlt();
 			break;
 		case MAV_FRAME_MISSION:
+		default:
 			return 0;
 			break;
 		}
@@ -253,6 +259,7 @@ public:
 			setZ(val - AP_MavlinkCommand(0).getLonDeg());
 			break;
 		case MAV_FRAME_MISSION:
+		default:
 			break;
 		}
 	}
@@ -270,6 +277,7 @@ public:
 			return getZ();
 			break;
 		case MAV_FRAME_MISSION:
+		default:
 			return 0;
 			break;
 		}
@@ -327,13 +335,16 @@ public:
 	 * @return the bearing
 	 */
 	float bearingTo(AP_MavlinkCommand next) {
-		float deltaLon = getLon() - next.getLon();
+		float deltaLon = next.getLon() - getLon();
+		/*
 		Serial.print("Lon: "); Serial.println(getLon());
 		Serial.print("nextLon: "); Serial.println(next.getLon());
 		Serial.print("deltaLonDeg * 1e7: "); Serial.println(deltaLon*rad2DegInt);
-		return atan2(sin(deltaLon)*cos(next.getLat()),
+		*/
+		float bearing = atan2(sin(deltaLon)*cos(next.getLat()),
 				cos(getLat())*sin(next.getLat()) -
 				sin(getLat())*cos(next.getLat())*cos(deltaLon));
+		return bearing;
 	}
 
 	/**
@@ -346,8 +357,10 @@ public:
 		// have to be careful to maintain the precision of the gps coordinate
 		float deltaLon = (lonDegInt - getLon_degInt())*degInt2Rad;
 		float nextLat = latDegInt*degInt2Rad;
-		return atan2(sin(deltaLon)*cos(nextLat), cos(getLat())*sin(nextLat) -
+		float bearing = atan2(sin(deltaLon)*cos(nextLat), cos(getLat())*sin(nextLat) -
 				sin(getLat())*cos(nextLat)*cos(deltaLon));
+		if (bearing < 0) bearing += 2*M_PI;
+		return bearing;
 	}
 
 	/**
@@ -376,6 +389,14 @@ public:
 		float a = sinDeltaLat2*sinDeltaLat2 +
 				cos(getLat())*cos(lat_degInt*degInt2Rad)*sinDeltaLon2*sinDeltaLon2;
 		float c = 2*atan2(sqrt(a),sqrt(1-a));
+		/*
+		Serial.print("wp lat_degInt: "); Serial.println(getLat_degInt());
+		Serial.print("wp lon_degInt: "); Serial.println(getLon_degInt());
+		Serial.print("lat_degInt: "); Serial.println(lat_degInt);
+		Serial.print("lon_degInt: "); Serial.println(lon_degInt);
+		Serial.print("sinDeltaLat2: "); Serial.println(sinDeltaLat2);
+		Serial.print("sinDeltaLon2: "); Serial.println(sinDeltaLon2);
+		*/
 		return rEarth*c;
 	}
 
@@ -403,9 +424,10 @@ public:
 
 	// calculates along  track distance of a current location
 	static float alongTrack(AP_MavlinkCommand previous, AP_MavlinkCommand current, int32_t lat_degInt, int32_t lon_degInt) {
+		// ignores lat/lon since single prec.
 		float dXt = crossTrack(previous,current,lat_degInt,lon_degInt);
 		float d = previous.distanceTo(lat_degInt,lon_degInt);
-		return acos(cos(d / rEarth) / cos(dXt / rEarth)) * rEarth;
+		return dXt/tan(asin(dXt/d));
 	}
 
 	static AP_Uint8 number;

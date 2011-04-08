@@ -23,6 +23,7 @@ enum keys {
 	k_chPitch,
 	k_chYaw,
 	k_chThr,
+	k_guide,
 	// 200-256 reserved for commands
 	k_commands = 200
 };

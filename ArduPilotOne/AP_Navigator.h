@@ -90,22 +90,22 @@ public:
 
     float getLat() const
     {
-        return _lat_degInt / scale_deg;
+        return _lat_degInt * degInt2Rad;
     }
 
     void setLat(float _lat)
     {
-        this->_lat_degInt = _lat * scale_deg;
+        this->_lat_degInt = _lat * rad2DegInt;
     }
 
     float getLon() const
     {
-        return _lon_degInt / scale_deg;
+        return _lon_degInt * degInt2Rad;
     }
 
     void setLon(float _lon)
     {
-        this->_lon_degInt = _lon * scale_deg;
+        this->_lon_degInt = _lon * rad2DegInt;
     }
 
     float getVD() const

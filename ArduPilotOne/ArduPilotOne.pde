@@ -94,7 +94,9 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	home.setLat(_navigator->getLat());
 	home.setLon(_navigator->getLon());
 	home.save();
-	_hal->debug->printf_P(PSTR("home lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
+	_hal->debug->printf_P(PSTR("home before load lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
+	home.load();
+	_hal->debug->printf_P(PSTR("home after load lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
 	delay(5000);
 
 	/*
@@ -362,7 +364,7 @@ void setup() {
 	/*
 	 * Guide
 	 */
-	AP_Guide * guide = new MavlinkGuide(navigator,hal);
+	AP_Guide * guide = new MavlinkGuide(k_guide,navigator,hal);
 
 	/*
 	 * Controller Initialization
