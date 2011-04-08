@@ -74,14 +74,17 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	while (1) {
 		delay(1000);
 		if (hal->mode() == MODE_LIVE) {
-			if (!(hal->gps) | (hal->gps->status() == GPS::GPS_OK)) {
+			if (_hal->gps) {
 				_hal->gps->update();
-				_navigator->update(0);
+				if (hal->gps->status() == GPS::GPS_OK) {
+					_navigator->update(0);
+					break;
+				} else {
+					hal->debug->println_P(PSTR("waiting for gps to initialize"));
+					hal->gcs->sendText(SEVERITY_LOW,PSTR("waiting for gps to initialize"));
+				}
+			} else { // no gps, can skip
 				break;
-			}
-			else {
-				hal->debug->println_P(PSTR("waiting for gps to initialize"));
-				hal->gcs->sendText(SEVERITY_LOW,PSTR("waiting for gps to initialize"));
 			}
 		} else if(hal->mode() == MODE_HIL_CNTL){ // hil
 			_hal->hil->receive();
@@ -309,6 +312,16 @@ void setup() {
 	DDRL |= B00000100; // set port L, pint 2 to output for the relay
 
 	/*
+	 * Initialize Comm Channels
+	 */
+	hal->debug->println_P(PSTR("initializing comm channels"));
+	if (hal->mode()==MODE_LIVE) {
+		Serial1.begin(38400, 128, 16); // gps
+	} else { // hil
+		Serial1.begin(57600, 128, 128);
+	}
+
+	/*
 	 * Sensor initialization
 	 */
 	if (hal->mode()==MODE_LIVE)
@@ -318,7 +331,9 @@ void setup() {
 		hal->adc->Init();
 
 		hal->debug->println_P(PSTR("initializing gps"));
-		hal->gps = new AP_GPS_MTK(&Serial1);
+		AP_GPS_Auto gpsDriver(&Serial1,&(hal->gps));
+		hal->gps = &gpsDriver;
+		hal->gps->init();
 
 		hal->debug->println_P(PSTR("initializing baro"));
 		hal->baro = new APM_BMP085_Class;
@@ -365,6 +380,7 @@ void setup() {
 		*/
 	}
 
+
 	/*
 	 * Navigator
 	 */
@@ -390,16 +406,10 @@ void setup() {
 	}
 
 	/*
-	 * Initialize Comm Channels
+	 * CommLinks
 	 */
-	hal->debug->println_P(PSTR("initializing comm channels"));
 	hal->gcs = new MavlinkComm(&Serial3,navigator,guide,controller,hal);
-	if (hal->mode()==MODE_LIVE) {
-		Serial1.begin(38400, 128, 16); // gps
-	} else { // hil
-		Serial1.begin(57600, 128, 128);
-		hal->hil = new MavlinkComm(&Serial1,navigator,guide,controller,hal);
-	}
+	hal->hil = new MavlinkComm(&Serial1,navigator,guide,controller,hal);
 
 	/*
 	 * Start the autopilot
