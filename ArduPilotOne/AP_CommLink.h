@@ -24,6 +24,10 @@
 
 namespace apo {
 
+class AP_Controller;
+class AP_Guide;
+class AP_HardwareAbstractionLayer;
+
 enum {
 	SEVERITY_LOW, SEVERITY_MED, SEVERITY_HIGH
 };

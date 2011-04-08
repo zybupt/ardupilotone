@@ -25,6 +25,8 @@
 #include <AP_Vector.h>
 #include "AP_MavlinkCommand.h"
 #include "constants.h"
+#include "AP_Guide.h"
+#include "AP_CommLink.h"
 
 namespace apo {
 
@@ -167,7 +169,7 @@ public:
 
 	void nextCommand() {
 		AP_MavlinkCommand::nextCommand();
-		//_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
+		_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 
 	void handleCommand(AP_MavlinkCommand command,
