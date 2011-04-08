@@ -5,14 +5,49 @@
  *      Author: vahuja
  */
 #include "Mouse.h"
+#include "Ardu.h"
+#include <EEPROM.h>
+#include <DataFlash.h>
+
+
+void writeEEPROM(float value, int address) {
+  union floatStore {
+    byte floatByte[4];
+    float floatVal;
+  } floatIn;
+
+  floatIn.floatVal = value;
+  for (int i = 0; i < 4; i++)
+    EEPROM.write(address + i, floatIn.floatByte[i]);
+}
+
 
 //
 // mouse_init - initialises the serial port for communication with the mouse sensor
 //
 
+// Write a Mouse Senor data packet
+void Log_Write_Mouse(int raw_x, int raw_y, int surface_quality, int expected_x, int expected_y, int x_cm, int y_cm)
+{
+  DataFlash.WriteByte(HEAD_BYTE1);
+  DataFlash.WriteByte(HEAD_BYTE2);
+  DataFlash.WriteByte(LOG_MOUSE_MSG);
+  DataFlash.WriteInt(raw_x);
+  DataFlash.WriteInt(raw_y);
+  DataFlash.WriteInt(surface_quality);
+  DataFlash.WriteInt(expected_x);
+  DataFlash.WriteInt(expected_y);
+  DataFlash.WriteInt(x_cm);
+  DataFlash.WriteInt(y_cm);
+  DataFlash.WriteByte(END_BYTE);
+}
+
+
 void cspc() {
   Serial.print(", ");
 }
+
+
 
 void Log_Write_PID(byte num_PID, int P, int I,int D, int output)
 {
@@ -26,6 +61,30 @@ void Log_Write_PID(byte num_PID, int P, int I,int D, int output)
   DataFlash.WriteInt(output);
   DataFlash.WriteByte(END_BYTE);
 }
+
+
+float readFloatSerial() {
+  byte index = 0;
+  byte timeout = 0;
+  char data[128] = "";
+
+  do {
+    if (SerAva() == 0) {
+      delay(10);
+      timeout++;
+    }
+    else {
+      data[index] = SerRea();
+      timeout = 0;
+      index++;
+    }
+  }
+  while ((data[constrain(index-1, 0, 128)] != ';') && (timeout < 5) && (index < 128));
+  return atof(data);
+}
+
+
+
 
 float readEEPROM(int address) {
   union floatStore {
@@ -44,7 +103,7 @@ void mouse_init()
     MOUSE_SERIAL.begin(MOUSE_SERIAL_BAUD);
 
     // load values from EEPROM
-    KP_MOUSE_ROLL = readEEPROM.(KP_MOUSE_ROLL_ADR);            // 1 cm change in horizontal position will cause this angular change (in degrees)
+    KP_MOUSE_ROLL = readEEPROM(KP_MOUSE_ROLL_ADR);            // 1 cm change in horizontal position will cause this angular change (in degrees)
     KI_MOUSE_ROLL = readEEPROM(KI_MOUSE_ROLL_ADR);
     KD_MOUSE_ROLL = readEEPROM(KD_MOUSE_ROLL_ADR);
     KP_MOUSE_PITCH = readEEPROM(KP_MOUSE_PITCH_ADR);              // 1 cm change in horizontal position will cause this angular change (in degrees)
