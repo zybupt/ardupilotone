@@ -24,7 +24,7 @@ apo::vehicle_t vehicle = apo::VEHICLE_CAR;
 //---------ADVANCED SECTION ----------------//
 
 // loop rates
-static const float loop0Rate = 150;
+static const float loop0Rate = 50;
 static const float loop1Rate = 20;
 static const float loop2Rate = 5;
 static const float loop3Rate = 1;

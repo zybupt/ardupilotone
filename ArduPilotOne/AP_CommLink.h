@@ -139,8 +139,25 @@ public:
 		case MAVLINK_MSG_ID_GPS_RAW: {
 			mavlink_msg_gps_raw_send(_channel,timeStamp,3,
 					_navigator->getLat()*rad2Deg, _navigator->getLon()*rad2Deg,_navigator->getAlt(), 0,0,
-					_navigator->getGroundSpeed(),_navigator->getYaw()*180/M_PI);
+					_navigator->getGroundSpeed(),_navigator->getYaw()*rad2Deg);
 			break;
+		}
+
+		case MAVLINK_MSG_ID_SCALED_IMU: {
+			/*
+			 * accel/gyro debug
+			 */
+			/*
+			 Vector3f accel = _hal->imu->get_accel();
+			 Vector3f gyro = _hal->imu->get_gyro();
+			 Serial.printf_P(PSTR("accel: %f %f %f gyro: %f %f %f\n"),
+			 accel.x,accel.y,accel.z,gyro.x,gyro.y,gyro.z);
+			 */
+			Vector3f accel = _hal->imu->get_accel();
+			Vector3f gyro = _hal->imu->get_gyro();
+			mavlink_msg_raw_imu_send(_channel,timeStamp,1000*accel.x,1000*accel.y,1000*accel.z,
+					1000*gyro.x,1000*gyro.y,1000*gyro.z,
+					_hal->compass->mag_x,_hal->compass->mag_y,_hal->compass->mag_z); // XXX THIS IS NOT SCALED FOR MAG
 		}
 
 		case MAVLINK_MSG_ID_RC_CHANNELS_SCALED: {

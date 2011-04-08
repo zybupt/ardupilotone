@@ -93,11 +93,13 @@ public:
 	}
 
 	virtual void update() {
+		/*
 		_hal->debug->printf_P(
 				PSTR("guide loop, number: %d, current index: %d, previous index: %d\n"),
 				AP_MavlinkCommand::number.get(),
 				AP_MavlinkCommand::currentIndex.get(),
 				AP_MavlinkCommand::previousIndex());
+				*/
 
 		AP_MavlinkCommand command = AP_MavlinkCommand(
 				AP_MavlinkCommand::currentIndex);
@@ -111,8 +113,10 @@ public:
 			headingCommand = home.bearingTo(_navigator->getLat_degInt(),
 					_navigator->getLon_degInt()) + 180*deg2Rad;
 			if (headingCommand > 360*deg2Rad) headingCommand -= 360*deg2Rad;
+			/*
 			_hal->debug->printf_P(PSTR("going home: bearing: %f distance: %f\n"),
 					headingCommand,home.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt()));
+					*/
 		} else {
 			// TODO wrong behavior if 0 selected as waypoint, says previous 0
 			float dXt = AP_MavlinkCommand::crossTrack(previousCommand,
@@ -130,9 +134,11 @@ public:
 			float distanceToNext = command.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt());
 			float segmentLength = previousCommand.distanceTo(command);
 			if (distanceToNext < command.getRadius()  || alongTrack > segmentLength) nextCommand();
+			/*
 			_hal->debug->printf_P(
 					PSTR("nav: bCurrent2Dest: %f\tdXt: %f\tcmdHeading: %f\tnextWpDistance: %f\talongTrack: %f\n"),
 					bearing * rad2Deg, dXt, headingCommand * rad2Deg, distanceToNext, alongTrack);
+					*/
 		}
 
 		groundSpeedCommand = _velocityCommand;

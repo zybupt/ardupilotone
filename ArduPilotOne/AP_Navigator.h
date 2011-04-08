@@ -300,7 +300,7 @@ public:
 		if (_hal->mode() == MODE_LIVE) {
 			if (_hal->adc)
 				_hal->imu = new AP_IMU_Oilpan(_hal->adc, _imuOffsetAddress);
-			if (_hal->imu && _hal->gps && _hal->compass)
+			if (_hal->imu)
 				_dcm = new AP_DCM(_hal->imu, _hal->gps, _hal->compass);
 		}
 		calibrate();
@@ -336,9 +336,10 @@ public:
 				setAlt(_rangeFinderDown->distance);
 
 			else {
-				float tmp = (_hal->baro->Press / 101325.0);
+				float tmp = (_hal->baro->Press/ 101325.0);
 				tmp = pow(tmp, 0.190295);
-				setAlt(44330 * (1.0 - tmp)); //sets the altitude in meters
+				//setAlt(44330 * (1.0 - tmp)); //sets the altitude in meters XXX wrong, baro reads 0 press
+				setAlt(0.0);
 			}
 		}
 
@@ -347,7 +348,7 @@ public:
 			setRoll(_dcm->roll);
 			setPitch(_dcm->pitch);
 			setYaw(_dcm->yaw);
-			setRoll(_dcm->get_gyro().x);
+			setRollRate(_dcm->get_gyro().x);
 			setPitchRate(_dcm->get_gyro().y);
 			setYawRate(_dcm->get_gyro().z);
 
@@ -371,10 +372,12 @@ public:
 			/*
 			 * accel/gyro debug
 			 */
+			/*
 			 Vector3f accel = _hal->imu->get_accel();
 			 Vector3f gyro = _hal->imu->get_gyro();
 			 Serial.printf_P(PSTR("accel: %f %f %f gyro: %f %f %f\n"),
 			 accel.x,accel.y,accel.z,gyro.x,gyro.y,gyro.z);
+			 */
 		}
 	}
 };

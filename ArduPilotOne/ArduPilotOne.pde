@@ -114,13 +114,14 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	/*
 	 * Attach loops
 	 */
-	Serial.println("attaching loops");
+	hal->debug->println_P(PSTR("attaching loops"));
 	subLoops().push_back(new Loop(loop1Rate, callback1, this));
 	subLoops().push_back(new Loop(loop2Rate, callback2, this));
 	subLoops().push_back(new Loop(loop3Rate, callback3, this));
 	subLoops().push_back(new Loop(loop4Rate, callback4, this));
 
-	hal->debug->println_P(PSTR("initialization complete"));
+	hal->debug->println_P(PSTR("running"));
+	hal->gcs->sendText(SEVERITY_LOW,PSTR("running"));
 }
 
 void ArduPilotOne::callback0(void * data) {
@@ -167,6 +168,16 @@ void ArduPilotOne::callback1(void * data) {
 		//apo->hal()->debug->println_P(PSTR("updating controller"));
 		apo->controller()->update(1./loop1Rate);
 	}
+	/*
+	char msg[50];
+	sprintf(msg, "c_hdg: %f, c_thr: %f", apo->guide()->headingCommand, apo->guide()->groundSpeedCommand);
+	apo->hal()->gcs->sendText(AP_CommLink::SEVERITY_LOW, msg);
+	*/
+}
+
+void ArduPilotOne::callback2(void * data) {
+	ArduPilotOne * apo = (ArduPilotOne *) data;
+	//apo->hal()->debug->println_P(PSTR("callback 2"));
 
 	/*
 	 * send telemetry
@@ -177,28 +188,7 @@ void ArduPilotOne::callback1(void * data) {
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
-	}
-
-	/*
-	char msg[50];
-	sprintf(msg, "c_hdg: %f, c_thr: %f", apo->guide()->headingCommand, apo->guide()->groundSpeedCommand);
-	apo->hal()->gcs->sendText(AP_CommLink::SEVERITY_LOW, msg);
-	*/
-	//apo->controller()->update(1. / apo->subLoops()[1]->dt());
-}
-
-void ArduPilotOne::callback2(void * data) {
-	ArduPilotOne * apo = (ArduPilotOne *) data;
-	//apo->hal()->debug->println_P(PSTR("callback 2"));
-
-	/*
-	 * compass correction for ahrs
-	 */
-	if (apo->hal()->compass)
-	{
-		//apo->hal()->debug->printf_P(PSTR("compass\n"));
-		apo->hal()->compass->calculate(apo->navigator()->getRoll(),
-				apo->navigator()->getPitch());
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_SCALED_IMU);
 	}
 
 	/*
@@ -232,6 +222,7 @@ void ArduPilotOne::callback2(void * data) {
 	/*
 	 * navigator debug
 	 */
+	/*
 	 if (apo->navigator()) {
 		 apo->hal()->debug->printf_P(PSTR("roll: %f deg\tpitch: %f deg\tyaw: %f deg\n"),
 				 apo->navigator()->getRoll()*rad2Deg,
@@ -242,6 +233,7 @@ void ArduPilotOne::callback2(void * data) {
 				 apo->navigator()->getLon()*rad2Deg,
 				 apo->navigator()->getAlt());
 	 }
+	 */
 }
 
 void ArduPilotOne::callback3(void * data) {
@@ -266,7 +258,6 @@ void ArduPilotOne::callback3(void * data) {
 	//apo->adc()->Ch(0), apo->adc()->Ch(1), apo->adc()->Ch(2),
 	//apo->adc()->Ch(3), apo->adc()->Ch(4), apo->adc()->Ch(5),
 	//apo->adc()->Ch(6), apo->adc()->Ch(7), apo->adc()->Ch(8));
-
 }
 
 void ArduPilotOne::callback4(void * data) {
