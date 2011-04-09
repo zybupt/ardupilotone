@@ -343,6 +343,7 @@ void setup() {
 
 		hal->debug->println_P(PSTR("initializing compass"));
 		hal->compass = new AP_Compass_HMC5843;
+		hal->compass->set_orientation(AP_COMPASS_COMPONENTS_UP_PINS_FORWARD);
 		hal->compass->init();
 
 		/**

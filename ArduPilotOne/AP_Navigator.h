@@ -322,14 +322,17 @@ public:
 
 		setTimeStamp(micros()); // if running in live mode, record new time stamp
 
-		/**The altitued is read off the barometer by implementing the following formula:
+
+		//_hal->debug->println_P(PSTR("nav loop"));
+
+		/**
+		 * The altitued is read off the barometer by implementing the following formula:
 		 * altitude (in m) = 44330*(1-(p/po)^(1/5.255)),
 		 * where, po is pressure in Pa at sea level (101325 Pa).
-		 *See http://www.sparkfun.com/tutorials/253 or type this formula
-		 *in a search engine for more information.
-		 *altInt contains the altitude in meters.
+		 * See http://www.sparkfun.com/tutorials/253 or type this formula
+		 * in a search engine for more information.
+		 * altInt contains the altitude in meters.
 		 */
-		//_hal->debug->println_P(PSTR("nav loop"));
 		if (_hal->baro) {
 
 			if (_rangeFinderDown != NULL && _rangeFinderDown->distance <= 695)
@@ -343,6 +346,7 @@ public:
 			}
 		}
 
+		// dcm class for attitude
 		if (_dcm) {
 			_dcm->update_DCM(dt);
 			setRoll(_dcm->roll);
@@ -352,15 +356,6 @@ public:
 			setPitchRate(_dcm->get_gyro().y);
 			setYawRate(_dcm->get_gyro().z);
 
-			if (_hal->gps) {
-				Matrix3f rot = _dcm->get_dcm_matrix(); // neglecting angle of attack for now
-				setVN(_hal->gps->ground_speed * rot.b.x);
-				setVE(_hal->gps->ground_speed * rot.b.y);
-				setVE(_hal->gps->ground_speed * rot.b.z);
-				setLat_degInt(_hal->gps->latitude);
-				setLon_degInt(_hal->gps->longitude);
-				setAlt_intM(_hal->gps->altitude*10);
-			}
 
 
 			// need to use lat/lon and convert
@@ -378,6 +373,17 @@ public:
 			 Serial.printf_P(PSTR("accel: %f %f %f gyro: %f %f %f\n"),
 			 accel.x,accel.y,accel.z,gyro.x,gyro.y,gyro.z);
 			 */
+		}
+
+		// gps for position
+		if (_hal->gps) {
+			Matrix3f rot = _dcm->get_dcm_matrix(); // neglecting angle of attack for now
+			setVN(_hal->gps->ground_speed * rot.b.x);
+			setVE(_hal->gps->ground_speed * rot.b.y);
+			setVE(_hal->gps->ground_speed * rot.b.z);
+			setLat_degInt(_hal->gps->latitude);
+			setLon_degInt(_hal->gps->longitude);
+			setAlt_intM(_hal->gps->altitude*10);
 		}
 	}
 };
