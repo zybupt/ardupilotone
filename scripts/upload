@@ -8,8 +8,10 @@ if [[ $port = '' ]]; then
 fi
 echo -e "port entered: >>$port<<"
 
-echo sketches built
+echo
+echo sketches built:
 ls build
+echo
 
 echo -n -e 'enter sketch (i.e. ArduPilotOne) : '
 read sketch
