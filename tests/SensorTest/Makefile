@@ -8,4 +8,4 @@
 BOARD	=	mega
 TMPDIR = build
 
-include ../libraries/AP_Common/Arduino.mk
+include ../../libraries/AP_Common/Arduino.mk

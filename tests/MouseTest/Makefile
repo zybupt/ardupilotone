@@ -7,4 +7,4 @@
 #
 BOARD= mega
 TMPDIR= /tmp
-include ../libraries/AP_Common/Arduino.mk
+include ../../libraries/AP_Common/Arduino.mk
