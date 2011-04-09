@@ -53,8 +53,8 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="MouseTest|MouseTest1" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="MouseTest"/>
+						<entry excluding="ArduPilotOne/tests/MouseTest|MouseTest|MouseTest1" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ArduPilotOne/tests/MouseTest"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
