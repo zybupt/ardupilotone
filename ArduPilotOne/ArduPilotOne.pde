@@ -78,10 +78,9 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 
 		delay(1000);
 		if (hal->mode() == MODE_LIVE) {
+			_navigator->updateSlow(0);
 			if (_hal->gps) {
-				_hal->gps->update();
-				if (hal->gps->status() == GPS::GPS_OK) {
-					_navigator->update(0);
+				if (hal->gps->fix) {
 					break;
 				} else if (millis() - timeStart > 6000) { // start anyway in 1 minute
 					hal->gcs->sendText(SEVERITY_LOW,PSTR("run w/o gps status, in 5 s"));
@@ -145,18 +144,12 @@ void ArduPilotOne::callback0(void * data) {
 	 * ahrs update
 	 */
 	if (apo->navigator())
-		apo->navigator()->update(1.0/loop0Rate);
+		apo->navigator()->updateFast(1.0/loop0Rate);
 }
 
 void ArduPilotOne::callback1(void * data) {
 	ArduPilotOne * apo = (ArduPilotOne *) data;
 	//apo->hal()->debug->println_P(PSTR("callback 1"));
-
-	/*
-	 * read compass
-	 */
-	if (apo->hal()->mode()==MODE_LIVE && apo->hal()->compass)
-		apo->hal()->compass->read();
 
 	/*
 	 * hardware in the loop
@@ -226,7 +219,6 @@ void ArduPilotOne::callback2(void * data) {
 	/*
 	 * navigator debug
 	 */
-	/*
 	 if (apo->navigator()) {
 		 apo->hal()->debug->printf_P(PSTR("roll: %f deg\tpitch: %f deg\tyaw: %f deg\n"),
 				 apo->navigator()->getRoll()*rad2Deg,
@@ -237,7 +229,6 @@ void ArduPilotOne::callback2(void * data) {
 				 apo->navigator()->getLon()*rad2Deg,
 				 apo->navigator()->getAlt());
 	 }
-	 */
 }
 
 void ArduPilotOne::callback3(void * data) {

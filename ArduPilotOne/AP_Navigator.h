@@ -36,7 +36,7 @@ public:
 	{
 	}
 	virtual void calibrate() = 0;
-	virtual void update(float dt) = 0;
+	virtual void updateFast(float dt) = 0;
 	virtual void updateSlow(float dt) = 0;
     float getD() const
     {
@@ -320,7 +320,7 @@ public:
 			_hal->imu->init_accel();
 		}
 	}
-	virtual void update(float dt) {
+	virtual void updateFast(float dt) {
 		if (_hal->mode() != MODE_LIVE)
 			return;
 
@@ -379,24 +379,29 @@ public:
 			 */
 		}
 
-		// gps for position
+		// gps for velocity
 		if (_hal->gps) {
 			Matrix3f rot = _dcm->get_dcm_matrix(); // neglecting angle of attack for now
 			setVN(_hal->gps->ground_speed * rot.b.x);
 			setVE(_hal->gps->ground_speed * rot.b.y);
-			setVE(_hal->gps->ground_speed * rot.b.z);
-			setLat_degInt(_hal->gps->latitude);
-			setLon_degInt(_hal->gps->longitude);
-			setAlt_intM(_hal->gps->altitude*10);
+			setVD(_hal->gps->ground_speed * rot.b.z);
 		}
 	}
 	virtual void updateSlow(float dt) {
 		if (_hal->mode() != MODE_LIVE)
 			return;
+
+		setTimeStamp(micros()); // if running in live mode, record new time stamp
+
 		if (_hal->gps) {
-			setLat_degInt(_hal->gps->latitude);
-			setLon_degInt(_hal->gps->longitude);
+			_hal->gps->update();
+			if (_hal->gps->fix && _hal->gps->new_data) {
+				setLat_degInt(_hal->gps->latitude);
+				setLon_degInt(_hal->gps->longitude);
+				setAlt_intM(_hal->gps->altitude*10);
+			}
 		}
+
 		if (_hal->compass) {
 			_hal->compass->read();
 			_hal->compass->calculate(getRoll(),getPitch());
