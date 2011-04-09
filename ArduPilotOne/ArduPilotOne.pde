@@ -74,6 +74,8 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	 * Look for valid initial state
 	 */
 	while (1) {
+		// letc gcs known we are alive
+
 		delay(1000);
 		if (hal->mode() == MODE_LIVE) {
 			if (_hal->gps) {
@@ -81,12 +83,17 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 				if (hal->gps->status() == GPS::GPS_OK) {
 					_navigator->update(0);
 					break;
-				} else if (millis() - timeStart > 60000) { // start anyway in 1 minute
+				} else if (millis() - timeStart > 6000) { // start anyway in 1 minute
 					hal->gcs->sendText(SEVERITY_LOW,PSTR("run w/o gps status, in 5 s"));
+					hal->debug->printf_P(PSTR("run w/o gps status, in 5 s\n"));
 					delay(5000);
+					break;
 				} else {
-					hal->debug->println_P(PSTR("waiting for gps to initialize"));
-					hal->gcs->sendText(SEVERITY_LOW,PSTR("waiting for gps to initialize"));
+					char msg[50];
+					sprintf(msg, "gps wait: %d s", (6000+timeStart-millis())/1000);
+					hal->gcs->sendText(SEVERITY_LOW, msg);
+					hal->debug->printf_P(PSTR("gps wait: %d s\n"), (6000+timeStart-millis())/1000);
+					hal->gcs->sendText(SEVERITY_LOW,msg);
 					hal->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
 				}
 			} else { // no gps, can skip

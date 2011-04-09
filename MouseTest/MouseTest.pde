@@ -348,3 +348,12 @@ void mouse_reset_I_terms_navigation()
     mouse_prev_err_pitch = 0;
 }
 
+// TODO: do something here to test it
+void setup()
+{
+}
+
+void loop()
+{
+}
+
