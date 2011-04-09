@@ -37,6 +37,7 @@ public:
 	}
 	virtual void calibrate() = 0;
 	virtual void update(float dt) = 0;
+	virtual void updateSlow(float dt) = 0;
     float getD() const
     {
         return _pD;
@@ -302,6 +303,10 @@ public:
 				_hal->imu = new AP_IMU_Oilpan(_hal->adc, _imuOffsetAddress);
 			if (_hal->imu)
 				_dcm = new AP_DCM(_hal->imu, _hal->gps, _hal->compass);
+			if (_hal->compass) {
+				_dcm->set_compass(_hal->compass);
+
+			}
 		}
 		calibrate();
 	}
@@ -314,7 +319,6 @@ public:
 			_hal->imu->init_gyro();
 			_hal->imu->init_accel();
 		}
-
 	}
 	virtual void update(float dt) {
 		if (_hal->mode() != MODE_LIVE)
@@ -384,6 +388,19 @@ public:
 			setLat_degInt(_hal->gps->latitude);
 			setLon_degInt(_hal->gps->longitude);
 			setAlt_intM(_hal->gps->altitude*10);
+		}
+	}
+	virtual void updateSlow(float dt) {
+		if (_hal->mode() != MODE_LIVE)
+			return;
+		if (_hal->gps) {
+			setLat_degInt(_hal->gps->latitude);
+			setLon_degInt(_hal->gps->longitude);
+		}
+		if (_hal->compass) {
+			_hal->compass->read();
+			_hal->compass->calculate(getRoll(),getPitch());
+			_hal->compass->null_offsets(_dcm->get_dcm_matrix());
 		}
 	}
 };

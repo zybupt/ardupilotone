@@ -205,19 +205,10 @@ void ArduPilotOne::callback2(void * data) {
 	}
 
 	/*
-	 * read gps and correct position
+	 * slow navigation loop update
 	 */
-	if (apo->hal()->gps) {
-		//apo->hal()->debug->printf_P(PSTR("gps\n"));
-		apo->hal()->gps->update();
-
-		// debug
-		/*
-		 apo->getDebug().printf_P(PSTR("lat: %ld lng: %ld alt: %ld\t"),
-		 apo->gps()->latitude,
-		 apo->gps()->longitude,
-		 apo->gps()->altitude);
-		 */
+	if (apo->navigator()) {
+		apo->navigator()->updateSlow(1.0/loop2Rate);
 	}
 
 	/*
