@@ -22,6 +22,7 @@
 #include "AP_HardwareAbstractionLayer.h"
 #include "AP_MavlinkCommand.h"
 #include "constants.h"
+#include "APO_Config.h"
 
 namespace apo {
 
@@ -395,6 +396,7 @@ public:
 
 		if (_hal->gps) {
 			_hal->gps->update();
+			updateGpsLight();
 			if (_hal->gps->fix && _hal->gps->new_data) {
 				setLat_degInt(_hal->gps->latitude);
 				setLon_degInt(_hal->gps->longitude);
@@ -406,6 +408,32 @@ public:
 			_hal->compass->read();
 			_hal->compass->calculate(getRoll(),getPitch());
 			_hal->compass->null_offsets(_dcm->get_dcm_matrix());
+		}
+	}
+	void updateGpsLight(void) {
+		// GPS LED on if we have a fix or Blink GPS LED if we are receiving data
+		// ---------------------------------------------------------------------
+		static bool GPS_light = false;
+		switch (_hal->gps->status()) {
+		case (2):
+			digitalWrite(C_LED_PIN, HIGH); //Turn LED C on when gps has valid fix.
+			break;
+
+		case (1):
+			if (_hal->gps->valid_read == true) {
+				GPS_light = !GPS_light; // Toggle light on and off to indicate gps messages being received, but no GPS fix lock
+				if (GPS_light) {
+					digitalWrite(C_LED_PIN, LOW);
+				} else {
+					digitalWrite(C_LED_PIN, HIGH);
+				}
+				_hal->gps->valid_read = false;
+			}
+			break;
+
+		default:
+			digitalWrite(C_LED_PIN, LOW);
+			break;
 		}
 	}
 };

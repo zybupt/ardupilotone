@@ -35,14 +35,14 @@ public:
 
 		// steering control loop
 		addBlock(new SumGain(&(headingCommand), &one, &(yaw), &negativeOne));
-		addBlock(new Pid(pidStrKey, PSTR("STR_"), 0.2, 0, 0, 0, 3));
+		addBlock(new Pid(pidStrKey, PSTR("STR_"), 1.0, 0, 0, 0, 3));
 		addBlock(new ToServo(_hal->rc[CH_STR])); // index depends on order of channels pushed back into _hal->rc
 
 		// throttle control loop
 		addBlock(
 				new SumGain(&groundSpeedCommand, &one, &groundSpeed,
 						&negativeOne));
-		addBlock(new Pid(pidThrKey, PSTR("THR_"), 0.5, 0.1, 0, 1, 3));
+		addBlock(new Pid(pidThrKey, PSTR("THR_"), 1.0, 1.0, 0, 1, 3));
 		addBlock(new ToServo(_hal->rc[CH_THR]));
 	}
 	virtual void update(const float & dt) {

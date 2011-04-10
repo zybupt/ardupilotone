@@ -69,7 +69,8 @@ public:
 				_rangeFinderLeft(), _rangeFinderRight(),
 				_group(key,PSTR("GUIDE_")),
 				_velocityCommand(&_group, 1, 1, PSTR("VELCMD")),
-				_crossTrackGain(&_group, 2, 10, PSTR("XTG"))
+				_crossTrackGain(&_group, 2, 2, PSTR("XTK")),
+				_crossTrackLim(&_group, 3, 10, PSTR("XTLIM"))
 		{
 
 		for (int i = 0; i < _hal->rangeFinders.getSize(); i++) {
@@ -123,10 +124,10 @@ public:
 					command, _navigator->getLat_degInt(),
 					_navigator->getLon_degInt());
 			float temp = dXt*_crossTrackGain*deg2Rad; // crosstrack gain, rad/m
-			if (temp > 90 * deg2Rad)
-				temp = 90 * deg2Rad;
-			if (temp < -90 * deg2Rad)
-				temp = -90 * deg2Rad;
+			if (temp > _crossTrackLim * deg2Rad)
+				temp = _crossTrackLim * deg2Rad;
+			if (temp < -_crossTrackLim * deg2Rad)
+				temp = -_crossTrackLim * deg2Rad;
 			float bearing = previousCommand.bearingTo(command);
 			headingCommand = bearing - temp;
 			float alongTrack = AP_MavlinkCommand::alongTrack(previousCommand,command,
@@ -235,6 +236,7 @@ private:
 	AP_Var_group _group;
 	AP_Float _velocityCommand;
 	AP_Float _crossTrackGain;
+	AP_Float _crossTrackLim;
 };
 float AP_Guide::rEarth = 6371000;
 

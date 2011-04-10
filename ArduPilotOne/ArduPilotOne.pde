@@ -192,9 +192,9 @@ void ArduPilotOne::callback2(void * data) {
 		// send messages
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
+		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_SCALED_IMU);
+		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_SCALED_IMU);
 	}
 
 	/*
@@ -219,6 +219,7 @@ void ArduPilotOne::callback2(void * data) {
 	/*
 	 * navigator debug
 	 */
+	/*
 	 if (apo->navigator()) {
 		 apo->hal()->debug->printf_P(PSTR("roll: %f deg\tpitch: %f deg\tyaw: %f deg\n"),
 				 apo->navigator()->getRoll()*rad2Deg,
@@ -229,6 +230,7 @@ void ArduPilotOne::callback2(void * data) {
 				 apo->navigator()->getLon()*rad2Deg,
 				 apo->navigator()->getAlt());
 	 }
+	 */
 }
 
 void ArduPilotOne::callback3(void * data) {
