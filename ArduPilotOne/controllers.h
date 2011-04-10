@@ -42,7 +42,7 @@ public:
 		addBlock(
 				new SumGain(&groundSpeedCommand, &one, &groundSpeed,
 						&negativeOne));
-		addBlock(new Pid(pidThrKey, PSTR("THR_"), 1.0, 1.0, 0, 1, 3));
+		addBlock(new Pid(pidThrKey, PSTR("THR_"), 0.6, 0.5, 0, 1, 3));
 		addBlock(new ToServo(_hal->rc[CH_THR]));
 	}
 	virtual void update(const float & dt) {

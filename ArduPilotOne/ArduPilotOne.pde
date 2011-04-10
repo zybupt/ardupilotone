@@ -268,11 +268,6 @@ void setup() {
 
 	using namespace apo;
 
-	/*
-	 * Load all parameters
-	 */
-	AP_Var::load_all();
-
 	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(halMode,board,vehicle);
 
 	/*

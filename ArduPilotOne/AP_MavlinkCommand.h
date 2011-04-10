@@ -410,7 +410,7 @@ public:
 	static void nextCommand() {
 		// find previous waypoint, TODO, handle non-nav commands
 		int16_t nextIndex = int16_t(currentIndex) + 1 ;
-		if (nextIndex > number) nextIndex = 0;
+		if (nextIndex > (number -1)) nextIndex = 0;
 		currentIndex = (uint8_t) nextIndex;
 	}
 
