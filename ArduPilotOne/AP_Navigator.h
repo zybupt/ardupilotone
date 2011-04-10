@@ -380,13 +380,11 @@ public:
 			 */
 		}
 
-		// gps for velocity
-		if (_hal->gps) {
-			Matrix3f rot = _dcm->get_dcm_matrix(); // neglecting angle of attack for now
-			setVN(_hal->gps->ground_speed * rot.b.x);
-			setVE(_hal->gps->ground_speed * rot.b.y);
-			setVD(_hal->gps->ground_speed * rot.b.z);
-		}
+		// correct velocity direction
+		Matrix3f rot = _dcm->get_dcm_matrix(); // neglecting angle of attack for now
+		setVN(getGroundSpeed() * rot.b.x);
+		setVE(getGroundSpeed() * rot.b.y);
+		setVD(getGroundSpeed() * rot.b.z);
 	}
 	virtual void updateSlow(float dt) {
 		if (_hal->mode() != MODE_LIVE)
@@ -400,7 +398,8 @@ public:
 			if (_hal->gps->fix && _hal->gps->new_data) {
 				setLat_degInt(_hal->gps->latitude);
 				setLon_degInt(_hal->gps->longitude);
-				setAlt_intM(_hal->gps->altitude*10);
+				setAlt_intM(_hal->gps->altitude*10); // gps in cm, intM in mm
+				setGroundSpeed(_hal->gps->ground_speed/100.0); // gps is in cm/s
 			}
 		}
 
