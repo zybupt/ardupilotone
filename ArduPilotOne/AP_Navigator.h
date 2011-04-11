@@ -369,6 +369,12 @@ public:
 			setPE((getLon() - home.getLon())*cos(home.getLat())/rEarth);
 			setPD(-(getAlt() - home.getAlt()));
 
+			// correct velocity direction
+			Matrix3f rot = _dcm->get_dcm_matrix(); // neglecting angle of attack for now
+			setVN(getGroundSpeed() * rot.b.x);
+			setVE(getGroundSpeed() * rot.b.y);
+			setVD(getGroundSpeed() * rot.b.z);
+		
 			/*
 			 * accel/gyro debug
 			 */
@@ -379,12 +385,6 @@ public:
 			 accel.x,accel.y,accel.z,gyro.x,gyro.y,gyro.z);
 			 */
 		}
-
-		// correct velocity direction
-		Matrix3f rot = _dcm->get_dcm_matrix(); // neglecting angle of attack for now
-		setVN(getGroundSpeed() * rot.b.x);
-		setVE(getGroundSpeed() * rot.b.y);
-		setVD(getGroundSpeed() * rot.b.z);
 	}
 	virtual void updateSlow(float dt) {
 		if (_hal->mode() != MODE_LIVE)

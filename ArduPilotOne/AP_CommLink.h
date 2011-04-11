@@ -143,12 +143,14 @@ public:
 			break;
 		}
 
+		/*
 		case MAVLINK_MSG_ID_GPS_RAW_INT: {
-			mavlink_msg_gps_raw_send(_channel,timeStamp,_hal->gps->status(),
+			mavlink_msg_gps_raw_int_send(_channel,timeStamp,_hal->gps->status(),
 					_navigator->getLat_degInt(), _navigator->getLon_degInt(),_navigator->getAlt_intM(), 0,0,
 					_navigator->getGroundSpeed(),_navigator->getYaw()*rad2Deg);
 			break;
 		}
+		*/
 
 		case MAVLINK_MSG_ID_SCALED_IMU: {
 			/*
