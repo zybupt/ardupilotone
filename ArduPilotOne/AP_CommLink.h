@@ -350,7 +350,7 @@ private:
 		_navigator->setLat(packet.lat*deg2Rad);
 		_navigator->setLon(packet.lon*deg2Rad);
 		_navigator->setAlt(packet.alt);
-		//_navigator->setYaw(packet.hdg*M_PI/180);
+		_navigator->setHeading(packet.hdg*deg2Rad);
 		_navigator->setGroundSpeed(packet.v);
 		_navigator->setAirSpeed(packet.v);
 		//_hal->debug->printf_P(PSTR("received hil gps raw packet\n"));

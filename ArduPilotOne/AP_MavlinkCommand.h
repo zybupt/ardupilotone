@@ -400,6 +400,42 @@ public:
 		return rEarth*c;
 	}
 
+	float getPN(int32_t lat_degInt, int32_t lon_degInt) {
+		// local tangent approximation at this waypoint
+		float deltaLat = (lat_degInt - getLat_degInt())*degInt2Rad;
+		return deltaLat*rEarth;
+	}
+
+	float getPE(int32_t lat_degInt, int32_t lon_degInt) {
+		// local tangent approximation at this waypoint
+		float deltaLon = (lon_degInt - getLon_degInt())*degInt2Rad;
+		return cos(getLat())*deltaLon*rEarth;
+	}
+
+	float getPD(int32_t alt_intM) {
+		return -(alt_intM/scale_m - getAlt());
+	}
+
+	float getLat(float pN) {
+
+		return pN/rEarth + getLat();
+	}
+
+	float getLon(float pE) {
+
+		return pE/rEarth/cos(getLat()) + getLon();
+	}
+
+	/**
+	 * Gets altitude in meters
+	 * @param pD alt in meters
+	 * @return
+	 */
+	float getAlt(float pD) {
+
+		return getAlt() - pD;
+	}
+
 	static uint8_t previousIndex() {
 		// find previous waypoint, TODO, handle non-nav commands
 		int16_t prevIndex = int16_t(currentIndex) -1 ;

@@ -31,10 +31,10 @@
 
 // attitude control loop
 #define PID_ATT_INTERVAL  1/20 // 20 hz
-#define PID_ATT_P .1
+#define PID_ATT_P 0.1
 #define PID_ATT_I 0.0
 #define PID_ATT_D 0.1
-#define PID_ATT_LIM 0.1 // 10 % #define MOTORs
+#define PID_ATT_LIM 0.01 // 10 % #define MOTORs
 #define PID_ATT_AWU 0.0
 #define PID_YAWPOS_P 1
 #define PID_YAWPOS_I 0.1
@@ -44,7 +44,7 @@
 #define PID_YAWSPEED_P 1
 #define PID_YAWSPEED_I 0
 #define PID_YAWSPEED_D 0.5
-#define PID_YAWSPEED_LIM 0.1 // 10 % #define MOTORs
+#define PID_YAWSPEED_LIM 0.01 // 10 % #define MOTORs
 #define PID_YAWSPEED_AWU 0.0
 #define ATT_OFFSET_X 0.0
 #define ATT_OFFSET_Y 0.0
@@ -63,6 +63,6 @@
 #define POSITION_SETPOINT_Z  0
 #define POSITION_SETPOINT_YAW  0.0
 
-#define THRUST_HOVER_OFFSET  0.5
+#define THRUST_HOVER_OFFSET  0.475
 
 #endif /* MIKROKOPTER_H_ */

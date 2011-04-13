@@ -32,41 +32,47 @@ public:
 	AP_Navigator(AP_HardwareAbstractionLayer * hal) :
 		_hal(hal), _timeStamp(0), _roll(0), _rollRate(0), _pitch(0),
 		_pitchRate(0), _yaw(0), _yawRate(0), _airSpeed(0), _groundSpeed(0),
-		_vN(0), _vE(0), _vD(0), _pN(0), _pE(0), _pD(0), _lat_degInt(0),
+		_vD(0),  _lat_degInt(0), _heading(0),
 		_lon_degInt(0), _alt_intM(0)
 	{
 	}
 	virtual void calibrate() = 0;
 	virtual void updateFast(float dt) = 0;
 	virtual void updateSlow(float dt) = 0;
-    float getD() const
+    float getPD() const
     {
-        return _pD;
+    	AP_MavlinkCommand home = AP_MavlinkCommand(0);
+        return home.getPD(getAlt_intM());
     }
 
     float getPE() const
     {
-        return _pE;
+    	AP_MavlinkCommand home = AP_MavlinkCommand(0);
+        return home.getPE(getLat_degInt(),getLon_degInt());
     }
 
     float getPN() const
     {
-        return _pN;
+    	AP_MavlinkCommand home = AP_MavlinkCommand(0);
+        return home.getPN(getLat_degInt(),getLon_degInt());
     }
 
     void setPD(float _pD)
     {
-        this->_pD = _pD;
+        AP_MavlinkCommand home = AP_MavlinkCommand(0);
+        setAlt(home.getAlt(_pD));
     }
 
     void setPE(float _pE)
     {
-        this->_pE = _pE;
+    	AP_MavlinkCommand home = AP_MavlinkCommand(0);
+    	setLat(home.getLat(_pE));
     }
 
     void setPN(float _pN)
     {
-        this->_pN = _pN;
+    	AP_MavlinkCommand home = AP_MavlinkCommand(0);
+    	setLon(home.getLon(_pN));
     }
 
     float getAirSpeed() const
@@ -114,9 +120,14 @@ public:
         return _vD;
     }
 
+    float getHeading() const
+    {
+    	return _heading;
+    }
+
     float getVE() const
     {
-        return _vE;
+        return sin(getHeading())*getGroundSpeed();
     }
 
     float getGroundSpeed() const
@@ -136,7 +147,7 @@ public:
 
     float getVN() const
     {
-        return _vN;
+        return cos(getHeading())*getGroundSpeed();
     }
 
     float getPitch() const
@@ -174,6 +185,11 @@ public:
         this->_airSpeed = _airSpeed;
     }
 
+    void setHeading(float _heading)
+    {
+    	this->_heading = _heading;
+    }
+
     void setAlt_intM(int32_t _alt_intM)
     {
         this->_alt_intM = _alt_intM;
@@ -182,11 +198,6 @@ public:
     void setVD(float _vD)
     {
         this->_vD = _vD;
-    }
-
-    void setVE(float _vE)
-    {
-        this->_vE = _vE;
     }
 
     void setGroundSpeed(float _groundSpeed)
@@ -202,11 +213,6 @@ public:
     void setLon_degInt(int32_t _lon_degInt)
     {
         this->_lon_degInt = _lon_degInt;
-    }
-
-    void setVN(float _vN)
-    {
-        this->_vN = _vN;
     }
 
     void setPitch(float _pitch)
@@ -259,12 +265,8 @@ private:
 	float _yawRate; // rad/s
 	float _airSpeed; // m/s
 	float _groundSpeed; // m/s
-	float _vN; // m/s
-	float _vE; // m/s
+	float _heading; // rad
 	float _vD; // m/s
-	float _pN; // m from home
-	float _pE; // m from home
-	float _pD; // m from home
 	int32_t _lat_degInt; // deg / 1e7
 	int32_t _lon_degInt; // deg / 1e7
 	int32_t _alt_intM; // meters / 1e3
@@ -369,12 +371,6 @@ public:
 			setPE((getLon() - home.getLon())*cos(home.getLat())/rEarth);
 			setPD(-(getAlt() - home.getAlt()));
 
-			// correct velocity direction
-			Matrix3f rot = _dcm->get_dcm_matrix(); // neglecting angle of attack for now
-			setVN(getGroundSpeed() * rot.b.x);
-			setVE(getGroundSpeed() * rot.b.y);
-			setVD(getGroundSpeed() * rot.b.z);
-		
 			/*
 			 * accel/gyro debug
 			 */

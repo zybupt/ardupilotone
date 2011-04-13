@@ -110,7 +110,19 @@ public:
 			_controller(controller) {
 		}
 		virtual void update(const float & dt) {
-			_controller->initialize();
+			_controller->bridge();
+		}
+	private:
+		QuadController * _controller;
+	};
+
+	class GainAdjust: public Block {
+	public:
+		GainAdjust(QuadController * controller) :
+			_controller(controller) {
+		}
+		virtual void update(const float & dt) {
+			_controller->gainAdjust();
 		}
 	private:
 		QuadController * _controller;
@@ -153,6 +165,7 @@ public:
 					 PID_POS_I, PID_POS_D, PID_POS_AWU, PID_POS_LIM));
 		addBlock(new Sink(_cmdNorthTilt));
 
+
 		// east position error -> east tilt
 		addBlock(new SumGain(&(_guide->pECmd), &one, &(pE), &positiveOne));
 		addBlock(new PidDFB(k_pidPE, PSTR("EAST_"), &(vE), PID_POS_P, PID_POS_I,
@@ -161,9 +174,11 @@ public:
 
 		// down error -> -thrust mix
 		addBlock(new SumGain(&(_guide->pDCmd), &one, &(pD), &negativeOne));
-		addBlock(new PidDFB(k_pidPD, PSTR("DOWN_"), &(vD), PID_POS_Z_P,
-					 PID_POS_Z_I, PID_POS_Z_D, PID_POS_Z_AWU, PID_POS_Z_LIM));
+		addBlock(new PidDFB(k_pidPD, PSTR("DOWN_"), &(vD), PID_POS_Z_P, PID_POS_Z_I,
+				PID_POS_Z_D, PID_POS_Z_AWU, PID_POS_Z_LIM));
 		addBlock(new Sink(_thrustMix));
+
+
 
 		/*
 		 * bridge, rotation of north/east tilt to body frame
@@ -194,9 +209,14 @@ public:
 				     PID_YAWSPEED_P, PID_YAWSPEED_I, PID_YAWSPEED_D,
 					 PID_YAWSPEED_AWU, PID_YAWSPEED_LIM));
 
-		addBlock(new PidDFB(k_pidYaw, PSTR("YAW_"), &(yawRate), PID_YAWPOS_P, PID_YAWPOS_I,
+		addBlock(new Pid(k_pidYaw, PSTR("YAW_"), PID_YAWPOS_P, PID_YAWPOS_I,
 				     PID_YAWPOS_D, PID_YAWPOS_AWU, PID_YAWPOS_LIM));
 		addBlock(new Sink(_yawMix));
+
+		/*
+		 * For manually adjusting gains before output
+		 */
+		addBlock(new GainAdjust(this));
 
 		/*
 		 * thrust trim
@@ -205,27 +225,28 @@ public:
 		// note that the position D -> thrust -1 gain is applied here to the
 
 		//thrust mix
-		addBlock(new SumGain(&_thrustMixTrim, &one, &_thrustMix, &negativeOne));
+		addBlock(new SumGain(&_thrustMixTrim, &one, &_thrustMix, &one));
 		addBlock(new Sink(_thrustMix));
+
 
 		/*
 		 * motor mix
 		 */
 
 		// left
-		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &one, &_yawMix, &one));
+		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &one));//, &_yawMix, &one));
 		addBlock(new ToServo(_hal->rc[CH_LEFT]));
 
 		// right
-		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &negativeOne,&_yawMix, &one));
+		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &negativeOne));//,&_yawMix, &one));
 		addBlock(new ToServo(_hal->rc[CH_RIGHT]));
 
 		// front
-		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &one, &_yawMix, &negativeOne));
+		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &one));//, &_yawMix, &negativeOne));
 		addBlock(new ToServo(_hal->rc[CH_FRONT]));
 
 		// back
-		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &negativeOne, &_yawMix, &negativeOne));
+		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &negativeOne));//, &_yawMix, &negativeOne));
 		addBlock(new ToServo(_hal->rc[CH_BACK]));
 
 	}
@@ -239,7 +260,7 @@ public:
 
 			pN = _nav->getPN();
 			pE = _nav->getPE();
-			pD = _nav->getD();
+			pD = _nav->getPD();
 
 			vN = _nav->getVN();
 			vE = _nav->getVE();
@@ -253,9 +274,9 @@ public:
 			rollRate = _nav->getRollRate();
 			yawRate = _nav->getYawRate();
 
-			_hal->rc[CH_THRUST]->setPwm(_hal->rc[CH_THRUST]->readRadio());
-			_thrustMix = _hal->rc[CH_THRUST]->getPosition();
-//			_hal->debug->printf_P(PSTR("thrustMix: %f\n"), _thrustMix);
+			// altCmd = _hal->rc[CH_THRUST]->readRadio()
+			_hal->rc[CH_THRUST]->setPosition(_thrustMix);
+			_hal->debug->printf_P(PSTR("thrustMix: %f\n"), _thrustMix);
 
 			// read mode switch
 			//_hal->debug->println_P(PSTR("update loop"));
@@ -344,7 +365,14 @@ public:
 //					_cmdRoll, _cmdPitch, _cmdYaw);
 		}
 
-	void initialize() {
+	void gainAdjust() {
+		_thrustMix /= 1;
+		_rollMix /= 1;
+		_yawMix  /= 1;
+		_pitchMix /= 1;
+	}
+
+	void bridge() {
 		//-----------------------------------------------------------------
 		// "transform-to-body"
 		{
