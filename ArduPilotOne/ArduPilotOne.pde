@@ -89,7 +89,7 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 					break;
 				} else {
 					char msg[50];
-					sprintf(msg, "gps wait: %d s", (6000+timeStart-millis())/1000);
+	     			sprintf(msg, "gps wait: %d s", (6000+timeStart-millis())/1000);
 					hal->gcs->sendText(SEVERITY_LOW, msg);
 					hal->debug->printf_P(PSTR("gps wait: %d s\n"), (6000+timeStart-millis())/1000);
 					hal->gcs->sendText(SEVERITY_LOW,msg);

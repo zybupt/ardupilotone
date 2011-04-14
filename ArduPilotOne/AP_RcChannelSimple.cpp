@@ -18,7 +18,7 @@
 AP_RcChannelSimple::AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name, APM_RC_Class & rc, const uint8_t & ch,
 			const uint16_t & pwmMin, 
 			const uint16_t & pwmNeutral, const uint16_t & pwmMax,
-			const uint16_t & pwmDeadZone,
+			//const uint16_t & pwmDeadZone,
 			const bool & filter, const bool & reverse) :
 		AP_Var_group(key,name),
 		_rc(rc),
@@ -26,7 +26,7 @@ AP_RcChannelSimple::AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name
 		pwmMin(this,3,pwmMin,PSTR("PMIN")),
 		pwmMax(this,4,pwmMax,PSTR("PMAX")),
 		pwmNeutral(this,5,pwmNeutral,PSTR("PNTRL")),
-		pwmDeadZone(this,6,pwmDeadZone,PSTR("PDEAD")),
+		//pwmDeadZone(this,6,pwmDeadZone,PSTR("PDEAD")),
 		filter(this,7,filter,PSTR("FLTR")),
 		reverse(this,8,reverse,PSTR("REV")),
 		_pwm(0)
@@ -63,7 +63,7 @@ AP_RcChannelSimple::setPwm(uint16_t pwm)
 	//Serial.printf("pwm after filter: %d\n", _pwm);
 
 	// apply deadzone
-	_pwm = (abs(_pwm - pwmNeutral) < pwmDeadZone) ? uint16_t(pwmNeutral) : _pwm;
+	//_pwm = (abs(_pwm - pwmNeutral) < pwmDeadZone) ? uint16_t(pwmNeutral) : _pwm;
 	//Serial.printf("pwm after deadzone: %d\n", _pwm);
 
 	// apply saturation

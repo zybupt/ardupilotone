@@ -21,7 +21,7 @@ public:
 	AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name, APM_RC_Class & rc, const uint8_t & ch,
 			const uint16_t & pwmMin=1200, 
 			const uint16_t & pwmNeutral=1500, const uint16_t & pwmMax=1800,
-			const uint16_t & pwmDeadZone=1,
+			//const uint16_t & pwmDeadZone=1,
 			const bool & filter=true, const bool & reverse=false);
 
 	// configuration
@@ -29,7 +29,7 @@ public:
 	AP_Uint16 pwmMin;
 	AP_Uint16 pwmNeutral;
 	AP_Uint16 pwmMax;
-	AP_Uint16 pwmDeadZone;
+	//AP_Uint16 pwmDeadZone;
 	AP_Bool filter;
 	AP_Bool reverse;
 

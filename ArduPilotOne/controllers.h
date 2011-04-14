@@ -26,12 +26,21 @@ public:
 		_hal->debug->println_P(PSTR("initializing car controller"));
 
 		// NOTE, if you change this order, change the numbers above
+//		_hal->rc.push_back(
+//				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7,1200,1500,1800,0,false,false));
+//		_hal->rc.push_back(
+//				new AP_RcChannelSimple(k_chStr, PSTR("STR_"), APM_RC, 0,1200,1540,1800,1,true,false));
+//		_hal->rc.push_back(
+//				new AP_RcChannelSimple(k_chThr, PSTR("THR_"), APM_RC,
+
+		//Modified with no deadZone
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7,1200,1500,1800,0,false,false));
+				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7,1200,1500,1800,false,false));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chStr, PSTR("STR_"), APM_RC, 0,1200,1540,1800,1,true,false));
+				new AP_RcChannelSimple(k_chStr, PSTR("STR_"), APM_RC, 0,1200,1540,1800,true,false));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chThr, PSTR("THR_"), APM_RC, 1,1200,1500,1800,1,true,false));
+				new AP_RcChannelSimple(k_chThr, PSTR("THR_"), APM_RC, 1,1200,1500,1800,true,false));
+
 
 		// steering control loop
 		addBlock(new SumGain(&(headingCommand), &one, &(yaw), &negativeOne));
