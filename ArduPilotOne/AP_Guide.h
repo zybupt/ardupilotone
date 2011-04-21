@@ -151,24 +151,33 @@ public:
 
 		// process mavlink commands
 		//handleCommand();
+		Serial.print("Heading Command: ");
+		Serial.println(headingCommand);
 
 		// obstacle avoidance overrides
 		// stop if your going to drive into something in front of you
-		if (_rangeFinderFront && _rangeFinderFront->distance < 30) {
-			airSpeedCommand = 0;
-			groundSpeedCommand = 0;
+		for(int i=0;i < _hal->rangeFinders.getSize(); i++) _hal->rangeFinders[i]->read();
+		float frontDistance = _rangeFinderFront->distance/200.0; //convert for other adc
+		if (_rangeFinderFront && frontDistance < 2) {
+			//airSpeedCommand = 0;
+			//groundSpeedCommand = 0;
+			headingCommand -= 45*deg2Rad;
+			_hal->debug->print("Obstacle Distance (m): ");
+			_hal->debug->println(frontDistance);
+			_hal->debug->print("Obstacle avoidance Heading Command: ");
+			_hal->debug->println(headingCommand);
 		}
-		if (_rangeFinderBack && _rangeFinderBack->distance < 30) {
+		if (_rangeFinderBack && _rangeFinderBack->distance < 5) {
 			airSpeedCommand = 0;
 			groundSpeedCommand = 0;
 		}
 
-		if (_rangeFinderLeft && _rangeFinderLeft->distance < 30) {
+		if (_rangeFinderLeft && _rangeFinderLeft->distance < 5) {
 			airSpeedCommand = 0;
 			groundSpeedCommand = 0;
 		}
 
-		if (_rangeFinderRight && _rangeFinderRight->distance < 30) {
+		if (_rangeFinderRight && _rangeFinderRight->distance < 5) {
 			airSpeedCommand = 0;
 			groundSpeedCommand = 0;
 		}

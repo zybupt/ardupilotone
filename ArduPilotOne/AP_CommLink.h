@@ -129,7 +129,7 @@ public:
 		}
 
 		case MAVLINK_MSG_ID_GLOBAL_POSITION: {
-			mavlink_msg_global_position_int_send(_channel,
+			mavlink_msg_global_position_send(_channel, timeStamp,
 					_navigator->getLat()*rad2Deg, _navigator->getLon()*rad2Deg,
 					_navigator->getAlt(), _navigator->getVN(),
 					_navigator->getVE(), _navigator->getVD());
@@ -347,6 +347,7 @@ private:
 		mavlink_gps_raw_t packet;
 		mavlink_msg_gps_raw_decode(msg, &packet);
 
+		_navigator->setTimeStamp(timeStamp);
 		_navigator->setLat(packet.lat*deg2Rad);
 		_navigator->setLon(packet.lon*deg2Rad);
 		_navigator->setAlt(packet.alt);

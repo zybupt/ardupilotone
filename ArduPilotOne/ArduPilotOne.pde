@@ -75,7 +75,8 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	 */
 	while (1) {
 		// letc gcs known we are alive
-
+		hal->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
+		hal->hil->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 		delay(1000);
 		if (hal->mode() == MODE_LIVE) {
 			_navigator->updateSlow(0);
@@ -100,6 +101,7 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 			}
 		} else if(hal->mode() == MODE_HIL_CNTL){ // hil
 			_hal->hil->receive();
+			Serial.println("HIL Recieve Called");
 			if (_navigator->getTimeStamp() != 0) {
 				// give hil a chance to send some packets
 				for (int i=0;i<5;i++) {
@@ -190,9 +192,10 @@ void ArduPilotOne::callback2(void * data) {
 	 */
 	if (apo->hal()->gcs) {
 		// send messages
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
+		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
 		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
 		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_SCALED_IMU);
 	}
@@ -333,13 +336,14 @@ void setup() {
 		 * The coordinate system is assigned by the right hand screw rule with the thumb pointing down.
 		 * In set_orientation, it is defind as (front/back,left/right,down,up)
 		 */
+	}
 
-		/*
 		hal->debug->println_P(PSTR("initializing front range finder"));
 		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 		hal->rangeFinders[0]->init(0);
 		hal->rangeFinders[0]->set_orientation(1,0,0);
 
+		/*
 		hal->debug->println_P(PSTR("initializing back range finder"));
 		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 		hal->rangeFinders[1]->init(1);
@@ -360,7 +364,7 @@ void setup() {
 		hal->rangeFinders[4]->init(4);
 		hal->rangeFinders[4]->set_orientation(0,0,1);
 		*/
-	}
+
 
 
 	/*

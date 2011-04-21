@@ -4,7 +4,8 @@ tests/MavlinkTest \
 tests/SensorTest \
 tests/MouseTest \
 libraries/AP_Compass/examples/AP_Compass_test \
-libraries/AP_RcChannel/examples/ServoSweep
+libraries/AP_RcChannel/examples/ServoSweep \
+libraries/AP_RangeFinder/examples/AP_RangeFinder_test
 
 BOARD=mega
 TMPDIR=${PWD}/build
