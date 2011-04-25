@@ -32,8 +32,8 @@ void setup()
 	Serial.println("Range Finder Test v1.0");
 	APM_BMP085.Init();	 // APM ADC initialization
 	adc.Init();            // APM ADC library initialization
-	aRF0.init(0, &adc);
-	aRF1.init(1, &adc);
+	aRF0.init(5, &adc);
+	aRF1.init(4, &adc);
 	delay(1000);
 	timer = millis();
 }
@@ -45,7 +45,7 @@ void loop()
 	float tmp_float;
 	float Altitude;
 
-    Serial.print("dist0:");
+    Serial.print("dist0:");	//the APM board also has its own onboard power supply so you can power it with a separate battery
     Serial.print(aRF0.read()/2);		//8-bit sensors would require a division by 2.....Vcc/1024 (for 10 bit) and Vcc/512 (for 8 bit)
 
     Serial.print("\traw0:");
@@ -74,6 +74,6 @@ void loop()
 		Serial.print(Altitude);
 		Serial.println();
 	}
-    delay(2000);
+    delay(200);
 }
 

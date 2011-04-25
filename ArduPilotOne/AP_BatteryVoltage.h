@@ -28,7 +28,7 @@
 #define VOLT_DIV_RATIO 1.0	//  Voltage divider ratio set with thru-hole resistor (see manual)
 #define INPUT_VOLTAGE 5.2	// (Volts) voltage your power regulator is feeding your ArduPilot to have an accurate pressure and battery
 #define CURRENT_AMPS(x) (x*(INPUT_VOLTAGE/1024.0))*CURR_AMP_DIV_RATIO
-float 	battery_voltage 	= LOW_VOLTAGE * 1.05;		// Battery Voltage, initialized above threshold for filter
+//float 	battery_voltage 	= LOW_VOLTAGE * 1.05;		// Battery Voltage, initialized above threshold for filter
 
 class AP_BatteryVoltage {
 

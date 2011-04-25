@@ -343,7 +343,7 @@ void setup() {
 		hal->rangeFinders[0]->init(0);
 		hal->rangeFinders[0]->set_orientation(1,0,0);
 
-		/*
+
 		hal->debug->println_P(PSTR("initializing back range finder"));
 		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 		hal->rangeFinders[1]->init(1);
@@ -363,7 +363,7 @@ void setup() {
 		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 		hal->rangeFinders[4]->init(4);
 		hal->rangeFinders[4]->set_orientation(0,0,1);
-		*/
+
 
 
 
