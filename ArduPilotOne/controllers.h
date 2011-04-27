@@ -125,18 +125,6 @@ public:
 		QuadController * _controller;
 	};
 
-	class GainAdjust: public Block {
-	public:
-		GainAdjust(QuadController * controller) :
-			_controller(controller) {
-		}
-		virtual void update(const float & dt) {
-			_controller->gainAdjust();
-		}
-	private:
-		QuadController * _controller;
-	};
-
 	QuadController(AP_Navigator * nav, AP_Guide * guide,
 			AP_HardwareAbstractionLayer * hal) :
 		AP_Controller(nav, guide, hal), _thrustMixTrim(THRUST_HOVER_OFFSET),
@@ -152,41 +140,40 @@ public:
 		_hal->rc.push_back(
 				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chLeft, PSTR("LEFT_"), APM_RC, 0));
+				new AP_RcChannelSimple(k_chLeft, PSTR("LEFT_"), APM_RC, 0, 1200, 1200, 1800));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chRight, PSTR("RIGHT_"), APM_RC, 1));
+				new AP_RcChannelSimple(k_chRight, PSTR("RIGHT_"), APM_RC, 1, 1200, 1200, 1800));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chFront, PSTR("FRONT_"), APM_RC, 2));
+				new AP_RcChannelSimple(k_chFront, PSTR("FRONT_"), APM_RC, 2, 1200, 1200, 1800));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chBack, PSTR("BACK_"), APM_RC, 3));
+				new AP_RcChannelSimple(k_chBack, PSTR("BACK_"), APM_RC, 3, 1200, 1200, 1800));
 		_hal->rc.push_back(
 				new AP_RcChannelSimple(k_chRoll, PSTR("ROLL_"), APM_RC, 0));
 		_hal->rc.push_back(
 				new AP_RcChannelSimple(k_chPitch, PSTR("PITCH_"), APM_RC, 1));
 		_hal->rc.push_back(
 				new AP_RcChannelSimple(k_chYaw, PSTR("YAW_"), APM_RC, 2));
-		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chThr, PSTR("THRUST_"), APM_RC, 3));
+		_hal->rc.push_back( // -1 -> 0 maps to 1200, linear 0-1 -> 1200-1800
+				new AP_RcChannelSimple(k_chThr, PSTR("THRUST_"), APM_RC, 3, 1200, 1200, 1800));
 
-		// north position error -> north tilt
-		addBlock(new SumGain(&(_guide->pNCmd), &one, &(pN), &negativeOne));
-		addBlock(new PidDFB(k_pidPN, PSTR("NORTH_"), &(vN), PID_POS_P,
-					 PID_POS_I, PID_POS_D, PID_POS_AWU, PID_POS_LIM));
-		addBlock(new Sink(_cmdNorthTilt));
-
-
-		// east position error -> east tilt
-		addBlock(new SumGain(&(_guide->pECmd), &one, &(pE), &positiveOne));
-		addBlock(new PidDFB(k_pidPE, PSTR("EAST_"), &(vE), PID_POS_P, PID_POS_I,
-					 PID_POS_D, PID_POS_AWU, PID_POS_LIM));
-		addBlock(new Sink(_cmdEastTilt));
-
-		// down error -> -thrust mix
-		addBlock(new SumGain(&(_guide->pDCmd), &one, &(pD), &negativeOne));
-		addBlock(new PidDFB(k_pidPD, PSTR("DOWN_"), &(vD), PID_POS_Z_P, PID_POS_Z_I,
-				PID_POS_Z_D, PID_POS_Z_AWU, PID_POS_Z_LIM));
-		addBlock(new Sink(_thrustMix));
-
+//		// north position error -> north tilt
+//		addBlock(new SumGain(&(_guide->pNCmd), &one, &(pN), &negativeOne));
+//		addBlock(new PidDFB(k_pidPN, PSTR("NORTH_"), &(vN), PID_POS_P,
+//					 PID_POS_I, PID_POS_D, PID_POS_AWU, PID_POS_LIM));
+//		addBlock(new Sink(_cmdNorthTilt));
+//
+//
+//		// east position error -> east tilt
+//		addBlock(new SumGain(&(_guide->pECmd), &one, &(pE), &positiveOne));
+//		addBlock(new PidDFB(k_pidPE, PSTR("EAST_"), &(vE), PID_POS_P, PID_POS_I,
+//					 PID_POS_D, PID_POS_AWU, PID_POS_LIM));
+//		addBlock(new Sink(_cmdEastTilt));
+//
+//		// down error -> -thrust mix
+//		addBlock(new SumGain(&(_guide->pDCmd), &one, &(pD), &negativeOne));
+//		addBlock(new PidDFB(k_pidPD, PSTR("DOWN_"), &(vD), PID_POS_Z_P, PID_POS_Z_I,
+//				PID_POS_Z_D, PID_POS_Z_AWU, PID_POS_Z_LIM));
+//		addBlock(new Sink(_thrustMix));
 
 
 		/*
@@ -194,7 +181,7 @@ public:
 		 * manual control mixing
 		 * trim thrust mix for hover
 		 */
-		addBlock(new Bridge(this));
+		//addBlock(new Bridge(this));
 
 		/*
 		 * attitude loop
@@ -223,18 +210,13 @@ public:
 		addBlock(new Sink(_yawMix));
 
 		/*
-		 * For manually adjusting gains before output
-		 */
-		addBlock(new GainAdjust(this));
-
-		/*
 		 * thrust trim
 		 */
 
 		// note that the position D -> thrust -1 gain is applied here to the
 
 		//thrust mix
-		addBlock(new SumGain(&_thrustMixTrim, &one, &_thrustMix, &one));
+		addBlock(new SumGain(/*&_thrustMixTrim, &one, */&_thrustMix, &one));
 		addBlock(new Sink(_thrustMix));
 
 
@@ -243,19 +225,19 @@ public:
 		 */
 
 		// left
-		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &one));//, &_yawMix, &one));
+		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &one, &_yawMix, &one));
 		addBlock(new ToServo(_hal->rc[CH_LEFT]));
 
 		// right
-		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &negativeOne));//,&_yawMix, &one));
+		addBlock(new SumGain(&_thrustMix, &one, &_rollMix, &negativeOne,&_yawMix, &one));
 		addBlock(new ToServo(_hal->rc[CH_RIGHT]));
 
 		// front
-		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &one));//, &_yawMix, &negativeOne));
+		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &one, &_yawMix, &negativeOne));
 		addBlock(new ToServo(_hal->rc[CH_FRONT]));
 
 		// back
-		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &negativeOne));//, &_yawMix, &negativeOne));
+		addBlock(new SumGain(&_thrustMix, &one, &_pitchMix, &negativeOne, &_yawMix, &negativeOne));
 		addBlock(new ToServo(_hal->rc[CH_BACK]));
 
 	}
@@ -290,11 +272,12 @@ public:
 			// read mode switch
 			//_hal->debug->println_P(PSTR("update loop"));
 			_hal->rc[CH_MODE]->setPwm(_hal->rc[CH_MODE]->readRadio());
-//			_hal->debug->printf_P(PSTR("normalized mode: %f\n"),
-//					_hal->rc[CH_MODE]->getPosition());
+			_hal->debug->printf_P(PSTR("normalized mode: %f\n"),
+					_hal->rc[CH_MODE]->getPosition());
 
-			// manual
-			if (_hal->rc[CH_MODE]->readRadio() < 1500) {
+			// manual (attitude loop only)
+
+			if (_hal->rc[CH_MODE]->readRadio() > 1350) {
 
 				// read and set pwm
 				_hal->rc[CH_ROLL]->setPwm(_hal->rc[CH_ROLL]->readRadio());
@@ -311,9 +294,9 @@ public:
 				AP_Controller::update(dt);
 
 				_mixRemoteWeight = 1;
-//				_hal->debug->println("manual");
+				_hal->debug->println("manual");
 
-			} else { // auto
+			} else { // auto (attitude and position loop)
 				headingCommand = _guide->headingCommand;
 				if (headingCommand > 180 * deg2Rad)
 					headingCommand -= 360 * deg2Rad;
@@ -323,10 +306,17 @@ public:
 				yaw = _nav->getYaw();
 				groundSpeed = _nav->getGroundSpeed();
 				groundSpeedCommand = _guide->groundSpeedCommand;
+
+				// read radio channel
+				_hal->rc[CH_ROLL]->readRadio();
+				_hal->rc[CH_PITCH]->readRadio();
+				_hal->rc[CH_YAW]->readRadio();
+				_hal->rc[CH_THRUST]->readRadio();
+
 				AP_Controller::update(dt);
 
 				_mixRemoteWeight = 0;
-//				_hal->debug->println("automode");
+				_hal->debug->println("automode");
 
 			}
 
@@ -372,14 +362,9 @@ public:
 //			_hal->debug->printf_P(
 //					PSTR("_cmdRoll, _cmdPitch, _cmdYaw: %f %f %f\n"),
 //					_cmdRoll, _cmdPitch, _cmdYaw);
-		}
 
-	void gainAdjust() {
-		_thrustMix /= 1;
-		_rollMix /= 1;
-		_yawMix  /= 1;
-		_pitchMix /= 1;
-	}
+
+		}
 
 	void bridge() {
 		//-----------------------------------------------------------------

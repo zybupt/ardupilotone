@@ -338,6 +338,7 @@ void setup() {
 		 */
 	}
 
+		/*
 		hal->debug->println_P(PSTR("initializing front range finder"));
 		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 		hal->rangeFinders[0]->init(0);
@@ -363,8 +364,7 @@ void setup() {
 		hal->rangeFinders.push_back(new AP_RangeFinder_MaxsonarLV);
 		hal->rangeFinders[4]->init(4);
 		hal->rangeFinders[4]->set_orientation(0,0,1);
-
-
+		*/
 
 
 	/*
