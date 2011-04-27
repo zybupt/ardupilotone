@@ -252,7 +252,6 @@ public:
     {
         return _timeStamp;
     }
-
 protected:
 	AP_HardwareAbstractionLayer * _hal;
 private:

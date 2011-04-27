@@ -8,33 +8,26 @@
 #include "AP_BatteryVoltage.h"
 #include "AP_ADC.h"
 
-AP_BatteryVoltage::AP_BatteryVoltage() :
-	_batteryVoltage(LOW_VOLTAGE * 1.05)
+float AP_BatteryVoltage::getVoltage()
 {
+	_batteryVoltage = BATTERY_VOLTAGE(analogRead(0)) * .1
+			+ _batteryVoltage * .9;
+
+	for(uint8_t i = 1; i < 4; i++)
+	{
+		if(_batteryVoltage > (BATTERY_VOLTAGE(analogRead(i)) * .1
+				+ _batteryVoltage * .9))
+		{
+			_batteryVoltage = BATTERY_VOLTAGE(analogRead(i)) * .1
+					+ _batteryVoltage * .9;
+		}
+	}
+
+	return _batteryVoltage;
 }
 
-float AP_BatteryVoltage::getVoltage(int cell)
+uint8_t AP_BatteryVoltage::batteryLeft()
 {
-	switch (cell) {
-	case 0:
-		_batteryVoltage = BATTERY_VOLTAGE(analogRead(BATTERY_PIN1)) * .1
-				+ _batteryVoltage * .9;
-		break;
-	case 1:
-		_batteryVoltage = BATTERY_VOLTAGE(analogRead(BATTERY_PIN1)) * .1
-				+ _batteryVoltage * .9;
-		break;
-	case 2:
-		_batteryVoltage = BATTERY_VOLTAGE(analogRead(BATTERY_PIN1)) * .1
-				+ _batteryVoltage * .9;
-		break;
-	case 3:
-		_batteryVoltage = BATTERY_VOLTAGE(analogRead(BATTERY_PIN1)) * .1
-				+ _batteryVoltage * .9;
-		break;
-	default:
-		break;
-		return _batteryVoltage;
-	}
+	return 0; //TODO Define function here - calculate % left.
 }
 

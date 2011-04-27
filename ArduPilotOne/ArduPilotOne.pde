@@ -249,8 +249,10 @@ void ArduPilotOne::callback3(void * data) {
 	/*
 	 * load/loop rate/ram debug
 	 */
+	apo->hal()->load = apo->load();
 	apo->hal()->debug->printf_P(PSTR("load: %d%%\trate: %f Hz\tfree ram: %d bytes\n"),
 			apo->load(),1.0/apo->dt(),freeMemory());
+	apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_SYS_STATUS);
 
 	/*
 	 * adc debug
