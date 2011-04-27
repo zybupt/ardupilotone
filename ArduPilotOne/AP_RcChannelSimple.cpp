@@ -31,7 +31,7 @@ AP_RcChannelSimple::AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name
 		reverse(this,6,reverse,PSTR("REV")),
 		_pwm(0)
 	{
-		setPosition(0.0);
+		setPwm(pwmNeutral);
 	}
 
 
