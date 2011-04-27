@@ -22,13 +22,13 @@ AP_RcChannelSimple::AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name
 			const bool & filter, const bool & reverse) :
 		AP_Var_group(key,name),
 		_rc(rc),
-		ch(this,0,ch,PSTR("CH")),
-		pwmMin(this,3,pwmMin,PSTR("PMIN")),
-		pwmMax(this,4,pwmMax,PSTR("PMAX")),
-		pwmNeutral(this,5,pwmNeutral,PSTR("PNTRL")),
+		ch(this,1,ch,PSTR("CH")),
+		pwmMin(this,2,pwmMin,PSTR("PMIN")),
+		pwmMax(this,3,pwmMax,PSTR("PMAX")),
+		pwmNeutral(this,4,pwmNeutral,PSTR("PNTRL")),
 		//pwmDeadZone(this,6,pwmDeadZone,PSTR("PDEAD")),
-		filter(this,7,filter,PSTR("FLTR")),
-		reverse(this,8,reverse,PSTR("REV")),
+		filter(this,5,filter,PSTR("FLTR")),
+		reverse(this,6,reverse,PSTR("REV")),
 		_pwm(0)
 	{
 		setPosition(0.0);
@@ -87,7 +87,7 @@ AP_RcChannelSimple::_positionToPwm(const float & position)
 {
 	uint16_t pwm;
 	//Serial.printf("position: %f\n", position);
-	float p = position - 0.0;
+	float p = position;
 	if(p < 0)
 		pwm = p * int16_t(pwmNeutral - pwmMin) + pwmNeutral;
 	else

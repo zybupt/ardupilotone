@@ -25,7 +25,6 @@
 namespace apo {
 
 class AP_Controller;
-class AP_Navigator;
 class AP_Guide;
 class AP_HardwareAbstractionLayer;
 
@@ -192,15 +191,6 @@ public:
 				ch[i] = _hal->rc[i]->getPwm();
 			mavlink_msg_rc_channels_raw_send(_channel, ch[0], ch[1], ch[2],
 					ch[3], ch[4], ch[5], ch[6], ch[7], 255);
-			break;
-		}
-
-		case MAVLINK_MSG_ID_SYS_STATUS: {
-
-			mavlink_msg_sys_status_send(_channel, _controller->getMode(),
-					_guide->getMode(), _hal->state(), _hal->load * 10,
-					_hal->battery->getVoltage(), _hal->battery->batteryLeft(),
-					_packetDrops);
 			break;
 		}
 

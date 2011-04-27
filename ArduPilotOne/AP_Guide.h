@@ -26,7 +26,7 @@
 #include "AP_MavlinkCommand.h"
 #include "constants.h"
 #include "AP_Guide.h"
-//#include "AP_CommLink.h"
+#include "AP_CommLink.h"
 
 namespace apo {
 
@@ -55,12 +55,7 @@ public:
 	float pECmd;
 	float pDCmd;
 	static float rEarth;
-    MAV_NAV getMode() const
-    {
-    	return _mode;
-    }
 protected:
-	MAV_NAV _mode;
 	uint8_t _cmdNum;
 	uint8_t _cmdIndex;
 	AP_Navigator * _navigator;
@@ -194,7 +189,7 @@ public:
 
 	void nextCommand() {
 		AP_MavlinkCommand::nextCommand();
-		// XXX: _hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
+		_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 
 	void handleCommand(AP_MavlinkCommand command,

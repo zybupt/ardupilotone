@@ -49,7 +49,6 @@
 #include "AP_Guide.h"
 #include "AP_CommLink.h"
 #include "ArduPilotOne.h"
-#include "AP_BatteryVoltage.h"
 #include "controllers.h"
 /*
  * Required Global Declarations
@@ -249,10 +248,8 @@ void ArduPilotOne::callback3(void * data) {
 	/*
 	 * load/loop rate/ram debug
 	 */
-	apo->hal()->load = apo->load();
 	apo->hal()->debug->printf_P(PSTR("load: %d%%\trate: %f Hz\tfree ram: %d bytes\n"),
 			apo->load(),1.0/apo->dt(),freeMemory());
-	apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_SYS_STATUS);
 
 	/*
 	 * adc debug
@@ -313,9 +310,6 @@ void setup() {
 	 */
 	if (hal->mode()==MODE_LIVE)
 	{
-		hal->debug->println_P(PSTR("initializing battery monitor"));
-		hal->battery = new AP_BatteryVoltage;
-
 		hal->debug->println_P(PSTR("initializing adc"));
 		hal->adc =  new AP_ADC_ADS7844;
 		hal->adc->Init();
