@@ -49,6 +49,7 @@
 #include "AP_Guide.h"
 #include "AP_CommLink.h"
 #include "ArduPilotOne.h"
+#include "AP_BatteryVoltage.h"
 #include "controllers.h"
 /*
  * Required Global Declarations
@@ -310,6 +311,9 @@ void setup() {
 	 */
 	if (hal->mode()==MODE_LIVE)
 	{
+		hal->debug->println_P(PSTR("initializing battery monitor"));
+		hal->battery = new AP_BatteryVoltage;
+
 		hal->debug->println_P(PSTR("initializing adc"));
 		hal->adc =  new AP_ADC_ADS7844;
 		hal->adc->Init();

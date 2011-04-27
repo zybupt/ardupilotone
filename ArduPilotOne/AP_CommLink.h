@@ -194,6 +194,11 @@ public:
 			break;
 		}
 
+		case MAVLINK_MSG_ID_SYS_STATUS: {
+			//mavlink_msg_sys_status_send(_channel,MAV_MODE_)
+			break;
+		}
+
 		case MAVLINK_MSG_ID_WAYPOINT_ACK: {
 			sendText(SEVERITY_LOW, PSTR("waypoint ack"));
 			mavlink_waypoint_ack_t packet;

@@ -39,6 +39,7 @@ public:
 			AP_HardwareAbstractionLayer * hal) :
 		_nav(nav), _guide(guide), _hal(hal) {
 	}
+	MAV_MODE mavMode() { return _mavMode; }
 	class Block {
 	public:
 		Block() :
@@ -87,12 +88,12 @@ public:
 			_blocks[i]->update(dt);
 		}
 	}
-
 protected:
 	Vector<Block *> _blocks;
 	AP_Navigator * _nav;
 	AP_Guide * _guide;
 	AP_HardwareAbstractionLayer * _hal;
+	MAV_MODE _mavMode;
 };
 
 /// Servo Block

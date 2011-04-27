@@ -8,10 +8,33 @@
 #include "AP_BatteryVoltage.h"
 #include "AP_ADC.h"
 
-void AP_BatteryVoltage::ReadBattery()
+AP_BatteryVoltage::AP_BatteryVoltage() :
+	_batteryVoltage(LOW_VOLTAGE * 1.05)
 {
-	battery_voltage1 = BATTERY_VOLTAGE(analogRead(BATTERY_PIN1)) * .1 + battery_voltage1 * .9;
-	battery_voltage2 = BATTERY_VOLTAGE(analogRead(BATTERY_PIN2)) * .1 + battery_voltage2 * .9;
-	battery_voltage3 = BATTERY_VOLTAGE(analogRead(BATTERY_PIN3)) * .1 + battery_voltage3 * .9;
-	battery_voltage4 = BATTERY_VOLTAGE(analogRead(BATTERY_PIN4)) * .1 + battery_voltage4 * .9;
 }
+
+float AP_BatteryVoltage::getVoltage(int cell)
+{
+	switch (cell) {
+	case 0:
+		_batteryVoltage = BATTERY_VOLTAGE(analogRead(BATTERY_PIN1)) * .1
+				+ _batteryVoltage * .9;
+		break;
+	case 1:
+		_batteryVoltage = BATTERY_VOLTAGE(analogRead(BATTERY_PIN1)) * .1
+				+ _batteryVoltage * .9;
+		break;
+	case 2:
+		_batteryVoltage = BATTERY_VOLTAGE(analogRead(BATTERY_PIN1)) * .1
+				+ _batteryVoltage * .9;
+		break;
+	case 3:
+		_batteryVoltage = BATTERY_VOLTAGE(analogRead(BATTERY_PIN1)) * .1
+				+ _batteryVoltage * .9;
+		break;
+	default:
+		break;
+		return _batteryVoltage;
+	}
+}
+

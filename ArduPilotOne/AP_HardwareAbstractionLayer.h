@@ -26,7 +26,7 @@ class Compass;
 class BetterStream;
 class AP_RcChannelSimple;
 class RangeFinder;
-//class Battery;
+class AP_BatteryVoltage;
 
 namespace apo {
 
