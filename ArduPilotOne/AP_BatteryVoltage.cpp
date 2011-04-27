@@ -8,10 +8,14 @@
 #include "AP_BatteryVoltage.h"
 #include "AP_ADC.h"
 
-void AP_BatteryVoltage::ReadBattery()
+float AP_BatteryVoltage::ReadBattery()
 {
-	battery_voltage1 = BATTERY_VOLTAGE(analogRead(BATTERY_PIN1)) * .1 + battery_voltage1 * .9;
-	battery_voltage2 = BATTERY_VOLTAGE(analogRead(BATTERY_PIN2)) * .1 + battery_voltage2 * .9;
-	battery_voltage3 = BATTERY_VOLTAGE(analogRead(BATTERY_PIN3)) * .1 + battery_voltage3 * .9;
-	battery_voltage4 = BATTERY_VOLTAGE(analogRead(BATTERY_PIN4)) * .1 + battery_voltage4 * .9;
+	_batteryVoltage = analogRead(0)*5/1023/0.71;
+	for(uint8_t i = 1; i < 4; i++)
+	{
+		if(_batteryVoltage > (analogRead(i)*5/1023/0.71))
+			_batteryVoltage = analogRead(i)*5/1023/0.71;
+	}
+
+	return _batteryVoltage;
 }

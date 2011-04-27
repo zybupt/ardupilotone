@@ -109,6 +109,14 @@ public:
 
 		// if we don't have enough waypoint for cross track calcs
 		// go home
+
+		_hal->debug->printf_P(PSTR("Voltage: %f\n"),_hal->battery->ReadBattery());
+		_hal->debug->printf_P(PSTR("A0: %f\n"),analogRead(0));
+		_hal->debug->printf_P(PSTR("A1: %f\n"),analogRead(1));
+		_hal->debug->printf_P(PSTR("A2: %f\n"),analogRead(2));
+		_hal->debug->printf_P(PSTR("A3: %f\n"),analogRead(3));
+
+
 		if (AP_MavlinkCommand::number == 1) {
 			AP_MavlinkCommand home(0);
 			headingCommand = home.bearingTo(_navigator->getLat_degInt(),
