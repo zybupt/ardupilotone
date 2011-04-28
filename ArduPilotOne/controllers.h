@@ -19,8 +19,9 @@ private:
 	float headingCommand, yaw, groundSpeed, groundSpeedCommand;
 public:
 	CarController(AP_Var::Key cntrlKey, AP_Var::Key pidStrKey,
-			AP_Var::Key pidThrKey, AP_HardwareAbstractionLayer * hal) :
-		AP_Controller(hal), _group(cntrlKey, PSTR("CNTRL_")),
+			AP_Var::Key pidThrKey, AP_Navigator * nav, AP_Guide * guide,
+			AP_HardwareAbstractionLayer * hal) :
+		AP_Controller(nav, guide, hal), _group(cntrlKey, PSTR("CNTRL_")),
 				_mode(&_group, 1, 0, PSTR("MODE")) {
 		_hal->debug->println_P(PSTR("initializing car controller"));
 
@@ -34,11 +35,11 @@ public:
 
 		//Modified with no deadZone
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7,1200,1500,1800));
+				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7,1200,1500,1800,false,false));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chStr, PSTR("STR_"), APM_RC, 0,1200,1540,1800));
+				new AP_RcChannelSimple(k_chStr, PSTR("STR_"), APM_RC, 0,1200,1540,1800,true,false));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chThr, PSTR("THR_"), APM_RC, 1,1200,1500,1800));
+				new AP_RcChannelSimple(k_chThr, PSTR("THR_"), APM_RC, 1,1200,1500,1800,true,false));
 
 
 		// steering control loop
@@ -124,11 +125,14 @@ public:
 		QuadController * _controller;
 	};
 
-	QuadController(AP_HardwareAbstractionLayer * hal) :
-		AP_Controller(hal), _thrustMixTrim(THRUST_HOVER_OFFSET),
+	QuadController(AP_Navigator * nav, AP_Guide * guide,
+			AP_HardwareAbstractionLayer * hal) :
+		AP_Controller(nav, guide, hal), _thrustMixTrim(THRUST_HOVER_OFFSET),
 				_cmdNorthTilt(0), _cmdEastTilt(0), _cmdRoll(0), _cmdPitch(0),
 				_cmdYaw(0), _thrustMix(0), _rollMix(0), _yawMix(0),
-				_pitchMix(0), _mixRemoteWeight(MIX_REMOTE_WEIGHT) {
+				_pitchMix(0), _mixOffsetWeight(MIX_OFFSET_WEIGHT),
+				_mixRemoteWeight(MIX_REMOTE_WEIGHT), _attOffsetX(ATT_OFFSET_X),
+				_attOffsetY(ATT_OFFSET_Y), _attOffsetZ(ATT_OFFSET_Z) {
 		/*
 		 * allocate radio channels
 		 * the order of the channels has to match the enumeration above
@@ -387,6 +391,10 @@ public:
 			_thrustMix /= cos(_cmdPitch);
 		}
 
+		// "mix offsets"
+		_cmdRoll -= _attOffsetX * _mixOffsetWeight;
+		_cmdPitch -= _attOffsetY * _mixOffsetWeight;
+		_thrustMix -= _attOffsetZ * _mixOffsetWeight;
 		// "mix manual"
 		_cmdRoll += _hal->rc[CH_ROLL]->getPosition() * _mixRemoteWeight;
 		_cmdPitch += _hal->rc[CH_PITCH]->getPosition() * _mixRemoteWeight;
@@ -414,7 +422,12 @@ private:
 	float _yawMix;
 	float _pitchMix;
 
+	float _mixOffsetWeight;
 	float _mixRemoteWeight;
+
+	float _attOffsetX;
+	float _attOffsetY;
+	float _attOffsetZ;
 };
 
 /*

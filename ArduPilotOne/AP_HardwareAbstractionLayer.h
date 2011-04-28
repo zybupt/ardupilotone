@@ -17,11 +17,6 @@
 #include "AP_RcChannelSimple.h"
 #include "AP_RangeFinder.h"
 #include "AP_BatteryVoltage.h"
-//#include "AP_Guide.h"
-//#include "AP_Navigator.h"
-//#include "AP_Controller.h"
-//#include "AP_Controller2.h"
-
 
 class AP_ADC;
 class IMU;
@@ -31,14 +26,10 @@ class Compass;
 class BetterStream;
 class AP_RcChannelSimple;
 class RangeFinder;
-class AP_BatteryVoltage;
+//class Battery;
 
 namespace apo {
 
-class AP_Guide;
-class AP_Navigator;
-class AP_Controller;
-class AP_Controller2;
 class AP_CommLink;
 
 // enumerations
@@ -55,15 +46,6 @@ public:
 		imu(), rc(), gcs(), hil(), debug(), battery(), load()
 	{
 	}
-
-	/**
-	 * Algorithms
-	 */
-	AP_Guide * guide;
-	AP_Navigator * navigator;
-	AP_Controller * controller;
-	AP_Controller2 * controller2;
-
 	/**
 	 * Sensors
 	 */

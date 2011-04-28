@@ -22,8 +22,7 @@ public:
 			const uint16_t & pwmMin=1200, 
 			const uint16_t & pwmNeutral=1500, const uint16_t & pwmMax=1800,
 			//const uint16_t & pwmDeadZone=1,
-			//const bool & filter=true,
-			const bool & reverse=false);
+			const bool & filter=true, const bool & reverse=false);
 
 	// configuration
 	AP_Uint8 ch;
@@ -31,7 +30,7 @@ public:
 	AP_Uint16 pwmNeutral;
 	AP_Uint16 pwmMax;
 	//AP_Uint16 pwmDeadZone;
-	//AP_Bool filter;
+	AP_Bool filter;
 	AP_Bool reverse;
 
 	// set
@@ -44,7 +43,7 @@ public:
 	float getPosition() { return _pwmToPosition(_pwm); }
 
 	// did our read come in 50µs below the min?
-	//bool failSafe() { _pwm < (pwmMin - 50); }
+	bool failSafe() { _pwm < (pwmMin - 50); }
 
 private:
 

@@ -19,8 +19,7 @@ AP_RcChannelSimple::AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name
 			const uint16_t & pwmMin, 
 			const uint16_t & pwmNeutral, const uint16_t & pwmMax,
 			//const uint16_t & pwmDeadZone,
-			//const bool & filter,
-			const bool & reverse) :
+			const bool & filter, const bool & reverse) :
 		AP_Var_group(key,name),
 		_rc(rc),
 		ch(this,0,ch,PSTR("CH")),
@@ -28,7 +27,7 @@ AP_RcChannelSimple::AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name
 		pwmMax(this,4,pwmMax,PSTR("PMAX")),
 		pwmNeutral(this,5,pwmNeutral,PSTR("PNTRL")),
 		//pwmDeadZone(this,6,pwmDeadZone,PSTR("PDEAD")),
-		//filter(this,7,filter,PSTR("FLTR")),
+		filter(this,7,filter,PSTR("FLTR")),
 		reverse(this,8,reverse,PSTR("REV")),
 		_pwm(0)
 	{
@@ -52,14 +51,14 @@ AP_RcChannelSimple::setPwm(uint16_t pwm)
 	//Serial.printf("pwm after reverse: %d\n", pwm);
 
 	// apply filter
-	/*if(filter){
+	if(filter){
 		if(_pwm == 0)
 			_pwm = pwm;
 		else
 			_pwm = ((pwm + _pwm) >> 1);		// Small filtering
 	}else{
 		_pwm = pwm;
-	}*/
+	}
 
 	//Serial.printf("pwm after filter: %d\n", _pwm);
 

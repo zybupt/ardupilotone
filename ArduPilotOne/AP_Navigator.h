@@ -26,8 +26,6 @@
 
 namespace apo {
 
-class AP_HardwareAbstractionLayer;
-
 /// Navigator class
 class AP_Navigator {
 public:
