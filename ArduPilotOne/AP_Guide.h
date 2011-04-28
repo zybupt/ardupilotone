@@ -27,9 +27,11 @@
 #include "constants.h"
 #include "AP_Guide.h"
 //#include "AP_CommLink.h"
+#include "AP_HardwareAbstractionLayer.h"
 
 namespace apo {
 
+class AP_HardwareAbstractionLayer;
 
 /// Guide class
 class AP_Guide {

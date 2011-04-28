@@ -41,8 +41,8 @@ enum {
 class AP_CommLink {
 public:
 
-	AP_CommLink(FastSerial * link, AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller, AP_HardwareAbstractionLayer * hal) :
-		_link(link), _navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
+	AP_CommLink(FastSerial * link, AP_HardwareAbstractionLayer * hal) :
+		_link(link), _hal(hal) {
 	}
 	virtual void send() = 0;
 	virtual void receive() = 0;
@@ -55,17 +55,13 @@ public:
 
 protected:
 	FastSerial * _link;
-	AP_Navigator * _navigator;
-	AP_Guide * _guide;
-	AP_Controller * _controller;
 	AP_HardwareAbstractionLayer * _hal;
 };
 
 class MavlinkComm: public AP_CommLink {
 public:
-	MavlinkComm(FastSerial * link, AP_Navigator * nav, AP_Guide * guide,
-			AP_Controller * controller, AP_HardwareAbstractionLayer * hal) :
-				AP_CommLink(link, nav, guide, controller, hal),
+	MavlinkComm(FastSerial * link,AP_HardwareAbstractionLayer * hal) :
+				AP_CommLink(link, hal),
 
 				// options
 				_useRelativeAlt(true),
@@ -123,24 +119,24 @@ public:
 
 		case MAVLINK_MSG_ID_ATTITUDE: {
 			mavlink_msg_attitude_send(_channel, timeStamp,
-					_navigator->getRoll(), _navigator->getPitch(),
-					_navigator->getYaw(), _navigator->getRollRate(),
-					_navigator->getPitchRate(), _navigator->getYawRate());
+					_hal->navigator->getRoll(), _hal->navigator->getPitch(),
+					_hal->navigator->getYaw(), _hal->navigator->getRollRate(),
+					_hal->navigator->getPitchRate(), _hal->navigator->getYawRate());
 			break;
 		}
 
 		case MAVLINK_MSG_ID_GLOBAL_POSITION: {
 			mavlink_msg_global_position_send(_channel, timeStamp,
-					_navigator->getLat()*rad2Deg, _navigator->getLon()*rad2Deg,
-					_navigator->getAlt(), _navigator->getVN(),
-					_navigator->getVE(), _navigator->getVD());
+					_hal->navigator->getLat()*rad2Deg, _hal->navigator->getLon()*rad2Deg,
+					_hal->navigator->getAlt(), _hal->navigator->getVN(),
+					_hal->navigator->getVE(), _hal->navigator->getVD());
 			break;
 		}
 
 		case MAVLINK_MSG_ID_GPS_RAW: {
 			mavlink_msg_gps_raw_send(_channel,timeStamp,_hal->gps->status(),
-					_navigator->getLat()*rad2Deg, _navigator->getLon()*rad2Deg,_navigator->getAlt(), 0,0,
-					_navigator->getGroundSpeed(),_navigator->getYaw()*rad2Deg);
+					_hal->navigator->getLat()*rad2Deg, _hal->navigator->getLon()*rad2Deg,_hal->navigator->getAlt(), 0,0,
+					_hal->navigator->getGroundSpeed(),_hal->navigator->getYaw()*rad2Deg);
 			break;
 		}
 
@@ -212,8 +208,8 @@ public:
 	  				prev_cell = ((temp*5/1023)/0.28);
 	  		}
 
-	                        mavlink_msg_sys_status_send(_channel, _controller->getMode(),
-	                                        _guide->getMode(), _hal->state(), _hal->load * 10,
+	                        mavlink_msg_sys_status_send(_channel, _hal->controller->getMode(),
+	                        		_hal->guide->getMode(), _hal->state(), _hal->load * 10,
 	                                        batteryVoltage*1000,(batteryVoltage - 3.3)/(4.2-3.3)*1000,
 	                                        _packetDrops);
 	                        break;
@@ -372,13 +368,13 @@ private:
 		mavlink_gps_raw_t packet;
 		mavlink_msg_gps_raw_decode(msg, &packet);
 
-		_navigator->setTimeStamp(timeStamp);
-		_navigator->setLat(packet.lat*deg2Rad);
-		_navigator->setLon(packet.lon*deg2Rad);
-		_navigator->setAlt(packet.alt);
-		_navigator->setHeading(packet.hdg*deg2Rad);
-		_navigator->setGroundSpeed(packet.v);
-		_navigator->setAirSpeed(packet.v);
+		_hal->navigator->setTimeStamp(timeStamp);
+		_hal->navigator->setLat(packet.lat*deg2Rad);
+		_hal->navigator->setLon(packet.lon*deg2Rad);
+		_hal->navigator->setAlt(packet.alt);
+		_hal->navigator->setHeading(packet.hdg*deg2Rad);
+		_hal->navigator->setGroundSpeed(packet.v);
+		_hal->navigator->setAirSpeed(packet.v);
 		//_hal->debug->printf_P(PSTR("received hil gps raw packet\n"));
 		/*
 		_hal->debug->printf_P(PSTR("received lat: %f deg\tlon: %f deg\talt: %f m\n"),
@@ -395,13 +391,13 @@ private:
 		mavlink_msg_attitude_decode(msg, &packet);
 
 		// set dcm hil sensor
-		_navigator->setTimeStamp(timeStamp);
-		_navigator->setRoll(packet.roll);
-		_navigator->setPitch(packet.pitch);
-		_navigator->setYaw(packet.yaw);
-		_navigator->setRollRate(packet.rollspeed);
-		_navigator->setPitchRate(packet.pitchspeed);
-		_navigator->setYawRate(packet.yawspeed);
+		_hal->navigator->setTimeStamp(timeStamp);
+		_hal->navigator->setRoll(packet.roll);
+		_hal->navigator->setPitch(packet.pitch);
+		_hal->navigator->setYaw(packet.yaw);
+		_hal->navigator->setRollRate(packet.rollspeed);
+		_hal->navigator->setPitchRate(packet.pitchspeed);
+		_hal->navigator->setYawRate(packet.yawspeed);
 		//_hal->debug->printf_P(PSTR("received hil attitude packet\n"));
 		break;
 	}

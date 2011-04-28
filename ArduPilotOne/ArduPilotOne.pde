@@ -63,10 +63,9 @@ namespace apo {
 
 class AP_HardwareAbstractionLayer;
 
-ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller,
-		AP_HardwareAbstractionLayer * hal) :
+ArduPilotOne::ArduPilotOne(AP_HardwareAbstractionLayer * hal) :
 	Loop(loop0Rate, callback0, this),
-			_navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
+			_hal(hal) {
 
 	uint32_t timeStart = millis();
 
@@ -79,7 +78,7 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 		hal->hil->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 		delay(1000);
 		if (hal->mode() == MODE_LIVE) {
-			_navigator->updateSlow(0);
+			_hal->navigator->updateSlow(0);
 			if (_hal->gps) {
 				if (hal->gps->fix) {
 					break;
@@ -102,7 +101,7 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 		} else if(hal->mode() == MODE_HIL_CNTL){ // hil
 			_hal->hil->receive();
 			Serial.println("HIL Recieve Called");
-			if (_navigator->getTimeStamp() != 0) {
+			if (_hal->navigator->getTimeStamp() != 0) {
 				// give hil a chance to send some packets
 				for (int i=0;i<5;i++) {
 					hal->debug->println_P(PSTR("reading initial hil packets"));
@@ -115,9 +114,9 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 		}
 	}
 	AP_MavlinkCommand home(0);
-	home.setAlt(_navigator->getAlt());
-	home.setLat(_navigator->getLat());
-	home.setLon(_navigator->getLon());
+	home.setAlt(_hal->navigator->getAlt());
+	home.setLat(_hal->navigator->getLat());
+	home.setLon(_hal->navigator->getLon());
 	home.save();
 	_hal->debug->printf_P(PSTR("home before load lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
 	home.load();
@@ -145,8 +144,8 @@ void ArduPilotOne::callback0(void * data) {
 	/*
 	 * ahrs update
 	 */
-	if (apo->navigator())
-		apo->navigator()->updateFast(1.0/loop0Rate);
+	if (apo->hal()->navigator)
+		apo->hal()->navigator->updateFast(1.0/loop0Rate);
 }
 
 void ArduPilotOne::callback1(void * data) {
@@ -165,16 +164,16 @@ void ArduPilotOne::callback1(void * data) {
 	/*
      * update control laws
 	 */
-	if (apo->guide())
-		apo->guide()->update();
+	if (apo->hal()->guide)
+		apo->hal()->guide->update();
 
 	/*
 	 * update control laws
 	 */
-	if (apo->controller())
+	if (apo->hal()->controller)
 	{
 		//apo->hal()->debug->println_P(PSTR("updating controller"));
-		apo->controller()->update(1./loop1Rate);
+		apo->hal()->controller->update(1./loop1Rate);
 	}
 	/*
 	char msg[50];
@@ -203,8 +202,8 @@ void ArduPilotOne::callback2(void * data) {
 	/*
 	 * slow navigation loop update
 	 */
-	if (apo->navigator()) {
-		apo->navigator()->updateSlow(1.0/loop2Rate);
+	if (apo->hal()->navigator) {
+		apo->hal()->navigator->updateSlow(1.0/loop2Rate);
 	}
 
 	/*
@@ -379,34 +378,33 @@ void setup() {
 	/*
 	 * Guide
 	 */
-	AP_Guide * guide = new MavlinkGuide(k_guide,navigator,hal);
+	hal->guide = new MavlinkGuide(k_guide,navigator,hal);
 
 	/*
 	 * Controller Initialization
 	 */
-	AP_Controller * controller = NULL;
 	switch(vehicle)
 	{
 	case VEHICLE_CAR:
-		controller = new CarController(k_cntrl,k_pidStr,k_pidThr,navigator,guide,hal);
+		hal->controller = new CarController(k_cntrl,k_pidStr,k_pidThr,hal);
 		break;
 	case VEHICLE_QUAD:
-		controller = new QuadController(navigator,guide,hal);
+		hal->controller = new QuadController(hal);
 		break;
 	}
 
 	/*
 	 * CommLinks
 	 */
-	hal->gcs = new MavlinkComm(&Serial3,navigator,guide,controller,hal);
-	hal->hil = new MavlinkComm(&Serial1,navigator,guide,controller,hal);
+	hal->gcs = new MavlinkComm(&Serial3,hal);
+	hal->hil = new MavlinkComm(&Serial1,hal);
 
 	/*
 	 * Start the autopilot
 	 */
 	hal->debug->printf_P(PSTR("initializing ArduPilotOne\n"));
 	hal->debug->printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
-	apoGlobal = new apo::ArduPilotOne(navigator,guide,controller,hal);
+	apoGlobal = new apo::ArduPilotOne(hal);
 }
 
 void loop() {

@@ -54,21 +54,11 @@ public:
 	/**
 	 * Default constructor
 	 */
-	ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller,
-			AP_HardwareAbstractionLayer * hal);
+	ArduPilotOne(AP_HardwareAbstractionLayer * hal);
 
 	/**
 	 * Accessors
 	 */
-	AP_Navigator * navigator() {
-		return _navigator;
-	}
-	AP_Guide * guide() {
-		return _guide;
-	}
-	AP_Controller * controller() {
-		return _controller;
-	}
 	AP_HardwareAbstractionLayer * hal() {
 		return _hal;
 	}
@@ -117,9 +107,6 @@ private:
 	/**
 	 * Components
 	 */
-	AP_Navigator * _navigator;
-	AP_Guide * _guide;
-	AP_Controller * _controller;
 	AP_HardwareAbstractionLayer * _hal;
 
 	/**

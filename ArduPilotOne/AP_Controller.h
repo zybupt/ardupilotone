@@ -27,6 +27,8 @@
 
 namespace apo {
 
+class AP_HardwareAbstractionLayer;
+
 const float one = 1.0;
 const float zero = 0.0;
 const float negativeOne = -1.0;
@@ -35,9 +37,7 @@ const float positiveOne = 1.0;
 /// Controller class
 class AP_Controller {
 public:
-	AP_Controller(AP_Navigator * nav, AP_Guide * guide,
-			AP_HardwareAbstractionLayer * hal) :
-		_nav(nav), _guide(guide), _hal(hal) {
+	AP_Controller(AP_HardwareAbstractionLayer * hal) : _hal(hal) {
 	}
 
 	MAV_MODE getMode() { return _mode; }
@@ -256,6 +256,15 @@ protected:
 	AP_Float _iMax; /// integrator saturation
 	AP_Float _yMax; /// output saturation
 	AP_Uint8 _fCut; /// derivative low-pass cut freq (Hz)
+};
+
+/// Source block
+/// inserts variable to output channel
+class Source: public AP_Controller::Block {
+public:
+	Source(float & var) {
+		_output.push_back(var);
+	}
 };
 
 /// Sink block
