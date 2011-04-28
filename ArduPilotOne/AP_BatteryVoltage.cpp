@@ -7,15 +7,35 @@
 
 #include "AP_BatteryVoltage.h"
 #include "AP_ADC.h"
+#include <Wire.h>
+#include <AP_RangeFinder.h>     // Range finder library
 
-float AP_BatteryVoltage::ReadBattery()
+int AP_BatteryVoltage::ReadBattery()
 {
-	_batteryVoltage = analogRead(0)*5/1023/0.71;
-	for(uint8_t i = 1; i < 4; i++)
-	{
-		if(_batteryVoltage > (analogRead(i)*5/1023/0.71))
-			_batteryVoltage = analogRead(i)*5/1023/0.71;
-	}
+	AP_RangeFinder_MaxsonarLV a0, a1, a2, a3;
+	AP_ADC_ADS7844	adc;
+	adc.Init();            // APM ADC library initialization
+
+	a0.init(0, &adc);
+	a1.init(1, &adc);
+	a2.init(2, &adc);
+	a3.init(3, &adc);
+
+
+//	_batteryVoltage = (analogRead(0)*5/1023)/0.28;
+//	for(uint8_t i = 1; i < 4; i++)
+//	{
+//		if(_batteryVoltage > (analogRead(i)*5/1023)/0.28)
+//			_batteryVoltage = (analogRead(i)*5/1023)/0.28;
+//	}
+
+		_batteryVoltage = (analogRead(0)*5/1023/0.28);/* + _batteryVoltage * 0.9;*/
+//		for(uint8_t i = 1; i < 3; i++)
+//		{
+//			if(_batteryVoltage > (analogRead(i)))
+//				_batteryVoltage = analogRead(i);
+//		}
 
 	return _batteryVoltage;
+
 }

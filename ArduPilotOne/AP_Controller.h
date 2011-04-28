@@ -39,6 +39,9 @@ public:
 			AP_HardwareAbstractionLayer * hal) :
 		_nav(nav), _guide(guide), _hal(hal) {
 	}
+
+	MAV_MODE getMode() { return _mode; }
+
 	class Block {
 	public:
 		Block() :
@@ -90,6 +93,7 @@ public:
 
 protected:
 	Vector<Block *> _blocks;
+	MAV_MODE _mode;
 	AP_Navigator * _nav;
 	AP_Guide * _guide;
 	AP_HardwareAbstractionLayer * _hal;

@@ -26,7 +26,7 @@
 #include "AP_MavlinkCommand.h"
 #include "constants.h"
 #include "AP_Guide.h"
-#include "AP_CommLink.h"
+//#include "AP_CommLink.h"
 
 namespace apo {
 
@@ -55,7 +55,15 @@ public:
 	float pECmd;
 	float pDCmd;
 	static float rEarth;
+	 MAV_NAV getMode() const
+   {
+	   	return _mode;
+	}
+
 protected:
+
+
+	MAV_NAV _mode;
 	uint8_t _cmdNum;
 	uint8_t _cmdIndex;
 	AP_Navigator * _navigator;
@@ -102,6 +110,26 @@ public:
 				AP_MavlinkCommand::previousIndex());
 				*/
 
+		  float batteryVoltage, prev_cell;
+		  float temp = (float)analogRead(0);
+			  		batteryVoltage = ((temp*5/1023)/0.28);/* + _batteryVoltage * 0.9;*/
+//			  		prev_cell = ((analogRead(0)*5/1023)/0.28);
+//			  		for(uint8_t i = 1; i < 4; i++)
+//			  		{
+//
+//			  			if(batteryVoltage > ((analogRead(i)*5/1023)/0.28 - prev_cell))
+//			  			{
+//			  				batteryVoltage = (analogRead(i)*5/1023)/0.28 - prev_cell;
+//			  			}
+//			  				prev_cell = ((analogRead(i)*5/1023)/0.28);
+//			  		}
+			  		_hal->debug->printf_P(PSTR("temp: %f\n"),temp);
+		_hal->debug->printf_P(PSTR("Battery Voltage: %f\n"),batteryVoltage);
+		_hal->debug->printf_P(PSTR("ADC0: %d\n"),analogRead(0));
+		_hal->debug->printf_P(PSTR("ADC0: %d\n"),analogRead(1));
+		_hal->debug->printf_P(PSTR("ADC0: %d\n"),analogRead(2));
+		_hal->debug->printf_P(PSTR("ADC0: %d\n"),analogRead(3));
+
 		AP_MavlinkCommand command = AP_MavlinkCommand(
 				AP_MavlinkCommand::currentIndex);
 		AP_MavlinkCommand previousCommand = AP_MavlinkCommand(
@@ -109,14 +137,6 @@ public:
 
 		// if we don't have enough waypoint for cross track calcs
 		// go home
-
-		_hal->debug->printf_P(PSTR("Voltage: %f\n"),_hal->battery->ReadBattery());
-		_hal->debug->printf_P(PSTR("A0: %f\n"),analogRead(0));
-		_hal->debug->printf_P(PSTR("A1: %f\n"),analogRead(1));
-		_hal->debug->printf_P(PSTR("A2: %f\n"),analogRead(2));
-		_hal->debug->printf_P(PSTR("A3: %f\n"),analogRead(3));
-
-
 		if (AP_MavlinkCommand::number == 1) {
 			AP_MavlinkCommand home(0);
 			headingCommand = home.bearingTo(_navigator->getLat_degInt(),
@@ -197,7 +217,7 @@ public:
 
 	void nextCommand() {
 		AP_MavlinkCommand::nextCommand();
-		_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
+		//_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 
 	void handleCommand(AP_MavlinkCommand command,
