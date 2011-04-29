@@ -33,14 +33,17 @@ AP_RcChannelSimple::AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name
 	{
 		Serial.print("pwm after ctor: "); Serial.println(pwmNeutral);
 		if (rcMode == RC_MODE_IN) return;
-		Serial.print("pwm set for ch: "); Serial.println(ch);
+		Serial.print("pwm set for ch: "); Serial.println(int(ch));
 		rc.OutputCh(ch,pwmNeutral);
 
 	}
 
 
 uint16_t AP_RcChannelSimple::readRadio() {
-	if (_rcMode == RC_MODE_OUT) return _pwmNeutral; // if this happens give a safe value of neutral
+	if (_rcMode == RC_MODE_OUT) {
+		Serial.print("tryng to read from output channel: "); Serial.println(int(_ch));
+		return _pwmNeutral; // if this happens give a safe value of neutral
+	}
 	return _rc.InputCh(_ch);
 }
 
@@ -57,6 +60,7 @@ AP_RcChannelSimple::setPwm(uint16_t pwm)
 	// apply saturation
 	if (_pwm > _pwmMax) _pwm = _pwmMax;
 	if (_pwm < _pwmMin) _pwm = _pwmMin;
+	_pwm = pwm;
 
 	//Serial.print("ch: "); Serial.print(ch); Serial.print(" pwm: "); Serial.println(pwm);
 	if (_rcMode == RC_MODE_IN) return;

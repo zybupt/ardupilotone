@@ -16,7 +16,6 @@
 #include "AP_Common.h"
 #include "AP_RcChannelSimple.h"
 #include "AP_RangeFinder.h"
-#include "AP_BatteryVoltage.h"
 
 class AP_ADC;
 class IMU;
@@ -26,7 +25,6 @@ class Compass;
 class BetterStream;
 class AP_RcChannelSimple;
 class RangeFinder;
-//class Battery;
 
 namespace apo {
 
@@ -43,13 +41,12 @@ public:
 	AP_HardwareAbstractionLayer(halMode_t mode, board_t board, vehicle_t vehicle) :
 		_mode(mode), _board(board), _vehicle(vehicle), adc(),
 		gps(), baro(), compass(), rangeFinders(),
-		imu(), rc(), gcs(), hil(), debug(), battery(), load()
+		imu(), rc(), gcs(), hil(), debug(), load()
 	{
 	}
 	/**
 	 * Sensors
 	 */
-	AP_BatteryVoltage * battery;
 	AP_ADC * adc;
 	GPS * gps;
 	APM_BMP085_Class * baro;
