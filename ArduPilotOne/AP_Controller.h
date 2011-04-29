@@ -258,21 +258,25 @@ protected:
 	AP_Uint8 _fCut; /// derivative low-pass cut freq (Hz)
 };
 
+/// Source block
+/// places variable in output
+class Source: public AP_Controller::Block {
+public:
+	Source(float & var)
+	{
+		_output.push_back(var);
+	}
+	virtual void update(const float & dt) {};
+};
+
 /// Sink block
 /// saves input port to variable
 class Sink: public AP_Controller::Block {
 public:
-	Sink(float & var, uint8_t port = 0) :
-		_var(var), _port(port) {
+	Sink(float & var, uint8_t port = 0) {
+		var = input(port);
 	}
-	virtual void update(const float & dt) {
-		//Serial.println("calling sink update");
-		//Serial.println("input: "); Serial.println(input(0));
-		_var = input(_port);
-	}
-protected:
-	float & _var;
-	uint8_t _port;
+	virtual void update(const float & dt) {};
 };
 
 /// Saturate block

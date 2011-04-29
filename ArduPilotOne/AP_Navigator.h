@@ -23,6 +23,7 @@
 #include "AP_MavlinkCommand.h"
 #include "constants.h"
 #include "APO_Config.h"
+#include "AP_Var_keys.h"
 
 namespace apo {
 
@@ -303,7 +304,7 @@ public:
 
 		if (_hal->mode() == MODE_LIVE) {
 			if (_hal->adc)
-				_hal->imu = new AP_IMU_Oilpan(_hal->adc, _imuOffsetAddress);
+				_hal->imu = new AP_IMU_Oilpan(_hal->adc, k_sensorCalib);
 			if (_hal->imu)
 				_dcm = new AP_DCM(_hal->imu, _hal->gps, _hal->compass);
 			if (_hal->compass) {
@@ -311,7 +312,6 @@ public:
 
 			}
 		}
-		calibrate();
 	}
 	virtual void calibrate() {
 		// TODO: handle cold restart
@@ -363,14 +363,6 @@ public:
 			setPitchRate(_dcm->get_gyro().y);
 			setYawRate(_dcm->get_gyro().z);
 
-
-
-			// need to use lat/lon and convert
-			AP_MavlinkCommand home(0);
-			setPN((getLat() - home.getLat())/rEarth);
-			setPE((getLon() - home.getLon())*cos(home.getLat())/rEarth);
-			setPD(-(getAlt() - home.getAlt()));
-
 			/*
 			 * accel/gyro debug
 			 */
@@ -404,6 +396,13 @@ public:
 			_hal->compass->calculate(getRoll(),getPitch());
 			_hal->compass->null_offsets(_dcm->get_dcm_matrix());
 		}
+
+		// need to use lat/lon and convert
+		// TODO make a local copy of home location, EEPROM takes way too long to read
+//		AP_MavlinkCommand home(0);
+//		setPN((getLat() - home.getLat())/rEarth);
+//		setPE((getLon() - home.getLon())*cos(home.getLat())/rEarth);
+//		setPD(-(getAlt() - home.getAlt()));
 	}
 	void updateGpsLight(void) {
 		// GPS LED on if we have a fix or Blink GPS LED if we are receiving data

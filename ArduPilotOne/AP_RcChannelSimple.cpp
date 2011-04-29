@@ -15,28 +15,33 @@
 #include <AP_Common.h>
 #include <HardwareSerial.h>
 
+namespace apo {
+
 AP_RcChannelSimple::AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name, APM_RC_Class & rc, const uint8_t & ch,
-			const uint16_t & pwmMin, 
+			const uint16_t & pwmMin,
 			const uint16_t & pwmNeutral, const uint16_t & pwmMax,
-			//const uint16_t & pwmDeadZone,
-			const bool & filter, const bool & reverse) :
+			const rcMode_t & rcMode, const bool & reverse) :
 		AP_Var_group(key,name),
 		_rc(rc),
-		ch(this,0,ch,PSTR("CH")),
-		pwmMin(this,3,pwmMin,PSTR("PMIN")),
-		pwmMax(this,4,pwmMax,PSTR("PMAX")),
-		pwmNeutral(this,5,pwmNeutral,PSTR("PNTRL")),
-		//pwmDeadZone(this,6,pwmDeadZone,PSTR("PDEAD")),
-		filter(this,7,filter,PSTR("FLTR")),
-		reverse(this,8,reverse,PSTR("REV")),
-		_pwm(0)
+		_ch(this,0,ch,PSTR("CH")),
+		_pwmMin(this,1,pwmMin,PSTR("PMIN")),
+		_pwmMax(this,2,pwmMax,PSTR("PMAX")),
+		_pwmNeutral(this,3,pwmNeutral,PSTR("PNTRL")),
+		_rcMode(rcMode),
+		_reverse(this,4,reverse,PSTR("REV")),
+		_pwm(pwmNeutral)
 	{
-		setPosition(0.0);
+		Serial.print("pwm after ctor: "); Serial.println(pwmNeutral);
+		if (rcMode == RC_MODE_IN) return;
+		Serial.print("pwm set for ch: "); Serial.println(ch);
+		rc.OutputCh(ch,pwmNeutral);
+
 	}
 
 
 uint16_t AP_RcChannelSimple::readRadio() {
-	return _rc.InputCh(ch);
+	if (_rcMode == RC_MODE_OUT) return _pwmNeutral; // if this happens give a safe value of neutral
+	return _rc.InputCh(_ch);
 }
 
 void
@@ -46,32 +51,16 @@ AP_RcChannelSimple::setPwm(uint16_t pwm)
 	//Serial.printf("reverse: %s\n", (reverse)?"true":"false");
 	
 	// apply reverse
-	if(reverse) pwm = int16_t(pwmNeutral-pwm) + pwmNeutral;
-
+	if(_reverse) pwm = int16_t(_pwmNeutral-pwm) + _pwmNeutral;
 	//Serial.printf("pwm after reverse: %d\n", pwm);
 
-	// apply filter
-	if(filter){
-		if(_pwm == 0)
-			_pwm = pwm;
-		else
-			_pwm = ((pwm + _pwm) >> 1);		// Small filtering
-	}else{
-		_pwm = pwm;
-	}
-
-	//Serial.printf("pwm after filter: %d\n", _pwm);
-
-	// apply deadzone
-	//_pwm = (abs(_pwm - pwmNeutral) < pwmDeadZone) ? uint16_t(pwmNeutral) : _pwm;
-	//Serial.printf("pwm after deadzone: %d\n", _pwm);
-
 	// apply saturation
-	if (_pwm > pwmMax) _pwm = pwmMax;
-	if (_pwm < pwmMin) _pwm = pwmMin;
+	if (_pwm > _pwmMax) _pwm = _pwmMax;
+	if (_pwm < _pwmMin) _pwm = _pwmMin;
 
 	//Serial.print("ch: "); Serial.print(ch); Serial.print(" pwm: "); Serial.println(pwm);
-	_rc.OutputCh(ch,_pwm);
+	if (_rcMode == RC_MODE_IN) return;
+	_rc.OutputCh(_ch,_pwm);
 }
 
 void
@@ -87,12 +76,13 @@ AP_RcChannelSimple::_positionToPwm(const float & position)
 {
 	uint16_t pwm;
 	//Serial.printf("position: %f\n", position);
-	float p = position - 0.0;
-	if(p < 0)
-		pwm = p * int16_t(pwmNeutral - pwmMin) + pwmNeutral;
+	if(position < 0)
+		pwm = position * int16_t(_pwmNeutral - _pwmMin) + _pwmNeutral;
 	else
-		pwm = p * int16_t(pwmMax - pwmNeutral) + pwmNeutral;
-	constrain(pwm,uint16_t(pwmMin),uint16_t(pwmMax));
+		pwm = position * int16_t(_pwmMax - _pwmNeutral) + _pwmNeutral;
+
+	if (pwm > _pwmMax) pwm = _pwmMax;
+	if (pwm < _pwmMin) pwm = _pwmMin;
 	return pwm;
 }
 
@@ -100,14 +90,17 @@ float
 AP_RcChannelSimple::_pwmToPosition(const uint16_t & pwm)
 {
 	float position;
-	if(pwm < pwmNeutral)
-		position = 1.0 * int16_t(pwm - pwmNeutral)/
-			int16_t(pwmNeutral - pwmMin);
+	if(pwm < _pwmNeutral)
+		position = 1.0 * int16_t(pwm - _pwmNeutral)/
+			int16_t(_pwmNeutral - _pwmMin);
 	else
-		position = 1.0 * int16_t(pwm - pwmNeutral)/
-			int16_t(pwmMax - pwmNeutral) ;
-	constrain(position,-1.0,1.0);
+		position = 1.0 * int16_t(pwm - _pwmNeutral)/
+			int16_t(_pwmMax - _pwmNeutral) ;
+	if (position > 1) position = 1;
+	if (position < -1) position = -1;
 	return position;
+}
+
 }
 
 // ------------------------------------------

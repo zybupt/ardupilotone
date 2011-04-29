@@ -68,7 +68,14 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	Loop(loop0Rate, callback0, this),
 			_navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
 
+	/*
+	 * Calibration
+	 */
+	navigator->calibrate();
+
+	// start clock
 	uint32_t timeStart = millis();
+	uint16_t gpsWaitTime = 1000; // 1 second wait for gps
 
 	/*
 	 * Look for valid initial state
@@ -83,16 +90,13 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 			if (_hal->gps) {
 				if (hal->gps->fix) {
 					break;
-				} else if (millis() - timeStart > 6000) { // start anyway in 1 minute
-					hal->gcs->sendText(SEVERITY_LOW,PSTR("run w/o gps status, in 5 s"));
-					hal->debug->printf_P(PSTR("run w/o gps status, in 5 s\n"));
-					delay(5000);
+				} else if (millis() - timeStart > gpsWaitTime) { // start anyway in 5 seconds
 					break;
 				} else {
 					char msg[50];
-	     			sprintf(msg, "gps wait: %d s", (6000+timeStart-millis())/1000);
+	     			sprintf(msg, "gps wait: %d s", (gpsWaitTime-(millis()-timeStart))/1000);
 					hal->gcs->sendText(SEVERITY_LOW, msg);
-					hal->debug->printf_P(PSTR("gps wait: %d s\n"), (6000+timeStart-millis())/1000);
+					hal->debug->printf_P(PSTR("gps wait: %d s\n"), (gpsWaitTime-(millis()-timeStart))/1000);
 					hal->gcs->sendText(SEVERITY_LOW,msg);
 					hal->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
 				}
@@ -122,8 +126,6 @@ ArduPilotOne::ArduPilotOne(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	_hal->debug->printf_P(PSTR("home before load lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
 	home.load();
 	_hal->debug->printf_P(PSTR("home after load lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
-	hal->gcs->sendText(SEVERITY_LOW,PSTR("start in 5 seconds"));
-	delay(5000);
 
 	/*
 	 * Attach loops
@@ -192,10 +194,10 @@ void ArduPilotOne::callback2(void * data) {
 	 */
 	if (apo->hal()->gcs) {
 		// send messages
-		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
+		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
 		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
+		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
 		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
 		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_SCALED_IMU);
 	}
@@ -406,6 +408,7 @@ void setup() {
 	 */
 	hal->debug->printf_P(PSTR("initializing ArduPilotOne\n"));
 	hal->debug->printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
+
 	apoGlobal = new apo::ArduPilotOne(navigator,guide,controller,hal);
 }
 

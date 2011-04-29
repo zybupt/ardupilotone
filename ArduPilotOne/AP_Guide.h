@@ -109,27 +109,6 @@ public:
 				AP_MavlinkCommand::currentIndex.get(),
 				AP_MavlinkCommand::previousIndex());
 				*/
-
-		  float batteryVoltage, prev_cell;
-		  float temp = (float)analogRead(0);
-			  		batteryVoltage = ((temp*5/1023)/0.28);/* + _batteryVoltage * 0.9;*/
-//			  		prev_cell = ((analogRead(0)*5/1023)/0.28);
-//			  		for(uint8_t i = 1; i < 4; i++)
-//			  		{
-//
-//			  			if(batteryVoltage > ((analogRead(i)*5/1023)/0.28 - prev_cell))
-//			  			{
-//			  				batteryVoltage = (analogRead(i)*5/1023)/0.28 - prev_cell;
-//			  			}
-//			  				prev_cell = ((analogRead(i)*5/1023)/0.28);
-//			  		}
-			  		_hal->debug->printf_P(PSTR("temp: %f\n"),temp);
-		_hal->debug->printf_P(PSTR("Battery Voltage: %f\n"),batteryVoltage);
-		_hal->debug->printf_P(PSTR("ADC0: %d\n"),analogRead(0));
-		_hal->debug->printf_P(PSTR("ADC0: %d\n"),analogRead(1));
-		_hal->debug->printf_P(PSTR("ADC0: %d\n"),analogRead(2));
-		_hal->debug->printf_P(PSTR("ADC0: %d\n"),analogRead(3));
-
 		AP_MavlinkCommand command = AP_MavlinkCommand(
 				AP_MavlinkCommand::currentIndex);
 		AP_MavlinkCommand previousCommand = AP_MavlinkCommand(
@@ -179,8 +158,6 @@ public:
 
 		// process mavlink commands
 		//handleCommand();
-		Serial.print("Heading Command: ");
-		Serial.println(headingCommand);
 
 		// obstacle avoidance overrides
 		// stop if your going to drive into something in front of you

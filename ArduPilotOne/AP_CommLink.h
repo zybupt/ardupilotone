@@ -199,25 +199,14 @@ public:
 
 	    	  float batteryVoltage, prev_cell, temp;
 	    	  temp = analogRead(0);
-	  		batteryVoltage = ((temp*5/1023)/0.28);/* + _batteryVoltage * 0.9;*/
-	  		prev_cell = ((temp*5/1023)/0.28);
-	  		for(uint8_t i = 1; i < 4; i++)
-	  		{
-	  			temp = analogRead(i);
+	    	  batteryVoltage = ((temp*5/1023)/0.28);
 
-	  			if(batteryVoltage > ((temp*5/1023)/0.28 - prev_cell))
-	  			{
-	  				batteryVoltage = (temp*5/1023)/0.28 - prev_cell;
-	  			}
-	  				prev_cell = ((temp*5/1023)/0.28);
-	  		}
-
-	                        mavlink_msg_sys_status_send(_channel, _controller->getMode(),
-	                                        _guide->getMode(), _hal->state(), _hal->load * 10,
-	                                        batteryVoltage*1000,(batteryVoltage - 3.3)/(4.2-3.3)*1000,
-	                                        _packetDrops);
-	                        break;
-	                }
+				mavlink_msg_sys_status_send(_channel, _controller->getMode(),
+								_guide->getMode(), _hal->state(), _hal->load * 10,
+								batteryVoltage*1000,(batteryVoltage - 3.3)/(4.2-3.3)*1000,
+								_packetDrops);
+				break;
+		}
 
 		case MAVLINK_MSG_ID_WAYPOINT_ACK: {
 			sendText(SEVERITY_LOW, PSTR("waypoint ack"));
