@@ -221,7 +221,7 @@ public:
 		}
 
 		case MAVLINK_MSG_ID_WAYPOINT_CURRENT: {
-			mavlink_msg_waypoint_current_send(_channel,AP_MavlinkCommand::currentIndex);
+			mavlink_msg_waypoint_current_send(_channel,_guide->getCurrentIndex());
 			break;
 		}
 
@@ -313,7 +313,7 @@ public:
 	void requestCmds() {
 		//_hal->debug->printf_P(PSTR("requesting commands\n"));
 		// request cmds one by one
-		if (_receivingCmds && _cmdRequestIndex <= AP_MavlinkCommand::number) {
+		if (_receivingCmds && _cmdRequestIndex <= _guide->getNumberOfCommands()) {
 			mavlink_msg_waypoint_request_send(_channel, _cmdDestSysId,
 					_cmdDestCompId, _cmdRequestIndex);
 		}
@@ -459,7 +459,7 @@ private:
 
 		// Start sending waypoints
 		mavlink_msg_waypoint_count_send(_channel, msg->sysid, msg->compid,
-				AP_MavlinkCommand::number);
+				_guide->getNumberOfCommands());
 
 		_cmdTimeLastSent = millis();
 		_cmdTimeLastReceived = millis();
@@ -486,7 +486,7 @@ private:
 		//_hal->debug->printf_P(PSTR("sequence: %d\n"),packet.seq);
 		AP_MavlinkCommand cmd(packet.seq);
 
-		mavlink_waypoint_t msg = cmd.convert();
+		mavlink_waypoint_t msg = cmd.convert(_guide->getCurrentIndex());
 		mavlink_msg_waypoint_send(_channel, _cmdDestSysId, _cmdDestCompId,
 				msg.seq, msg.frame, msg.command, msg.current, msg.autocontinue,
 				msg.param1, msg.param2, msg.param3, msg.param4, msg.x, msg.y,
@@ -541,8 +541,8 @@ private:
 
 		// clear all waypoints
 		uint8_t type = 0; // ok (0), error(1)
-		AP_MavlinkCommand::number.set_and_save(0);
-		AP_MavlinkCommand::currentIndex.set_and_save(0);
+		_guide->setNumberOfCommands(1);
+		_guide->setCurrentIndex(0);
 
 		// send acknowledgement 3 times to makes sure it is received
 		for (int i = 0; i < 3; i++)
@@ -562,9 +562,8 @@ private:
 			break;
 
 		// set current waypoint
-		AP_MavlinkCommand::currentIndex = packet.seq;
-		AP_MavlinkCommand::currentIndex.save();
-		mavlink_msg_waypoint_current_send(_channel, AP_MavlinkCommand::currentIndex);
+		_guide->setCurrentIndex(packet.seq);
+		mavlink_msg_waypoint_current_send(_channel, _guide->getCurrentIndex());
 		break;
 	}
 
@@ -581,7 +580,7 @@ private:
 		if (packet.count > _cmdMax) {
 			packet.count = _cmdMax;
 		}
-		AP_MavlinkCommand::number.set_and_save(packet.count);
+		_guide->setNumberOfCommands(packet.count);
 		_cmdTimeLastReceived = millis();
 		_receivingCmds = true;
 		_sendingCmds = false;
@@ -625,7 +624,7 @@ private:
 		AP_MavlinkCommand command(packet);
 		//sendText(SEVERITY_HIGH, PSTR("waypoint stored"));
 		_cmdRequestIndex++;
-		if (_cmdRequestIndex >= AP_MavlinkCommand::number) {
+		if (_cmdRequestIndex >= _guide->getNumberOfCommands()) {
 			sendMessage( MAVLINK_MSG_ID_WAYPOINT_ACK);
 			//sendText(SEVERITY_LOW, PSTR("waypoint ack sent"));
 		}

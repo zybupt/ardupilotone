@@ -42,7 +42,9 @@ public:
 	AP_Guide(AP_Navigator * navigator, AP_HardwareAbstractionLayer * hal) :
 		_navigator(navigator), headingCommand(0), airSpeedCommand(0),
 				groundSpeedCommand(0), altitudeCommand(0), pNCmd(0), pECmd(0),
-				pDCmd(0), _hal(hal) {
+				pDCmd(0), _hal(hal), _home(0), _command(0), _previousCommand(0),
+				_mode(MAV_NAV_LOST), _numberOfCommands(1), _cmdIndex(0)
+	{
 	}
 
 	virtual void update() = 0;
@@ -55,17 +57,50 @@ public:
 	float pECmd;
 	float pDCmd;
 	static float rEarth;
-	 MAV_NAV getMode() const
-   {
+	MAV_NAV getMode() const
+	{
 	   	return _mode;
+	}
+	uint8_t getCurrentIndex()
+	{
+		return _cmdIndex;
+	}
+
+	void setCurrentIndex(uint8_t val)
+	{
+		_cmdIndex.set_and_save(val);
+	}
+
+	uint8_t getNumberOfCommands()
+	{
+		return _numberOfCommands;
+	}
+
+	void setNumberOfCommands(uint8_t val)
+	{
+		_numberOfCommands.set_and_save(val);
+	}
+
+	uint8_t getPreviousIndex() {
+			// find previous waypoint, TODO, handle non-nav commands
+			int16_t prevIndex = int16_t(getCurrentIndex()) -1 ;
+			if (prevIndex < 0) prevIndex = getNumberOfCommands()-1;
+			return (uint8_t)prevIndex;
+		}
+
+	uint8_t getNextIndex() {
+		// find previous waypoint, TODO, handle non-nav commands
+		int16_t nextIndex = int16_t(getCurrentIndex()) + 1 ;
+		if (nextIndex > (getNumberOfCommands() -1)) nextIndex = 0;
+		return nextIndex;
 	}
 
 protected:
 
-
+	AP_MavlinkCommand _home, _command, _previousCommand;
 	MAV_NAV _mode;
-	uint8_t _cmdNum;
-	uint8_t _cmdIndex;
+	AP_Uint8 _numberOfCommands;
+	AP_Uint8 _cmdIndex;
 	AP_Navigator * _navigator;
 	AP_HardwareAbstractionLayer * _hal;
 };
@@ -102,23 +137,18 @@ public:
 	}
 
 	virtual void update() {
-		/*
-		_hal->debug->printf_P(
+		/*_hal->debug->printf_P(
 				PSTR("guide loop, number: %d, current index: %d, previous index: %d\n"),
-				AP_MavlinkCommand::number.get(),
-				AP_MavlinkCommand::currentIndex.get(),
-				AP_MavlinkCommand::previousIndex());
-				*/
-		AP_MavlinkCommand command = AP_MavlinkCommand(
-				AP_MavlinkCommand::currentIndex);
-		AP_MavlinkCommand previousCommand = AP_MavlinkCommand(
-				AP_MavlinkCommand::previousIndex());
+				getNumberOfCommands(),
+				getCurrentIndex(),
+				getPreviousIndex());*/
+
+
 
 		// if we don't have enough waypoint for cross track calcs
 		// go home
-		if (AP_MavlinkCommand::number == 1) {
-			AP_MavlinkCommand home(0);
-			headingCommand = home.bearingTo(_navigator->getLat_degInt(),
+		if (_numberOfCommands == 1) {
+			headingCommand = _home.bearingTo(_navigator->getLat_degInt(),
 					_navigator->getLon_degInt()) + 180*deg2Rad;
 			if (headingCommand > 360*deg2Rad) headingCommand -= 360*deg2Rad;
 			/*
@@ -127,21 +157,21 @@ public:
 					*/
 		} else {
 			// TODO wrong behavior if 0 selected as waypoint, says previous 0
-			float dXt = AP_MavlinkCommand::crossTrack(previousCommand,
-					command, _navigator->getLat_degInt(),
+			float dXt = AP_MavlinkCommand::crossTrack(_previousCommand,
+					_command, _navigator->getLat_degInt(),
 					_navigator->getLon_degInt());
 			float temp = dXt*_crossTrackGain*deg2Rad; // crosstrack gain, rad/m
 			if (temp > _crossTrackLim * deg2Rad)
 				temp = _crossTrackLim * deg2Rad;
 			if (temp < -_crossTrackLim * deg2Rad)
 				temp = -_crossTrackLim * deg2Rad;
-			float bearing = previousCommand.bearingTo(command);
+			float bearing = _previousCommand.bearingTo(_command);
 			headingCommand = bearing - temp;
-			float alongTrack = AP_MavlinkCommand::alongTrack(previousCommand,command,
+			float alongTrack = AP_MavlinkCommand::alongTrack(_previousCommand,_command,
 					_navigator->getLat_degInt(),_navigator->getLon_degInt());
-			float distanceToNext = command.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt());
-			float segmentLength = previousCommand.distanceTo(command);
-			if (distanceToNext < command.getRadius()  || alongTrack > segmentLength) nextCommand();
+			float distanceToNext = _command.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt());
+			float segmentLength = _previousCommand.distanceTo(_command);
+			if (distanceToNext < _command.getRadius()  || alongTrack > segmentLength) nextCommand();
 			/*
 			_hal->debug->printf_P(
 					PSTR("nav: bCurrent2Dest: %f\tdXt: %f\tcmdHeading: %f\tnextWpDistance: %f\talongTrack: %f\n"),
@@ -193,7 +223,9 @@ public:
 	}
 
 	void nextCommand() {
-		AP_MavlinkCommand::nextCommand();
+		_cmdIndex = getNextIndex();
+		_command = AP_MavlinkCommand(getCurrentIndex());
+		_previousCommand = AP_MavlinkCommand(getPreviousIndex());
 		//_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 

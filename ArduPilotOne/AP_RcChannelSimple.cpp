@@ -31,9 +31,9 @@ AP_RcChannelSimple::AP_RcChannelSimple(AP_Var::Key key, const prog_char_t * name
 		_reverse(this,4,reverse,PSTR("REV")),
 		_pwm(pwmNeutral)
 	{
-		Serial.print("pwm after ctor: "); Serial.println(pwmNeutral);
+		//Serial.print("pwm after ctor: "); Serial.println(pwmNeutral);
 		if (rcMode == RC_MODE_IN) return;
-		Serial.print("pwm set for ch: "); Serial.println(int(ch));
+		//Serial.print("pwm set for ch: "); Serial.println(int(ch));
 		rc.OutputCh(ch,pwmNeutral);
 
 	}

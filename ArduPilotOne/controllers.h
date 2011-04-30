@@ -29,11 +29,11 @@ public:
 		_hal->debug->println_P(PSTR("initializing car controller"));
 
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7,1200,1500,1800));
+				new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7,1100,1500,1900));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chStr, PSTR("STR_"), APM_RC, 0,1200,1540,1800));
+				new AP_RcChannelSimple(k_chStr, PSTR("STR_"), APM_RC, 0,1100,1540,1900));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chThr, PSTR("THR_"), APM_RC, 1,1200,1500,1800));
+				new AP_RcChannelSimple(k_chThr, PSTR("THR_"), APM_RC, 1,1100,1500,1900));
 	}
 	virtual void update(const float & dt) {
 		// read mode switch
@@ -104,27 +104,26 @@ public:
 		 * the order of the channels has to match the enumeration above
 		 */
 		_hal->rc.push_back(
-		new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7, 1200, 1500, 1800, RC_MODE_IN));
+		new AP_RcChannelSimple(k_chMode, PSTR("MODE_"), APM_RC, 7, 1100, 1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chLeft, PSTR("LEFT_"), APM_RC, 0, 1100, 1200, 1800, RC_MODE_OUT));
+				new AP_RcChannelSimple(k_chLeft, PSTR("LEFT_"), APM_RC, 0, 1100, 1100, 1900, RC_MODE_OUT));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chRight, PSTR("RIGHT_"), APM_RC, 1, 1100, 1200, 1800, RC_MODE_OUT));
+				new AP_RcChannelSimple(k_chRight, PSTR("RIGHT_"), APM_RC, 1, 1100, 1100, 1900, RC_MODE_OUT));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chFront, PSTR("FRONT_"), APM_RC, 2, 1100, 1200, 1800, RC_MODE_OUT));
+				new AP_RcChannelSimple(k_chFront, PSTR("FRONT_"), APM_RC, 2, 1100, 1100, 1900, RC_MODE_OUT));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chBack, PSTR("BACK_"), APM_RC, 3, 1100, 1200, 1800, RC_MODE_OUT));
+				new AP_RcChannelSimple(k_chBack, PSTR("BACK_"), APM_RC, 3, 1100, 1100, 1900, RC_MODE_OUT));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chRoll, PSTR("ROLL_"), APM_RC, 0, 1200, 1500, 1800, RC_MODE_IN));
+				new AP_RcChannelSimple(k_chRoll, PSTR("ROLL_"), APM_RC, 0, 1100, 1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chPitch, PSTR("PITCH_"), APM_RC, 1, 1200, 1500, 1800, RC_MODE_IN));
+				new AP_RcChannelSimple(k_chPitch, PSTR("PITCH_"), APM_RC, 1, 1100, 1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back(
-				new AP_RcChannelSimple(k_chYaw, PSTR("YAW_"), APM_RC, 2, 1200, 1500, 1800, RC_MODE_IN));
+				new AP_RcChannelSimple(k_chYaw, PSTR("YAW_"), APM_RC, 2, 1100, 1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back( // -1 -> 0 maps to 1200, linear 0-1 -> 1200-1800
-				new AP_RcChannelSimple(k_chThr, PSTR("THRUST_"), APM_RC, 3, 1100, 1200, 1800, RC_MODE_IN));
+				new AP_RcChannelSimple(k_chThr, PSTR("THRUST_"), APM_RC, 3, 1100, 1100, 1900, RC_MODE_IN));
 	}
 
 	virtual void update(const float & dt) {
-
 			// read and set pwm so they can be read as positions later
 			_hal->rc[CH_MODE]->setPwm(_hal->rc[CH_MODE]->readRadio());
 			_hal->rc[CH_ROLL]->setPwm(_hal->rc[CH_ROLL]->readRadio());

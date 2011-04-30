@@ -76,7 +76,7 @@ public:
 		// wind up guard
 		if (_eI > _iMax)
 			_eI = _iMax;
-		else if (_eI < -_iMax)
+		if (_eI < -_iMax)
 			_eI = -_iMax;
 
 		// pid sum
@@ -85,7 +85,7 @@ public:
 		// saturation
 		if (y > _yMax)
 			y = _yMax;
-		else if (y < -_yMax)
+		if (y < -_yMax)
 			y = -_yMax;
 
 		return y;
@@ -130,7 +130,7 @@ public:
 		// wind up guard
 		if (_eI > _iMax)
 			_eI = _iMax;
-		else if (_eI < -_iMax)
+		if (_eI < -_iMax)
 			_eI = -_iMax;
 
 		// pid sum
@@ -139,7 +139,7 @@ public:
 		// saturation
 		if (y > _yMax)
 			y = _yMax;
-		else if (y < -_yMax)
+		if (y < -_yMax)
 			y = -_yMax;
 
 		return y;

@@ -154,9 +154,6 @@ public:
 	void setZ(float val) {
 		_data.get().z = val;
 	}
-	bool getCurrent() {
-		return (currentIndex.get() == getSeq());
-	}
 	float getLatDeg() {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
@@ -311,7 +308,7 @@ public:
 	 * conversion for outbound packets to ground station
 	 * @return output the mavlink_waypoint_t packet
 	 */
-	mavlink_waypoint_t convert() {
+	mavlink_waypoint_t convert(uint8_t current) {
 		mavlink_waypoint_t mavCmd;
 		mavCmd.seq = getSeq();
 		mavCmd.command = getCommand();
@@ -324,7 +321,7 @@ public:
 		mavCmd.y = getY();
 		mavCmd.z = getZ();
 		mavCmd.autocontinue = getAutocontinue();
-		mavCmd.current = getCurrent();
+		mavCmd.current = (getSeq() == current);
 		mavCmd.target_component = mavlink_system.compid;
 		mavCmd.target_system = mavlink_system.sysid;
 		return mavCmd;
@@ -436,20 +433,6 @@ public:
 		return getAlt() - pD;
 	}
 
-	static uint8_t previousIndex() {
-		// find previous waypoint, TODO, handle non-nav commands
-		int16_t prevIndex = int16_t(currentIndex) -1 ;
-		if (prevIndex < 0) prevIndex = number-1;
-		return (uint8_t)prevIndex;
-	}
-
-	static void nextCommand() {
-		// find previous waypoint, TODO, handle non-nav commands
-		int16_t nextIndex = int16_t(currentIndex) + 1 ;
-		if (nextIndex > (number -1)) nextIndex = 0;
-		currentIndex = (uint8_t) nextIndex;
-	}
-
 	//calculates cross track of a current location
 	static float crossTrack(AP_MavlinkCommand previous, AP_MavlinkCommand current, int32_t lat_degInt, int32_t lon_degInt) {
 		float d = previous.distanceTo(lat_degInt,lon_degInt);
@@ -466,15 +449,12 @@ public:
 		return dXt/tan(asin(dXt/d));
 	}
 
-	static AP_Uint8 number;
-	static AP_Uint8 currentIndex;
 	// constants
 	static float rEarth;
 	static float rad2Deg;
 	static float rad2DegInt;
 };
-AP_Uint8 AP_MavlinkCommand::number = 1;
-AP_Uint8 AP_MavlinkCommand::currentIndex = 0;
+
 float AP_MavlinkCommand::rad2DegInt = 1e7*rad2Deg;
 float AP_MavlinkCommand::rad2Deg = 180/M_PI;
 float AP_MavlinkCommand::rEarth = 6371000;
