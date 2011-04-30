@@ -175,13 +175,27 @@ public:
 
 			// attitude loop
 			float rollMix = pidRoll.update(cmdRoll - _nav->getRoll(),_nav->getRollRate(),dt);
-			float pitchMix = pidRoll.update(cmdPitch - _nav->getPitch(),_nav->getPitchRate(),dt);
-			float yawMix = pidRoll.update(cmdYawRate - _nav->getYaw(),_nav->getYawRate(),dt);
+			float pitchMix = pidPitch.update(cmdPitch - _nav->getPitch(),_nav->getPitchRate(),dt);
+			float yawMix = pidYawRate.update(cmdYawRate - _nav->getYawRate(),dt);
 
 			_hal->rc[CH_LEFT]->setPosition(thrustMix + rollMix + yawMix);
 			_hal->rc[CH_RIGHT]->setPosition(thrustMix - rollMix + yawMix);
 			_hal->rc[CH_FRONT]->setPosition(thrustMix + pitchMix - yawMix);
 			_hal->rc[CH_BACK]->setPosition(thrustMix - pitchMix - yawMix);
+
+			_hal->debug->printf("L: %f\t R: %f\t F: %f\t B: %f\n",
+					_hal->rc[CH_LEFT]->getPosition(),
+					_hal->rc[CH_RIGHT]->getPosition(),
+					_hal->rc[CH_FRONT]->getPosition(),
+					_hal->rc[CH_BACK]->getPosition());
+
+			_hal->debug->printf("rollMix: %f\t pitchMix: %f\t yawMix: %f\t thrustMix: %f\n",
+								rollMix,
+								pitchMix,
+								yawMix,
+								thrustMix);
+
+//			_hal->debug->printf("thrust pwm: %d\n",_hal->rc[CH_THRUST]->readRadio());
 		}
 
 private:

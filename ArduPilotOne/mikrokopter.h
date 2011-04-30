@@ -32,7 +32,7 @@
 #define PID_ATT_P 0.03 // 0.1
 #define PID_ATT_I 0.03 // 0.0
 #define PID_ATT_D 0.03 // 0.1
-#define PID_ATT_LIM 0.3 // 0.01 // 10 % #define MOTORs
+#define PID_ATT_LIM 0.1 // 0.01 // 10 % #define MOTORs
 #define PID_ATT_AWU 0.1 // 0.0
 #define PID_YAWPOS_P 1
 #define PID_YAWPOS_I 0.1
