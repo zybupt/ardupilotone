@@ -1,6 +1,7 @@
 sketches= \
-libraries/APO/examples/AutopilotCar \
-libraries/APO/examples/AutopilotQuad \
+ardurover \
+arduquad \
+arduplane \
 libraries/AP_Compass/examples/AP_Compass_test \
 libraries/APO/examples/ServoSweep \
 libraries/APO/examples/ServoManual \
