@@ -13,6 +13,8 @@
 #include "AP_Var_keys.h"
 #include "constants.h"
 
+namespace apo {
+
 class AP_MavlinkCommand {
 private:
 	struct CommandStorage {
@@ -31,6 +33,7 @@ private:
 	uint16_t _seq;
 	//static AP_Var_group _group;
 public:
+	static AP_MavlinkCommand home;
 	/**
 	 * Constructor for loading from memory.
 	 * @param index Start at zero.
@@ -90,10 +93,10 @@ public:
 	bool load() {
 		return _data.load();
 	}
-	uint8_t getSeq() {
+	uint8_t getSeq() const {
 		return _seq;
 	}
-	bool getAutocontinue() {
+	bool getAutocontinue() const {
 		return _data.get().autocontinue;
 	}
 	void setAutocontinue(bool val) {
@@ -102,61 +105,61 @@ public:
 	void setSeq(uint8_t val) {
 		_seq = val;
 	}
-	MAV_CMD getCommand() {
+	MAV_CMD getCommand() const {
 		return _data.get().command;
 	}
 	void setCommand(MAV_CMD val) {
 		_data.get().command = val;
 	}
-	MAV_FRAME getFrame() {
+	MAV_FRAME getFrame() const {
 		return _data.get().frame;
 	}
 	void setFrame(MAV_FRAME val) {
 		_data.get().frame = val;
 	}
-	float getParam1() {
+	float getParam1() const {
 		return _data.get().param1;
 	}
 	void setParam1(float val) {
 		_data.get().param1 = val;
 	}
-	float getParam2() {
+	float getParam2() const {
 		return _data.get().param2;
 	}
 	void setParam2(float val) {
 		_data.get().param2 = val;
 	}
-	float getParam3() {
+	float getParam3() const {
 		return _data.get().param3;
 	}
 	void setParam3(float val) {
 		_data.get().param3 = val;
 	}
-	float getParam4() {
+	float getParam4() const {
 		return _data.get().param4;
 	}
 	void setParam4(float val) {
 		_data.get().param4 = val;
 	}
-	float getX() {
+	float getX() const {
 		return _data.get().x;
 	}
 	void setX(float val) {
 		_data.get().x = val;
 	}
-	float getY() {
+	float getY() const {
 		return _data.get().y;
 	}
 	void setY(float val) {
 		_data.get().y = val;
 	}
-	float getZ() {
+	float getZ() const {
 		return _data.get().z;
 	}
 	void setZ(float val) {
 		_data.get().z = val;
 	}
-	float getLatDeg() {
+	float getLatDeg() const {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
@@ -181,7 +184,7 @@ public:
 			break;
 		}
 	}
-	float getLonDeg() {
+	float getLonDeg() const {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
@@ -215,29 +218,29 @@ public:
 	void setLat_degInt(int32_t val) {
 		setLatDeg(val/1.0e7);
 	}
-	int32_t getLon_degInt() {
+	int32_t getLon_degInt() const {
 		return getLonDeg()*1e7;
 	}
-	int32_t getLat_degInt() {
+	int32_t getLat_degInt() const {
 		return getLatDeg()*1e7;
 	}
-	float getLon() {
+	float getLon() const {
 		return getLonDeg()*deg2Rad;
 	}
-	float getLat() {
+	float getLat() const {
 		return getLatDeg()*deg2Rad;
 	}
 	void setLat(float val) {
 		setLatDeg(val*rad2Deg);
 	}
-	float getAlt() {
+	float getAlt() const {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
 			return getZ();
 			break;
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
 		case MAV_FRAME_LOCAL:
-			return getZ() + AP_MavlinkCommand(0).getAlt();
+			return getZ() + home.getAlt();
 			break;
 		case MAV_FRAME_MISSION:
 		default:
@@ -255,7 +258,7 @@ public:
 			setZ(val);
 			break;
 		case MAV_FRAME_LOCAL:
-			setZ(val - AP_MavlinkCommand(0).getLonDeg());
+			setZ(val - home.getLonDeg());
 			break;
 		case MAV_FRAME_MISSION:
 		default:
@@ -263,13 +266,13 @@ public:
 		}
 	}
 	/**
-	 * Get the relative altitud to home
+	 * Get the relative altitude to home
 	 * @return relative altitude in meters
 	 */
-	float getRelAlt() {
+	float getRelAlt() const {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
-			return getZ() - AP_MavlinkCommand(0).getAlt();
+			return getZ() - home.getAlt();
 			break;
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
 		case MAV_FRAME_LOCAL:
@@ -287,7 +290,7 @@ public:
 	void setRelAlt(float val) {
 		switch (getFrame()) {
 		case MAV_FRAME_GLOBAL:
-			setZ(val + AP_MavlinkCommand(0).getAlt());
+			setZ(val + home.getAlt());
 			break;
 		case MAV_FRAME_GLOBAL_RELATIVE_ALT:
 		case MAV_FRAME_LOCAL:
@@ -298,7 +301,7 @@ public:
 		}
 	}
 
-	float getRadius() {
+	float getRadius() const {
 		return getParam2();
 	}
 
@@ -333,7 +336,7 @@ public:
 	 * @param next The command to calculate the bearing to.
 	 * @return the bearing
 	 */
-	float bearingTo(AP_MavlinkCommand next) {
+	float bearingTo(AP_MavlinkCommand next) const {
 		float deltaLon = next.getLon() - getLon();
 		/*
 		Serial.print("Lon: "); Serial.println(getLon());
@@ -352,7 +355,7 @@ public:
 	 * @param lonDegInt longitude in degrees E-7
 	 * @return
 	 */
-	float bearingTo(int32_t latDegInt, int32_t lonDegInt) {
+	float bearingTo(int32_t latDegInt, int32_t lonDegInt) const {
 		// have to be careful to maintain the precision of the gps coordinate
 		float deltaLon = (lonDegInt - getLon_degInt())*degInt2Rad;
 		float nextLat = latDegInt*degInt2Rad;
@@ -367,7 +370,7 @@ public:
 	 * @param next The command to measure to.
 	 * @return The distance in meters.
 	 */
-	float distanceTo(AP_MavlinkCommand next) {
+	float distanceTo(AP_MavlinkCommand next) const {
 		float sinDeltaLat2 = sin((getLat()-next.getLat())/2);
 		float sinDeltaLon2 = sin((getLon()-next.getLon())/2);
 		float a = sinDeltaLat2*sinDeltaLat2 + cos(getLat())*cos(next.getLat())*
@@ -382,7 +385,7 @@ public:
 	 * @param lonDegInt longitude in degrees E-7
 	 * @return The distance in meters.
 	 */
-	float distanceTo(int32_t lat_degInt, int32_t lon_degInt) {
+	float distanceTo(int32_t lat_degInt, int32_t lon_degInt) const {
 		float sinDeltaLat2 = sin((lat_degInt - getLat_degInt())*degInt2Rad/2);
 		float sinDeltaLon2 = sin((lon_degInt - getLon_degInt())*degInt2Rad/2);
 		float a = sinDeltaLat2*sinDeltaLat2 +
@@ -399,28 +402,28 @@ public:
 		return rEarth*c;
 	}
 
-	float getPN(int32_t lat_degInt, int32_t lon_degInt) {
+	float getPN(int32_t lat_degInt, int32_t lon_degInt) const {
 		// local tangent approximation at this waypoint
 		float deltaLat = (lat_degInt - getLat_degInt())*degInt2Rad;
 		return deltaLat*rEarth;
 	}
 
-	float getPE(int32_t lat_degInt, int32_t lon_degInt) {
+	float getPE(int32_t lat_degInt, int32_t lon_degInt) const {
 		// local tangent approximation at this waypoint
 		float deltaLon = (lon_degInt - getLon_degInt())*degInt2Rad;
 		return cos(getLat())*deltaLon*rEarth;
 	}
 
-	float getPD(int32_t alt_intM) {
+	float getPD(int32_t alt_intM) const {
 		return -(alt_intM/scale_m - getAlt());
 	}
 
-	float getLat(float pN) {
+	float getLat(float pN) const {
 
 		return pN/rEarth + getLat();
 	}
 
-	float getLon(float pE) {
+	float getLon(float pE) const {
 
 		return pE/rEarth/cos(getLat()) + getLon();
 	}
@@ -430,7 +433,7 @@ public:
 	 * @param pD alt in meters
 	 * @return
 	 */
-	float getAlt(float pD) {
+	float getAlt(float pD) const {
 
 		return getAlt() - pD;
 	}
@@ -451,6 +454,8 @@ public:
 		return dXt/tan(asin(dXt/d));
 	}
 };
+
+} // namespace apo
 
 
 #endif /* AP_MAVLINKCOMMAND_H_ */

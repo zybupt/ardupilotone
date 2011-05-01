@@ -47,38 +47,32 @@ public:
 	virtual void updateSlow(float dt) = 0;
     float getPD() const
     {
-    	AP_MavlinkCommand home = AP_MavlinkCommand(0);
-        return home.getPD(getAlt_intM());
+        return AP_MavlinkCommand::home.getPD(getAlt_intM());
     }
 
     float getPE() const
     {
-    	AP_MavlinkCommand home = AP_MavlinkCommand(0);
-        return home.getPE(getLat_degInt(),getLon_degInt());
+        return AP_MavlinkCommand::home.getPE(getLat_degInt(),getLon_degInt());
     }
 
     float getPN() const
     {
-    	AP_MavlinkCommand home = AP_MavlinkCommand(0);
-        return home.getPN(getLat_degInt(),getLon_degInt());
+        return AP_MavlinkCommand::home.getPN(getLat_degInt(),getLon_degInt());
     }
 
     void setPD(float _pD)
     {
-        AP_MavlinkCommand home = AP_MavlinkCommand(0);
-        setAlt(home.getAlt(_pD));
+        setAlt(AP_MavlinkCommand::home.getAlt(_pD));
     }
 
     void setPE(float _pE)
     {
-    	AP_MavlinkCommand home = AP_MavlinkCommand(0);
-    	setLat(home.getLat(_pE));
+    	setLat(AP_MavlinkCommand::home.getLat(_pE));
     }
 
     void setPN(float _pN)
     {
-    	AP_MavlinkCommand home = AP_MavlinkCommand(0);
-    	setLon(home.getLon(_pN));
+    	setLon(AP_MavlinkCommand::home.getLon(_pN));
     }
 
     float getAirSpeed() const
@@ -401,13 +395,6 @@ public:
 			_hal->compass->calculate(getRoll(),getPitch());
 			_hal->compass->null_offsets(_dcm->get_dcm_matrix());
 		}
-
-		// need to use lat/lon and convert
-		// TODO make a local copy of home location, EEPROM takes way too long to read
-//		AP_MavlinkCommand home(0);
-//		setPN((getLat() - home.getLat())/rEarth);
-//		setPE((getLon() - home.getLon())*cos(home.getLat())/rEarth);
-//		setPD(-(getAlt() - home.getAlt()));
 	}
 	void updateGpsLight(void) {
 		// GPS LED on if we have a fix or Blink GPS LED if we are receiving data

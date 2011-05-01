@@ -40,7 +40,7 @@ apo::board_t board = apo::BOARD_ARDUPILOTMEGA;
 apo::vehicle_t vehicle = apo::VEHICLE_CAR;
 
 // optional sensors
-static bool gpsEnabled = true;
+static bool gpsEnabled = false;
 static bool baroEnabled = true;
 static bool compassEnabled = true;
 

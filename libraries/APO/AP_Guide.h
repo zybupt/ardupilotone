@@ -43,7 +43,7 @@ public:
 	AP_Guide(AP_Navigator * navigator, AP_HardwareAbstractionLayer * hal) :
 		_navigator(navigator), headingCommand(0), airSpeedCommand(0),
 				groundSpeedCommand(0), altitudeCommand(0), pNCmd(0), pECmd(0),
-				pDCmd(0), _hal(hal), _home(0), _command(0), _previousCommand(0),
+				pDCmd(0), _hal(hal), _command(0), _previousCommand(0),
 				_mode(MAV_NAV_LOST), _numberOfCommands(1), _cmdIndex(0)
 	{
 	}
@@ -100,7 +100,7 @@ public:
 
 protected:
 
-	AP_MavlinkCommand _home, _command, _previousCommand;
+	AP_MavlinkCommand _command, _previousCommand;
 	MAV_NAV _mode;
 	AP_Uint8 _numberOfCommands;
 	AP_Uint8 _cmdIndex;
@@ -151,12 +151,12 @@ public:
 		// if we don't have enough waypoint for cross track calcs
 		// go home
 		if (_numberOfCommands == 1) {
-			headingCommand = _home.bearingTo(_navigator->getLat_degInt(),
+			headingCommand = AP_MavlinkCommand::home.bearingTo(_navigator->getLat_degInt(),
 					_navigator->getLon_degInt()) + 180*deg2Rad;
 			if (headingCommand > 360*deg2Rad) headingCommand -= 360*deg2Rad;
 			/*
 			_hal->debug->printf_P(PSTR("going home: bearing: %f distance: %f\n"),
-					headingCommand,home.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt()));
+					headingCommand,AP_MavlinkCommand::home.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt()));
 					*/
 		} else {
 			// TODO wrong behavior if 0 selected as waypoint, says previous 0
@@ -185,9 +185,9 @@ public:
 		groundSpeedCommand = _velocityCommand;
 
 		// TODO : calculate pN,pE,pD from home and gps coordinates
-		pNCmd = 0;
-		pECmd = 0;
-		pDCmd = 0;
+		pNCmd = _command.getPN(_navigator->getLat_degInt(),_navigator->getLon_degInt());
+		pECmd = _command.getPE(_navigator->getLat_degInt(),_navigator->getLon_degInt());
+		pDCmd = _command.getPD(_navigator->getAlt_intM());
 
 		// process mavlink commands
 		//handleCommand();

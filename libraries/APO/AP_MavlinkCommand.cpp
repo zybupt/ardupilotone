@@ -6,3 +6,9 @@
  */
 
 #include "AP_MavlinkCommand.h"
+
+namespace apo {
+
+AP_MavlinkCommand AP_MavlinkCommand::home =  AP_MavlinkCommand(0);
+
+}
