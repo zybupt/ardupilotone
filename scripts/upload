@@ -13,10 +13,10 @@ echo sketches built:
 ls build
 echo
 
-echo -n -e 'enter sketch (i.e. ArduPilotOne) : '
+echo -n -e 'enter sketch (i.e. AutopilotQuad) : '
 read sketch
 if [[ $sketch = '' ]]; then
-	sketch='ArduPilotOne'
+	sketch='AutopilotQuad'
 fi
 echo -e "sketch entered: >>$sketch<<"
 
