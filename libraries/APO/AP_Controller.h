@@ -51,22 +51,92 @@ protected:
 	AP_HardwareAbstractionLayer * _hal;
 };
 
-class Pid2 {
+class AP_ControllerBlock {
 public:
-	Pid2(AP_Var::Key key, const prog_char_t * name, float kP = 0.0,
-			float kI = 0.0, float kD = 0.0, float iMax = 0.0, float yMax = 0.0,
-			uint8_t dFcut = 20.0) :
-		_group(key, name), _eP(0), _eI(0), _eD(0),
-				_kP(&_group, 1, kP, PSTR("P")),
-				_kI(&_group, 2, kI, PSTR("I")),
-				_kD(&_group, 3, kD, PSTR("D")),
-				_iMax(&_group, 4, iMax, PSTR("IMAX")),
-				_yMax(&_group, 5, yMax, PSTR("YMAX")),
-				_fCut(&_group, 6, dFcut, PSTR("FCUT")) {
+        AP_ControllerBlock(AP_Var_group * group, uint8_t groupStart, uint8_t groupLength) :
+                _group(group), _groupStart(groupStart), _groupEnd(groupStart+groupLength)
+        {
+        }
+        uint8_t getGroupEnd() { return _groupEnd; }
+protected:
+        AP_Var_group * _group; /// helps with parameter management
+        uint8_t _groupStart;
+        uint8_t _groupEnd;
+};
+
+class BlockSaturation : public AP_ControllerBlock {
+public:
+	BlockSaturation(AP_Var_group * group, uint8_t groupStart, float yMax) :
+		AP_ControllerBlock(group,groupStart,1),
+		_yMax(group, groupStart, yMax, PSTR("YMAX")) {
+	}
+	float update(const float & input) {
+
+		// pid sum
+		float y = input;
+
+		// saturation
+		if (y > _yMax)
+			y = _yMax;
+		if (y < -_yMax)
+			y = -_yMax;
+		return y;
+	}
+protected:
+	AP_Float _yMax; /// output saturation
+};
+
+class BlockP : public AP_ControllerBlock {
+public:
+	BlockP(AP_Var_group * group, uint8_t groupStart, float kP) :
+				AP_ControllerBlock(group,groupStart,1 ),
+				_kP(group, groupStart, kP, PSTR("P")) {
 	}
 
 	float update(const float & input, const float & dt) {
+		return _kP * input;
+	}
+protected:
+	AP_Float _kP; /// proportional gain
+};
 
+class BlockI : public AP_ControllerBlock {
+public:
+	BlockI(AP_Var_group * group, uint8_t groupStart, float kI, float iMax) :
+				AP_ControllerBlock(group,groupStart,2),
+				_kI(group, groupStart, kI, PSTR("I")),
+				_iMax(group, groupStart+1, iMax, PSTR("IMAX")),
+				_eI(0) {
+	}
+
+	float update(const float & input, const float & dt) {
+		// integral
+		_eI += input * dt;
+
+		// wind up guard
+		if (_eI > _iMax)
+			_eI = _iMax;
+		if (_eI < -_iMax)
+			_eI = -_iMax;
+
+		return _eI;
+	}
+protected:
+	float _eI; /// integral of input
+	AP_Float _kI; /// integral gain
+	AP_Float _iMax; /// integrator saturation
+};
+
+class BlockD : public AP_ControllerBlock {
+public:
+	BlockD(AP_Var_group * group, uint8_t groupStart, float kD,uint8_t dFcut) :
+				AP_ControllerBlock(group,groupStart,2),
+				_kD(group, groupStart, kD, PSTR("D")),
+				_fCut(_group, groupStart+1, dFcut, PSTR("FCUT")),
+				_eP(0), _eD(0) {
+	}
+
+	float update(const float & input, const float & dt) {
 		// derivative with low pass
 		float RC = 1 / (2 * M_PI * _fCut); // low pass filter
 		_eD = _eD + ((_eP - input) / dt - _eD) * (dt / (dt + RC));
@@ -75,90 +145,107 @@ public:
 		// because derivatve uses _eP as previous value
 		_eP = input;
 
-		// integral
-		_eI += _eP * dt;
-
-		// wind up guard
-		if (_eI > _iMax)
-			_eI = _iMax;
-		if (_eI < -_iMax)
-			_eI = -_iMax;
-
-		// pid sum
-		float y = _kP * _eP + _kI * _eI + _kD * _eD;
-
-		// saturation
-		if (y > _yMax)
-			y = _yMax;
-		if (y < -_yMax)
-			y = -_yMax;
-
-		return y;
+		return _kD * _eD;
 	}
 protected:
-	AP_Var_group _group; /// helps with parameter management
-	float _eP; /// input
-	float _eI; /// integral of input
-	float _eD; /// derivative of input
-	AP_Float _kP; /// proportional gain
-	AP_Float _kI; /// integral gain
 	AP_Float _kD; /// derivative gain
-	AP_Float _iMax; /// integrator saturation
-	AP_Float _yMax; /// output saturation
 	AP_Uint8 _fCut; /// derivative low-pass cut freq (Hz)
+	float _eP; /// input
+	float _eD; /// derivative of input
 };
 
-
-/// PID(DFB) block
-class PidDFB2 {
+class BlockPID : public AP_ControllerBlock {
 public:
-	PidDFB2(AP_Var::Key key, const prog_char_t * name,
-			float kP = 0.0, float kI = 0.0, float kD = 0.0, float iMax = 0.0,
-			float yMax = 0.0) :
-		_group(key, name), _eP(0), _eI(0), _eD(0),
-				_kP(&_group, 1, kP, PSTR("P")),
-				_kI(&_group, 2, kI, PSTR("I")),
-				_kD(&_group, 3, kD, PSTR("D")),
-				_iMax(&_group, 4, iMax, PSTR("IMAX")),
-				_yMax(&_group, 5, yMax, PSTR("YMAX")) {
+	BlockPID(AP_Var_group * group, uint8_t groupStart,
+			float kP, float kI, float kD, float iMax,
+			float yMax, uint8_t dFcut) :
+				AP_ControllerBlock(group,groupStart,6),
+				_blockP(group,groupStart,kP),
+				_blockI(group,_blockP.getGroupEnd(),kI,iMax),
+				_blockD(group,_blockI.getGroupEnd(),kD,dFcut),
+				_blockSaturation(group,_blockD.getGroupEnd(),yMax) {
 	}
 
-	float update(const float & input, const float & derivative, const float & dt) {
+	float update(const float & input, const float & dt) {
 
-		// proportional, note must come after derivative
-		// because derivative uses _eP as previous value
-		_eP = input;
-
-		// integral
-		_eI += _eP * dt;
-
-		// wind up guard
-		if (_eI > _iMax)
-			_eI = _iMax;
-		if (_eI < -_iMax)
-			_eI = -_iMax;
-
-		// pid sum
-		float y = _kP * _eP + _kI * _eI - _kD * derivative;
-
-		// saturation
-		if (y > _yMax)
-			y = _yMax;
-		if (y < -_yMax)
-			y = -_yMax;
-
-		return y;
+		float y = _blockP.update(input,dt) +
+				_blockI.update(input,dt) +
+				_blockD.update(input,dt);
+		return _blockSaturation.update(y);
 	}
 protected:
-	AP_Var_group _group; /// helps with parameter management
-	float _eP; /// input
-	float _eI; /// integral of input
-	float _eD; /// derivative of input
-	AP_Float _kP; /// proportional gain
-	AP_Float _kI; /// integral gain
+	BlockP _blockP;
+	BlockI _blockI;
+	BlockD _blockD;
+	BlockSaturation _blockSaturation;
+};
+
+class BlockPI : public AP_ControllerBlock {
+public:
+	BlockPI(AP_Var_group * group, uint8_t groupStart,
+			float kP, float kI, float iMax, float yMax) :
+				AP_ControllerBlock(group,groupStart,4),
+				_blockP(group,groupStart,kP),
+				_blockI(group,_blockP.getGroupEnd(),kI,iMax),
+				_blockSaturation(group,_blockI.getGroupEnd(),yMax) {
+	}
+
+	float update(const float & input, const float & dt) {
+
+		float y = _blockP.update(input,dt) +
+				_blockI.update(input,dt);
+		return _blockSaturation.update(y);
+	}
+protected:
+	BlockP _blockP;
+	BlockI _blockI;
+	BlockSaturation _blockSaturation;
+};
+
+class BlockPD : public AP_ControllerBlock {
+public:
+	BlockPD(AP_Var_group * group, uint8_t groupStart,
+			float kP, float kI, float kD, float iMax,
+			float yMax, uint8_t dFcut) :
+				AP_ControllerBlock(group,groupStart,4),
+				_blockP(group,groupStart,kP),
+				_blockD(group,_blockP.getGroupEnd(),kD,dFcut),
+				_blockSaturation(group,_blockD.getGroupEnd(),yMax) {
+	}
+
+	float update(const float & input, const float & dt) {
+
+		float y = _blockP.update(input,dt) +
+				_blockD.update(input,dt);
+		return _blockSaturation.update(y);
+	}
+protected:
+	BlockP _blockP;
+	BlockD _blockD;
+	BlockSaturation _blockSaturation;
+};
+
+/// PID with derivative feedback (ignores reference derivative)
+class BlockPIDDfb : public AP_ControllerBlock {
+public:
+	BlockPIDDfb(AP_Var_group * group, uint8_t groupStart,
+			float kP, float kI, float kD, float iMax, float yMax) :
+				AP_ControllerBlock(group,groupStart,5),
+				_blockP(group,groupStart,kP),
+				_blockI(group,_blockP.getGroupEnd(),kI,iMax),
+				_blockSaturation(group,_blockI.getGroupEnd(),yMax),
+				_kD(group, _blockSaturation.getGroupEnd(), kD, PSTR("D")) {
+	}
+	float update(const float & input, const float & derivative, const float & dt) {
+		float y = _blockP.update(input,dt) +
+				_blockI.update(input,dt) - _kD * derivative;
+		return _blockSaturation.update(y);
+	}
+protected:
+	BlockP _blockP;
+	BlockI _blockI;
+	BlockSaturation _blockSaturation;
 	AP_Float _kD; /// derivative gain
-	AP_Float _iMax; /// integrator saturation
-	AP_Float _yMax; /// integrator saturation
 };
 
 } // apo

@@ -17,16 +17,20 @@ private:
 	enum {
 		CH_MODE = 0, CH_STR, CH_THR
 	};
-	PidDFB2 pidStr;
-	Pid2 pidThr;
+	BlockPIDDfb pidStr;
+	BlockPID pidThr;
 public:
 	CarController(AP_Var::Key cntrlKey, AP_Var::Key pidStrKey,
 			AP_Var::Key pidThrKey, AP_Navigator * nav, AP_Guide * guide,
 			AP_HardwareAbstractionLayer * hal) :
 		AP_Controller(nav, guide, hal), _group(cntrlKey, PSTR("CNTRL_")),
 				_mode(&_group, 1, 0, PSTR("MODE")),
-				pidStr(pidStrKey, PSTR("STR_"), 1.0, 0, 0, 0, 3),
-				pidThr(pidThrKey, PSTR("THR_"), 0.6, 0.5, 0, 1, 3) {
+				pidStr(new AP_Var_group(pidStrKey, PSTR("STR_")),1,
+						steeringP, steeringI, steeringD,
+						steeringIMax, steeringYMax),
+				pidThr(new AP_Var_group(pidThrKey, PSTR("THR_")),1,
+						throttleP, throttleI, throttleD,
+						throttleIMax, throttleYMax, throttleDFCut) {
 		_hal->debug->println_P(PSTR("initializing car controller"));
 
 		_hal->rc.push_back(

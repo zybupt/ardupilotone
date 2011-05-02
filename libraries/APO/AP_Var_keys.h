@@ -22,15 +22,25 @@ enum keys {
 	k_chStr,
 
 	// pids
-	k_pidPN = 40,
+	k_pidGroundSpeed2Throttle = 40,
+	k_pidStr,
+	k_pidPN,
 	k_pidPE,
 	k_pidPD,
-	k_pidThr,
-	k_pidStr,
 	k_pidRoll,
 	k_pidPitch,
 	k_pidYawRate,
 	k_pidYaw,
+
+	//				PidDFB pidHdng2Bank, pidBank2Aileron;
+	//					Pid pidAlt2Thr, pidSpeed2Elevator,  pidYawRate2Rudder;
+
+	k_pidHdng2Bank,
+	k_pidBank2Aileron,
+	k_pidAltitude2Throttle,
+	k_pidAirSpeed2Elevator,
+	k_pidYawRate2Rudder,
+
 
 	// 200-256 reserved for commands
 	k_commands = 200

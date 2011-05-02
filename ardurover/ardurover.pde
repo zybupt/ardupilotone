@@ -20,6 +20,10 @@
 #include <AP_IMU.h>
 #include <APM_BMP085.h>
 
+
+// Vehicle Configuration
+#include "vehicles/traxxasStampede.h"
+
 // Local Modules
 #include "controllers.h"
 
@@ -67,15 +71,7 @@ const uint8_t heartbeatTimeout = 3;
 
 //---------HARDWARE CONFIG ----------------//
 
-//Hardware Parameters
-#define SLIDE_SWITCH_PIN 40
-#define PUSHBUTTON_PIN 41
-#define A_LED_PIN 37 //36 = B,3637 = A,363735 = C
-#define B_LED_PIN 36
-#define C_LED_PIN 35
-#define EEPROM_MAX_ADDR	2048
 #define RANGE_FINDER_CLASS AP_RangeFinder_MaxsonarLV
-
 
 //---------MAIN ----------------//
 
@@ -220,7 +216,8 @@ void setup() {
 	 */
 	AP_Navigator * navigator = new DcmNavigator(hal);
 	AP_Guide * guide = new MavlinkGuide(k_guide,navigator,hal);
-	AP_Controller * controller = new CarController(k_cntrl,k_pidStr,k_pidThr,navigator,guide,hal);
+	AP_Controller * controller = new CarController(k_cntrl,k_pidStr,
+			k_pidGroundSpeed2Throttle,navigator,guide,hal);
 
 	/*
 	 * CommLinks

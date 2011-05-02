@@ -32,21 +32,27 @@ public:
 	QuadController(AP_Navigator * nav, AP_Guide * guide,
 			AP_HardwareAbstractionLayer * hal) :
 				AP_Controller(nav, guide, hal),
-				pidRoll(k_pidRoll, PSTR("ROLL_"), PID_ATT_P, PID_ATT_I,
-						PID_ATT_D, PID_ATT_AWU, PID_ATT_LIM),
-				pidPitch(k_pidPitch, PSTR("PITCH_"), PID_ATT_P, PID_ATT_I,
-						PID_ATT_D, PID_ATT_AWU, PID_ATT_LIM),
-				pidYaw(k_pidYaw, PSTR("YAW_"), PID_YAWPOS_P, PID_YAWPOS_I,
-						PID_YAWPOS_D, PID_YAWPOS_AWU, PID_YAWPOS_LIM),
-				pidYawRate(k_pidYawRate, PSTR("YAWRATE_"), PID_YAWSPEED_P,
-						PID_YAWSPEED_I, PID_YAWSPEED_D, PID_YAWSPEED_AWU,
-						PID_YAWSPEED_LIM),
-				pidPN(k_pidPN, PSTR("NORTH_"), PID_POS_P,
-						PID_POS_I, PID_POS_D, PID_POS_AWU, PID_POS_LIM),
-				pidPE(k_pidPE, PSTR("EAST_"), PID_POS_P, PID_POS_I,
-						PID_POS_D, PID_POS_AWU, PID_POS_LIM),
-				pidPD(k_pidPD, PSTR("DOWN_"), PID_POS_Z_P, PID_POS_Z_I,
-						PID_POS_Z_D, PID_POS_Z_AWU, PID_POS_Z_LIM)
+				pidRoll(new AP_Var_group(k_pidRoll, PSTR("ROLL_")),1,
+						PID_ATT_P, PID_ATT_I,PID_ATT_D,
+						PID_ATT_AWU, PID_ATT_LIM),
+				pidPitch(new AP_Var_group(k_pidPitch, PSTR("PITCH_")),1,
+						PID_ATT_P, PID_ATT_I,PID_ATT_D,
+						PID_ATT_AWU, PID_ATT_LIM),
+				pidYaw(new AP_Var_group(k_pidYaw, PSTR("YAW_")),1,
+						PID_YAWPOS_P, PID_YAWPOS_I,PID_YAWPOS_D,
+						PID_YAWPOS_AWU, PID_YAWPOS_LIM),
+				pidYawRate(new AP_Var_group(k_pidYawRate, PSTR("YAWRATE_")),1,
+						PID_YAWSPEED_P,PID_YAWSPEED_I, PID_YAWSPEED_D,
+						PID_YAWSPEED_AWU,PID_YAWSPEED_LIM, PID_YAWSPEED_DFCUT),
+				pidPN(new AP_Var_group(k_pidPN, PSTR("NORTH_")),1,
+						PID_POS_P,PID_POS_I, PID_POS_D,
+						PID_POS_AWU, PID_POS_LIM),
+				pidPE(new AP_Var_group(k_pidPE, PSTR("EAST_")),1,
+						PID_POS_P, PID_POS_I,PID_POS_D,
+						PID_POS_AWU, PID_POS_LIM),
+				pidPD(new AP_Var_group(k_pidPD, PSTR("DOWN_")),1,
+						PID_POS_Z_P, PID_POS_Z_I,PID_POS_Z_D,
+						PID_POS_Z_AWU, PID_POS_Z_LIM)
 	{
 		/*
 		 * allocate radio channels
@@ -158,8 +164,8 @@ public:
 		}
 
 private:
-	PidDFB2 pidRoll, pidPitch, pidYaw, pidPN, pidPE, pidPD;
-	Pid2 pidYawRate;
+	BlockPIDDfb pidRoll, pidPitch, pidYaw, pidPN, pidPE, pidPD;
+	BlockPID pidYawRate;
 };
 
 } // namespace apo
