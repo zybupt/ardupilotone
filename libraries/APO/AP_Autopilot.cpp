@@ -16,6 +16,21 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	Loop(loop0Rate, callback0, this),
 			_navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
 
+
+	/*
+	 * Pins
+	 */
+	if (hal->getBoard()==BOARD_ARDUPILOTMEGA)
+	{
+		hal->debug->println_P(PSTR("settings pin modes"));
+		pinMode(A_LED_PIN, OUTPUT); //  extra led
+		pinMode(B_LED_PIN, OUTPUT); //  imu ledclass AP_CommLink;
+		pinMode(C_LED_PIN, OUTPUT); //  gps led
+		pinMode(SLIDE_SWITCH_PIN, INPUT);
+		pinMode(PUSHBUTTON_PIN, INPUT);
+		DDRL |= B00000100; // set port L, pint 2 to output for the relay
+	}
+
 	/*
 	 * Calibration
 	 */
