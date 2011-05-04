@@ -164,8 +164,10 @@ public:
 		}
 
 private:
-	BlockPIDDfb pidRoll, pidPitch, pidYaw, pidPN, pidPE, pidPD;
+	BlockPIDDfb pidRoll, pidPitch, pidYaw;
 	BlockPID pidYawRate;
+	BlockPIDDfb pidPN, pidPE, pidPD;
+
 };
 
 } // namespace apo

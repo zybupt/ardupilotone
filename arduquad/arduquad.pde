@@ -118,7 +118,7 @@ void setup() {
 	 * Initialize Comm Channels
 	 */
 	hal->debug->println_P(PSTR("initializing comm channels"));
-	if (hal->mode()==MODE_LIVE) {
+	if (hal->getMode()==MODE_LIVE) {
 		Serial1.begin(38400, 128, 16); // gps
 	} else { // hil
 		Serial1.begin(57600, 128, 128);
@@ -127,7 +127,7 @@ void setup() {
 	/*
 	 * Sensor initialization
 	 */
-	if (hal->mode()==MODE_LIVE)
+	if (hal->getMode()==MODE_LIVE)
 	{
 		hal->debug->println_P(PSTR("initializing adc"));
 		hal->adc =  new AP_ADC_ADS7844;

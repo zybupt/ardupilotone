@@ -50,13 +50,13 @@ public:
 			//_hal->debug->println("manual");
 
 		} else { // auto
-			float headingError = _guide->headingCommand - _nav->getHeading();
+			float headingError = _guide->getHeadingCommand() - _nav->getHeading();
 			if (headingError > 180 * deg2Rad)
 				headingError -= 360 * deg2Rad;
 			if (headingError < -180 * deg2Rad)
 				headingError += 360 * deg2Rad;
 			_hal->rc[CH_STR]->setPosition(pidStr.update(headingError,_nav->getYawRate(),dt));
-			_hal->rc[CH_THR]->setPosition(pidThr.update(_guide->groundSpeedCommand - _nav->getGroundSpeed(),dt));
+			_hal->rc[CH_THR]->setPosition(pidThr.update(_guide->getGroundSpeedCommand() - _nav->getGroundSpeed(),dt));
 			//_hal->debug->println("automode");
 		}
 	}
