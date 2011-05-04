@@ -59,7 +59,7 @@ static bool rangeFinderDownEnabled = true;
 //---------ADVANCED SECTION ----------------//
 
 // loop rates
-const float loop0Rate = 200;
+const float loop0Rate = 150;
 const float loop1Rate = 50;
 const float loop2Rate = 10;
 const float loop3Rate = 1;
