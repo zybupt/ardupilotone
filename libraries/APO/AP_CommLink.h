@@ -175,7 +175,7 @@ public:
 			int16_t ch[8];
 			for (int i = 0; i < 8; i++)
 				ch[i] = 0;
-			for (int i = 0; i < 8 && i < _hal->rc.getSize(); i++)
+			for (uint8_t i = 0; i < 8 && i < _hal->rc.getSize(); i++)
 			{
 				ch[i] = 10000 * _hal->rc[i]->getPosition();
 				//_hal->debug->printf_P(PSTR("ch: %d position: %d\n"),i,ch[i]);
@@ -189,7 +189,7 @@ public:
 			int16_t ch[8];
 			for (int i = 0; i < 8; i++)
 				ch[i] = 0;
-			for (int i = 0; i < 8 && i < _hal->rc.getSize(); i++)
+			for (uint8_t i = 0; i < 8 && i < _hal->rc.getSize(); i++)
 				ch[i] = _hal->rc[i]->getPwm();
 			mavlink_msg_rc_channels_raw_send(_channel, ch[0], ch[1], ch[2],
 					ch[3], ch[4], ch[5], ch[6], ch[7], 255);
@@ -198,12 +198,12 @@ public:
 
 	      case MAVLINK_MSG_ID_SYS_STATUS: {
 
-	    	  float batteryVoltage, prev_cell, temp;
+	    	  float batteryVoltage, temp;
 	    	  temp = analogRead(0);
 	    	  batteryVoltage = ((temp*5/1023)/0.28);
 
 				mavlink_msg_sys_status_send(_channel, _controller->getMode(),
-								_guide->getMode(), _hal->state(), _hal->load * 10,
+								_guide->getMode(), _hal->getState(), _hal->load * 10,
 								batteryVoltage*1000,(batteryVoltage - 3.3)/(4.2-3.3)*1000,
 								_packetDrops);
 				break;
@@ -211,7 +211,7 @@ public:
 
 		case MAVLINK_MSG_ID_WAYPOINT_ACK: {
 			sendText(SEVERITY_LOW, PSTR("waypoint ack"));
-			mavlink_waypoint_ack_t packet;
+			//mavlink_waypoint_ack_t packet;
 			uint8_t type = 0; // ok (0), error(1)
 			mavlink_msg_waypoint_ack_send(_channel, _cmdDestSysId,
 					_cmdDestCompId, type);
@@ -333,6 +333,7 @@ private:
 	uint16_t _cmdDestSysId;
 	uint16_t _cmdDestCompId;
 	uint16_t _cmdRequestIndex;
+	uint16_t _cmdMax;
 	Vector<mavlink_command_t *> _cmdList;
 
 	// parameters
@@ -340,7 +341,6 @@ private:
 	uint16_t _parameterCount;
 	AP_Var * _queuedParameter;
 	uint16_t _queuedParameterIndex;
-	uint16_t _cmdMax;
 
 	// channel
 	mavlink_channel_t _channel;
@@ -491,11 +491,11 @@ private:
 		//_hal->debug->printf_P(PSTR("sequence: %d\n"),packet.seq);
 		AP_MavlinkCommand cmd(packet.seq);
 
-		mavlink_waypoint_t msg = cmd.convert(_guide->getCurrentIndex());
+		mavlink_waypoint_t wp = cmd.convert(_guide->getCurrentIndex());
 		mavlink_msg_waypoint_send(_channel, _cmdDestSysId, _cmdDestCompId,
-				msg.seq, msg.frame, msg.command, msg.current, msg.autocontinue,
-				msg.param1, msg.param2, msg.param3, msg.param4, msg.x, msg.y,
-				msg.z);
+				wp.seq, wp.frame, wp.command, wp.current, wp.autocontinue,
+				wp.param1, wp.param2, wp.param3, wp.param4, wp.x, wp.y,
+				wp.z);
 
 		// update last waypoint comm stamp
 		_cmdTimeLastSent = millis();
@@ -512,7 +512,7 @@ private:
 			break;
 
 		// check for error
-		uint8_t type = packet.type; // ok (0), error(1)
+		//uint8_t type = packet.type; // ok (0), error(1)
 
 		// turn off waypoint send
 		_sendingCmds = false;

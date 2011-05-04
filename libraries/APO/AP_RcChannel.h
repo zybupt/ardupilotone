@@ -49,13 +49,9 @@ public:
 	uint16_t getPwm() { return _pwm; }
 	float getPosition() { return _pwmToPosition(_pwm); }
 
-	// did our read come in 50µs below the min?
-	bool failSafe() { _pwm < (_pwmMin - 50); }
-
 private:
 
 	// configuration
-	const char * _name;
 	APM_RC_Class & _rc;
 		
 	// internal states

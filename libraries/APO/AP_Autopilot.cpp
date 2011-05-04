@@ -22,8 +22,8 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	navigator->calibrate();
 
 	// start clock
-	uint32_t timeStart = millis();
-	uint16_t gpsWaitTime = 5000; // 5 second wait for gps
+	//uint32_t timeStart = millis();
+	//uint16_t gpsWaitTime = 5000; // 5 second wait for gps
 
 	/*
 	 * Look for valid initial state
@@ -33,7 +33,7 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 		hal->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 		hal->hil->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 		delay(1000);
-		if (hal->mode() == MODE_LIVE) {
+		if (hal->getMode() == MODE_LIVE) {
 			_navigator->updateSlow(0);
 			if (_hal->gps) {
 				if (hal->gps->fix) {
@@ -45,7 +45,7 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 			} else { // no gps, can skip
 				break;
 			}
-		} else if(hal->mode() == MODE_HIL_CNTL){ // hil
+		} else if(hal->getMode() == MODE_HIL_CNTL){ // hil
 			_hal->hil->receive();
 			Serial.println("HIL Recieve Called");
 			if (_navigator->getTimeStamp() != 0) {
@@ -89,8 +89,8 @@ void AP_Autopilot::callback0(void * data) {
 	/*
 	 * ahrs update
 	 */
-	if (apo->navigator())
-		apo->navigator()->updateFast(1.0/loop0Rate);
+	if (apo->getNavigator())
+		apo->getNavigator()->updateFast(1.0/loop0Rate);
 }
 
 void AP_Autopilot::callback1(void * data) {
@@ -100,25 +100,25 @@ void AP_Autopilot::callback1(void * data) {
 	/*
 	 * hardware in the loop
 	 */
-	if (apo->hal()->hil && apo->hal()->mode()!=MODE_LIVE)
+	if (apo->getHal()->hil && apo->getHal()->getMode()!=MODE_LIVE)
 	{
-		apo->hal()->hil->receive();
-		apo->hal()->hil->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
+		apo->getHal()->hil->receive();
+		apo->getHal()->hil->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
 	}
 
 	/*
      * update control laws
 	 */
-	if (apo->guide())
-		apo->guide()->update();
+	if (apo->getGuide())
+		apo->getGuide()->update();
 
 	/*
 	 * update control laws
 	 */
-	if (apo->controller())
+	if (apo->getController())
 	{
 		//apo->hal()->debug->println_P(PSTR("updating controller"));
-		apo->controller()->update(1./loop1Rate);
+		apo->getController()->update(1./loop1Rate);
 	}
 	/*
 	char msg[50];
@@ -134,33 +134,33 @@ void AP_Autopilot::callback2(void * data) {
 	/*
 	 * send telemetry
 	 */
-	if (apo->hal()->gcs) {
+	if (apo->getHal()->gcs) {
 		// send messages
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
-		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
-		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
-		apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
-		//apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_SCALED_IMU);
+		apo->getHal()->gcs->sendMessage(MAVLINK_MSG_ID_GPS_RAW);
+		apo->getHal()->gcs->sendMessage(MAVLINK_MSG_ID_ATTITUDE);
+		//apo->getHal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
+		//apo->getHal()->gcs->sendMessage(MAVLINK_MSG_ID_GLOBAL_POSITION);
+		apo->getHal()->gcs->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_RAW);
+		//apo->getHal()->gcs->sendMessage(MAVLINK_MSG_ID_SCALED_IMU);
 	}
 
 	/*
 	 * slow navigation loop update
 	 */
-	if (apo->navigator()) {
-		apo->navigator()->updateSlow(1.0/loop2Rate);
+	if (apo->getNavigator()) {
+		apo->getNavigator()->updateSlow(1.0/loop2Rate);
 	}
 
 	/*
 	 * handle ground control station communication
 	 */
-	if (apo->hal()->gcs) {
+	if (apo->getHal()->gcs) {
 		// send messages
-		apo->hal()->gcs->requestCmds();
-		apo->hal()->gcs->sendParameters();
+		apo->getHal()->gcs->requestCmds();
+		apo->getHal()->gcs->sendParameters();
 
 		// receive messages
-		apo->hal()->gcs->receive();
+		apo->getHal()->gcs->receive();
 	}
 
 	/*
@@ -168,11 +168,11 @@ void AP_Autopilot::callback2(void * data) {
 	 */
 	/*
 	 if (apo->navigator()) {
-		 apo->hal()->debug->printf_P(PSTR("roll: %f deg\tpitch: %f deg\tyaw: %f deg\n"),
+		 apo->getHal()->debug->printf_P(PSTR("roll: %f deg\tpitch: %f deg\tyaw: %f deg\n"),
 				 apo->navigator()->getRoll()*rad2Deg,
 				 apo->navigator()->getPitch()*rad2Deg,
 				 apo->navigator()->getYaw()*rad2Deg);
-		 apo->hal()->debug->printf_P(PSTR("lat: %f deg\tlon: %f deg\talt: %f m\n"),
+		 apo->getHal()->debug->printf_P(PSTR("lat: %f deg\tlon: %f deg\talt: %f m\n"),
 				 apo->navigator()->getLat()*rad2Deg,
 				 apo->navigator()->getLon()*rad2Deg,
 				 apo->navigator()->getAlt());
@@ -182,22 +182,22 @@ void AP_Autopilot::callback2(void * data) {
 
 void AP_Autopilot::callback3(void * data) {
 	AP_Autopilot * apo = (AP_Autopilot *) data;
-	//apo->hal()->debug->println_P(PSTR("callback 3"));
+	//apo->getHal()->debug->println_P(PSTR("callback 3"));
 
 	/*
 	 * send heartbeat
 	 */
-	apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
+	apo->getHal()->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 
 	/*
 	 * load/loop rate/ram debug
 	 */
 
-	apo->hal()->load = apo->load();
-	apo->hal()->debug->printf_P(PSTR("load: %d%%\trate: %f Hz\tfree ram: %d bytes\n"),
+	apo->getHal()->load = apo->load();
+	apo->getHal()->debug->printf_P(PSTR("load: %d%%\trate: %f Hz\tfree ram: %d bytes\n"),
 			apo->load(),1.0/apo->dt(),freeMemory());
 
-	apo->hal()->gcs->sendMessage(MAVLINK_MSG_ID_SYS_STATUS);
+	apo->getHal()->gcs->sendMessage(MAVLINK_MSG_ID_SYS_STATUS);
 
 	/*
 	 * adc debug
@@ -209,7 +209,7 @@ void AP_Autopilot::callback3(void * data) {
 }
 
 void AP_Autopilot::callback4(void * data) {
-	AP_Autopilot * apo = (AP_Autopilot *) data;
+	//AP_Autopilot * apo = (AP_Autopilot *) data;
 	//apo->hal()->debug->println_P(PSTR("callback 4"));
 }
 

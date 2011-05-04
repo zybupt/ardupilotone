@@ -41,22 +41,17 @@ public:
 	 * @param navigator This is the navigator pointer.
 	 */
 	AP_Guide(AP_Navigator * navigator, AP_HardwareAbstractionLayer * hal) :
-		_navigator(navigator), headingCommand(0), airSpeedCommand(0),
-				groundSpeedCommand(0), altitudeCommand(0), pNCmd(0), pECmd(0),
-				pDCmd(0), _hal(hal), _command(0), _previousCommand(0),
-				_mode(MAV_NAV_LOST), _numberOfCommands(1), _cmdIndex(0)
+		_navigator(navigator), _hal(hal),
+		_command(0), _previousCommand(0),
+		_headingCommand(0), _airSpeedCommand(0),
+		_groundSpeedCommand(0), _altitudeCommand(0), _pNCmd(0), _pECmd(0),
+		_pDCmd(0), _mode(MAV_NAV_LOST), _numberOfCommands(1), _cmdIndex(0)
 	{
 	}
 
 	virtual void update() = 0;
 	virtual void nextCommand() = 0;
-	float headingCommand;
-	float airSpeedCommand;
-	float groundSpeedCommand;
-	float altitudeCommand;
-	float pNCmd;
-	float pECmd;
-	float pDCmd;
+
 	MAV_NAV getMode() const
 	{
 	   	return _mode;
@@ -98,14 +93,30 @@ public:
 		return nextIndex;
 	}
 
-protected:
+	float getHeadingCommand() { return _headingCommand;}
+	float getAirSpeedCommand() { return _airSpeedCommand;}
+	float getGroundSpeedCommand() { return _groundSpeedCommand;}
+	float getAltitudeCommand() { return _altitudeCommand;}
+	float getPNCmd() { return _pNCmd;}
+	float getPECmd() { return _pECmd;}
+	float getPDCmd() { return _pDCmd;}
+	MAV_NAV getMode() { return _mode;}
+	uint8_t getCommandIndex() { return _cmdIndex;}
 
+protected:
+	AP_Navigator * _navigator;
+	AP_HardwareAbstractionLayer * _hal;
 	AP_MavlinkCommand _command, _previousCommand;
+	float _headingCommand;
+	float _airSpeedCommand;
+	float _groundSpeedCommand;
+	float _altitudeCommand;
+	float _pNCmd;
+	float _pECmd;
+	float _pDCmd;
 	MAV_NAV _mode;
 	AP_Uint8 _numberOfCommands;
 	AP_Uint8 _cmdIndex;
-	AP_Navigator * _navigator;
-	AP_HardwareAbstractionLayer * _hal;
 };
 
 class MavlinkGuide: public AP_Guide {
@@ -119,7 +130,7 @@ public:
 				_crossTrackLim(&_group, 3, 10, PSTR("XTLIM"))
 		{
 
-		for (int i = 0; i < _hal->rangeFinders.getSize(); i++) {
+		for (uint8_t i = 0; i < _hal->rangeFinders.getSize(); i++) {
 			RangeFinder * rF = _hal->rangeFinders[i];
 			if (rF == NULL)
 				continue;
@@ -151,9 +162,9 @@ public:
 		// if we don't have enough waypoint for cross track calcs
 		// go home
 		if (_numberOfCommands == 1) {
-			headingCommand = AP_MavlinkCommand::home.bearingTo(_navigator->getLat_degInt(),
+			_headingCommand = AP_MavlinkCommand::home.bearingTo(_navigator->getLat_degInt(),
 					_navigator->getLon_degInt()) + 180*deg2Rad;
-			if (headingCommand > 360*deg2Rad) headingCommand -= 360*deg2Rad;
+			if (_headingCommand > 360*deg2Rad) _headingCommand -= 360*deg2Rad;
 			/*
 			_hal->debug->printf_P(PSTR("going home: bearing: %f distance: %f\n"),
 					headingCommand,AP_MavlinkCommand::home.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt()));
@@ -169,7 +180,7 @@ public:
 			if (temp < -_crossTrackLim * deg2Rad)
 				temp = -_crossTrackLim * deg2Rad;
 			float bearing = _previousCommand.bearingTo(_command);
-			headingCommand = bearing - temp;
+			_headingCommand = bearing - temp;
 			float alongTrack = AP_MavlinkCommand::alongTrack(_previousCommand,_command,
 					_navigator->getLat_degInt(),_navigator->getLon_degInt());
 			float distanceToNext = _command.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt());
@@ -182,24 +193,24 @@ public:
 					*/
 		}
 
-		groundSpeedCommand = _velocityCommand;
+		_groundSpeedCommand = _velocityCommand;
 
 		// TODO : calculate pN,pE,pD from home and gps coordinates
-		pNCmd = _command.getPN(_navigator->getLat_degInt(),_navigator->getLon_degInt());
-		pECmd = _command.getPE(_navigator->getLat_degInt(),_navigator->getLon_degInt());
-		pDCmd = _command.getPD(_navigator->getAlt_intM());
+		_pNCmd = _command.getPN(_navigator->getLat_degInt(),_navigator->getLon_degInt());
+		_pECmd = _command.getPE(_navigator->getLat_degInt(),_navigator->getLon_degInt());
+		_pDCmd = _command.getPD(_navigator->getAlt_intM());
 
 		// process mavlink commands
 		//handleCommand();
 
 		// obstacle avoidance overrides
 		// stop if your going to drive into something in front of you
-		for(int i=0;i < _hal->rangeFinders.getSize(); i++) _hal->rangeFinders[i]->read();
+		for(uint8_t i=0;i < _hal->rangeFinders.getSize(); i++) _hal->rangeFinders[i]->read();
 		float frontDistance = _rangeFinderFront->distance/200.0; //convert for other adc
 		if (_rangeFinderFront && frontDistance < 2) {
 			//airSpeedCommand = 0;
 			//groundSpeedCommand = 0;
-			headingCommand -= 45*deg2Rad;
+			_headingCommand -= 45*deg2Rad;
 //			_hal->debug->print("Obstacle Distance (m): ");
 //			_hal->debug->println(frontDistance);
 //			_hal->debug->print("Obstacle avoidance Heading Command: ");
@@ -209,19 +220,19 @@ public:
 //											frontDistance);
 		}
 		if (_rangeFinderBack && _rangeFinderBack->distance < 5) {
-			airSpeedCommand = 0;
-			groundSpeedCommand = 0;
+			_airSpeedCommand = 0;
+			_groundSpeedCommand = 0;
 
 		}
 
 		if (_rangeFinderLeft && _rangeFinderLeft->distance < 5) {
-			airSpeedCommand = 0;
-			groundSpeedCommand = 0;
+			_airSpeedCommand = 0;
+			_groundSpeedCommand = 0;
 		}
 
 		if (_rangeFinderRight && _rangeFinderRight->distance < 5) {
-			airSpeedCommand = 0;
-			groundSpeedCommand = 0;
+			_airSpeedCommand = 0;
+			_groundSpeedCommand = 0;
 		}
 	}
 

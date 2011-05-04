@@ -58,12 +58,12 @@ public:
 	void update()
 	{
 		// read the radio 
-		for (int i=0;i<ch.getSize();i++) ch[i]->readRadio();
+		for (uint8_t i=0;i<ch.getSize();i++) ch[i]->readRadio();
 
 		// print channel names
 		Serial.print("\t\t");
 		static char name[7];
-		for (int i=0;i<ch.getSize();i++)
+		for (uint8_t i=0;i<ch.getSize();i++)
 		{
 			ch[i]->copy_name(name,7);
 			Serial.printf("%7s\t",name);
@@ -72,12 +72,12 @@ public:
 
 		// print pwm
 		Serial.printf("pwm      :\t");
-		for (int i=0;i<ch.getSize();i++) Serial.printf("%7d\t",ch[i]->getPwm());
+		for (uint8_t i=0;i<ch.getSize();i++) Serial.printf("%7d\t",ch[i]->getPwm());
 		Serial.println();
 
 		// print position
 		Serial.printf("position :\t");
-		for (int i=0;i<ch.getSize();i++) Serial.printf("%7.2f\t",ch[i]->getPosition());
+		for (uint8_t i=0;i<ch.getSize();i++) Serial.printf("%7.2f\t",ch[i]->getPosition());
 		Serial.println();
 
 		delay(500);

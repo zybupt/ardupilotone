@@ -77,8 +77,8 @@ public:
 		return _y;
 	}
 protected:
-	float _y;
 	AP_Float _fCut;
+	float _y;
 };
 
 class BlockSaturation : public AP_ControllerBlock {
@@ -102,6 +102,36 @@ public:
 	}
 protected:
 	AP_Float _yMax; /// output saturation
+};
+
+class BlockDerivative {
+public:
+	BlockDerivative() : _lastInput(0), firstRun(true) {
+	}
+	float update(const float & input, const float & dt) {
+		float derivative = (input - _lastInput)/dt;
+		_lastInput = input;
+		if (firstRun) {
+			firstRun = false;
+			return 0;
+		}
+		else return derivative;
+	}
+protected:
+	float _lastInput; /// last input
+	bool firstRun;
+};
+
+class BlockIntegral {
+public:
+	BlockIntegral() : _i(0) {
+	}
+	float update(const float & input, const float & dt) {
+		_i += input * dt;
+		return _i;
+	}
+protected:
+	float _i; /// integral
 };
 
 class BlockP : public AP_ControllerBlock {
@@ -137,9 +167,9 @@ public:
 		return _blockSaturation.update(_eI);
 	}
 protected:
-	float _eI; /// integral of input
 	AP_Float _kI; /// integral gain
 	BlockSaturation _blockSaturation;  /// integrator saturation
+	float _eI; /// integral of input
 };
 
 class BlockD : public AP_ControllerBlock {
@@ -152,9 +182,8 @@ public:
 				AP_ControllerBlock(group,groupStart,2),
 				_blockLowPass(group,groupStart,dFCut, dFCutLabel ? : PSTR("DFCUT")),
 				_kD(group, _blockLowPass.getGroupEnd(), kD, kDLabel ? : PSTR("D")),
-				_eP(0), _eD(0) {
+				_eP(0) {
 	}
-
 	float update(const float & input, const float & dt) {
 		// derivative with low pass
 		float _eD = _blockLowPass.update((_eP - input) / dt,dt);
@@ -164,10 +193,9 @@ public:
 		return _kD * _eD;
 	}
 protected:
-	AP_Float _kD; /// derivative gain
 	BlockLowPass _blockLowPass;
+	AP_Float _kD; /// derivative gain
 	float _eP; /// input
-	float _eD; /// derivative of input
 };
 
 class BlockPID : public AP_ControllerBlock {

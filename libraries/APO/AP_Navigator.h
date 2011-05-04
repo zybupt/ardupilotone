@@ -38,8 +38,8 @@ public:
 	AP_Navigator(AP_HardwareAbstractionLayer * hal) :
 		_hal(hal), _timeStamp(0), _roll(0), _rollRate(0), _pitch(0),
 		_pitchRate(0), _yaw(0), _yawRate(0), _airSpeed(0), _groundSpeed(0),
-		_vD(0),  _lat_degInt(0), _heading(0),
-		_lon_degInt(0), _alt_intM(0)
+		_heading(0), _vD(0),
+		_lat_degInt(0), _lon_degInt(0), _alt_intM(0)
 	{
 	}
 	virtual void calibrate() = 0;
@@ -180,73 +180,73 @@ public:
         return _yawRate;
     }
 
-    void setAirSpeed(float _airSpeed)
+    void setAirSpeed(float airSpeed)
     {
-        this->_airSpeed = _airSpeed;
+        _airSpeed = airSpeed;
     }
 
-    void setHeading(float _heading)
+    void setHeading(float heading)
     {
-    	this->_heading = _heading;
+    	_heading = heading;
     }
 
-    void setAlt_intM(int32_t _alt_intM)
+    void setAlt_intM(int32_t alt_intM)
     {
-        this->_alt_intM = _alt_intM;
+        _alt_intM = alt_intM;
     }
 
-    void setVD(float _vD)
+    void setVD(float vD)
     {
-        this->_vD = _vD;
+        _vD = vD;
     }
 
-    void setGroundSpeed(float _groundSpeed)
+    void setGroundSpeed(float groundSpeed)
     {
-        this->_groundSpeed = _groundSpeed;
+        _groundSpeed = groundSpeed;
     }
 
-    void setLat_degInt(int32_t _lat_degInt)
+    void setLat_degInt(int32_t lat_degInt)
     {
-        this->_lat_degInt = _lat_degInt;
+        _lat_degInt = lat_degInt;
     }
 
-    void setLon_degInt(int32_t _lon_degInt)
+    void setLon_degInt(int32_t lon_degInt)
     {
-        this->_lon_degInt = _lon_degInt;
+        _lon_degInt = lon_degInt;
     }
 
-    void setPitch(float _pitch)
+    void setPitch(float pitch)
     {
-        this->_pitch = _pitch;
+        _pitch = pitch;
     }
 
-    void setPitchRate(float _pitchRate)
+    void setPitchRate(float pitchRate)
     {
-        this->_pitchRate = _pitchRate;
+        _pitchRate = pitchRate;
     }
 
-    void setRoll(float _roll)
+    void setRoll(float roll)
     {
-        this->_roll = _roll;
+        _roll = roll;
     }
 
-    void setRollRate(float _rollRate)
+    void setRollRate(float rollRate)
     {
-        this->_rollRate = _rollRate;
+        _rollRate = rollRate;
     }
 
-    void setYaw(float _yaw)
+    void setYaw(float yaw)
     {
-        this->_yaw = _yaw;
+        _yaw = yaw;
     }
 
-    void setYawRate(float _yawRate)
+    void setYawRate(float yawRate)
     {
-        this->_yawRate = _yawRate;
+       _yawRate = yawRate;
     }
-    void setTimeStamp(int32_t _timeStamp)
+    void setTimeStamp(int32_t timeStamp)
     {
-        this->_timeStamp = _timeStamp;
+        _timeStamp = timeStamp;
     }
     int32_t getTimeStamp() const
     {
@@ -292,7 +292,7 @@ public:
 		 * rangeFinder<direction> is assigned values based on orientation which
 		 * is specified in ArduPilotOne.pde.
 		 */
-		for (int i = 0; i < _hal-> rangeFinders.getSize(); i++) {
+		for (uint8_t i = 0; i < _hal-> rangeFinders.getSize(); i++) {
 			if (_hal->rangeFinders[i] == NULL)
 				continue;
 			if (_hal->rangeFinders[i]->orientation_x == 0
@@ -301,7 +301,7 @@ public:
 				_rangeFinderDown = _hal->rangeFinders[i];
 		}
 
-		if (_hal->mode() == MODE_LIVE) {
+		if (_hal->getMode() == MODE_LIVE) {
 			if (_hal->adc)
 				_hal->imu = new AP_IMU_Oilpan(_hal->adc, k_sensorCalib);
 			if (_hal->imu)
@@ -323,7 +323,7 @@ public:
 		}
 	}
 	virtual void updateFast(float dt) {
-		if (_hal->mode() != MODE_LIVE)
+		if (_hal->getMode() != MODE_LIVE)
 			return;
 
 		setTimeStamp(micros()); // if running in live mode, record new time stamp
@@ -374,7 +374,7 @@ public:
 		}
 	}
 	virtual void updateSlow(float dt) {
-		if (_hal->mode() != MODE_LIVE)
+		if (_hal->getMode() != MODE_LIVE)
 			return;
 
 		setTimeStamp(micros()); // if running in live mode, record new time stamp

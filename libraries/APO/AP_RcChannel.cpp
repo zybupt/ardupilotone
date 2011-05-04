@@ -18,18 +18,18 @@
 
 namespace apo {
 
-AP_RcChannel::AP_RcChannel(AP_Var::Key key, const prog_char_t * name, APM_RC_Class & rc, const uint8_t & ch,
+AP_RcChannel::AP_RcChannel(AP_Var::Key keyValue, const prog_char_t * name, APM_RC_Class & rc, const uint8_t & ch,
 			const uint16_t & pwmMin,
 			const uint16_t & pwmNeutral, const uint16_t & pwmMax,
 			const rcMode_t & rcMode, const bool & reverse) :
-		AP_Var_group(key,name),
-		_rc(rc),
+		AP_Var_group(keyValue,name),
 		_ch(this,0,ch,PSTR("CH")),
 		_pwmMin(this,1,pwmMin,PSTR("PMIN")),
-		_pwmMax(this,2,pwmMax,PSTR("PMAX")),
 		_pwmNeutral(this,3,pwmNeutral,PSTR("PNTRL")),
+		_pwmMax(this,2,pwmMax,PSTR("PMAX")),
 		_rcMode(rcMode),
 		_reverse(this,4,reverse,PSTR("REV")),
+		_rc(rc),
 		_pwm(pwmNeutral)
 	{
 		//Serial.print("pwm after ctor: "); Serial.println(pwmNeutral);
@@ -59,8 +59,8 @@ AP_RcChannel::setPwm(uint16_t pwm)
 	//Serial.printf("pwm after reverse: %d\n", pwm);
 
 	// apply saturation
-	if (_pwm > _pwmMax) _pwm = _pwmMax;
-	if (_pwm < _pwmMin) _pwm = _pwmMin;
+	if (_pwm > uint8_t(_pwmMax)) _pwm = _pwmMax;
+	if (_pwm < uint8_t(_pwmMin)) _pwm = _pwmMin;
 	_pwm = pwm;
 
 	//Serial.print("ch: "); Serial.print(ch); Serial.print(" pwm: "); Serial.println(pwm);
@@ -86,8 +86,8 @@ AP_RcChannel::_positionToPwm(const float & position)
 	else
 		pwm = position * int16_t(_pwmMax - _pwmNeutral) + _pwmNeutral;
 
-	if (pwm > _pwmMax) pwm = _pwmMax;
-	if (pwm < _pwmMin) pwm = _pwmMin;
+	if (pwm > uint16_t(_pwmMax)) pwm = _pwmMax;
+	if (pwm < uint16_t(_pwmMin)) pwm = _pwmMin;
 	return pwm;
 }
 
@@ -95,7 +95,7 @@ float
 AP_RcChannel::_pwmToPosition(const uint16_t & pwm)
 {
 	float position;
-	if(pwm < _pwmNeutral)
+	if(pwm < uint8_t(_pwmNeutral))
 		position = 1.0 * int16_t(pwm - _pwmNeutral)/
 			int16_t(_pwmNeutral - _pwmMin);
 	else

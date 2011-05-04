@@ -74,16 +74,16 @@ public:
 	/**
 	 * Accessors
 	 */
-	AP_Navigator * navigator() {
+	AP_Navigator * getNavigator() {
 		return _navigator;
 	}
-	AP_Guide * guide() {
+	AP_Guide * getGuide() {
 		return _guide;
 	}
-	AP_Controller * controller() {
+	AP_Controller * getController() {
 		return _controller;
 	}
-	AP_HardwareAbstractionLayer * hal() {
+	AP_HardwareAbstractionLayer * getHal() {
 		return _hal;
 	}
 

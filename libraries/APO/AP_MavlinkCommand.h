@@ -39,7 +39,7 @@ public:
 	 * @param index Start at zero.
 	 */
 	AP_MavlinkCommand(uint16_t index) :
-		_seq(index), _data(k_commands+index) {
+		_data(k_commands+index), _seq(index) {
 		_data.load();
 		//Serial.print("x: "); Serial.println(_data.get().x);
 	}

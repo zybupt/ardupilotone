@@ -45,11 +45,12 @@ class AP_HardwareAbstractionLayer {
 public:
 
 	AP_HardwareAbstractionLayer(halMode_t mode, board_t board, vehicle_t vehicle) :
-		_mode(mode), _board(board), _vehicle(vehicle), adc(),
-		gps(), baro(), compass(), rangeFinders(),
-		imu(), rc(), gcs(), hil(), debug(), load(), lastHeartBeat()
+		adc(), gps(), baro(), compass(), rangeFinders(),
+		imu(), rc(), gcs(), hil(), debug(), load(), lastHeartBeat(),
+		_mode(mode), _board(board), _vehicle(vehicle), _state(MAV_STATE_UNINIT)
 	{
 	}
+
 	/**
 	 * Sensors
 	 */
@@ -72,18 +73,18 @@ public:
 	AP_CommLink * hil;
 	FastSerial * debug;
 
+	uint8_t load;
+	uint32_t lastHeartBeat;
+
 	// accessors
-	halMode_t mode() { return _mode; }
-	board_t board() { return _board; }
-	vehicle_t vehicle() { return _vehicle; }
-	MAV_STATE state(){ return _state; }
+	halMode_t getMode() { return _mode; }
+	board_t getBoard() { return _board; }
+	vehicle_t getVehicle() { return _vehicle; }
+	MAV_STATE getState(){ return _state; }
 
 	float getTimeSinceLastHeartBeat() {
 		return (micros() - lastHeartBeat)/1e6;
 	}
-
-	uint8_t load;
-	uint32_t lastHeartBeat;
 
 private:
 
