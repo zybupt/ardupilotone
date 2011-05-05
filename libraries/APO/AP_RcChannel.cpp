@@ -48,6 +48,11 @@ uint16_t AP_RcChannel::readRadio() {
 	return _rc.InputCh(_ch);
 }
 
+void AP_RcChannel::setUsingRadio()
+{
+	setPwm(readRadio());
+}
+
 void
 AP_RcChannel::setPwm(uint16_t pwm)
 {

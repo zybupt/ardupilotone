@@ -27,22 +27,22 @@ const float PID_POS_Z_AWU = 0.1;
 
 // attitude control loop
 const float PID_ATT_INTERVAL  = 1/20; // 20 hz
-const float PID_ATT_P = 0.03; // 0.1
-const float PID_ATT_I = 0.03; // 0.0
-const float PID_ATT_D = 0.03; // 0.1
-const float PID_ATT_LIM = 0.1; // 0.01 // 10 % #define MOTORs
-const float PID_ATT_AWU = 0.1; // 0.0
-const float PID_YAWPOS_P = 1;
-const float PID_YAWPOS_I = 0.1;
+const float PID_ATT_P = 0.001; // 0.1
+const float PID_ATT_I = 0; // 0.0
+const float PID_ATT_D = 0; // 0.1
+const float PID_ATT_LIM = .01; // 0.01 // 10 % #define MOTORs
+const float PID_ATT_AWU = 0; // 0.0
+const float PID_YAWPOS_P = .01;
+const float PID_YAWPOS_I = 0;
 const float PID_YAWPOS_D = 0;
-const float PID_YAWPOS_LIM = 1; // 1 rad/s
-const float PID_YAWPOS_AWU = 1; // 1 rad/s
-const float PID_YAWSPEED_P = 1;
+const float PID_YAWPOS_LIM = .01; // 1 rad/s
+const float PID_YAWPOS_AWU = 0; // 1 rad/s
+const float PID_YAWSPEED_P = 0;
 const float PID_YAWSPEED_I = 0;
-const float PID_YAWSPEED_D = 0.5;
-const float PID_YAWSPEED_LIM = 0.1; // 0.01 // 10 % MOTORs
+const float PID_YAWSPEED_D = 0;
+const float PID_YAWSPEED_LIM = 0.01; // 0.01 // 10 % MOTORs
 const float PID_YAWSPEED_AWU = 0.0;
-const float PID_YAWSPEED_DFCUT = 30.0; // 30 Radians, about 10 Hz
+const float PID_YAWSPEED_DFCUT = 3.0; // 3 Radians, about 1 Hz
 
 // mixing
 const float MIX_REMOTE_WEIGHT = 1;

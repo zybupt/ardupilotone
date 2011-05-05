@@ -162,6 +162,7 @@ public:
 		// if we don't have enough waypoint for cross track calcs
 		// go home
 		if (_numberOfCommands == 1) {
+			_mode = MAV_NAV_RETURNING;
 			_headingCommand = AP_MavlinkCommand::home.bearingTo(_navigator->getLat_degInt(),
 					_navigator->getLon_degInt()) + 180*deg2Rad;
 			if (_headingCommand > 360*deg2Rad) _headingCommand -= 360*deg2Rad;
@@ -170,6 +171,7 @@ public:
 					headingCommand,AP_MavlinkCommand::home.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt()));
 					*/
 		} else {
+			_mode = MAV_NAV_WAYPOINT;
 			// TODO wrong behavior if 0 selected as waypoint, says previous 0
 			float dXt = AP_MavlinkCommand::crossTrack(_previousCommand,
 					_command, _navigator->getLat_degInt(),
@@ -208,6 +210,7 @@ public:
 		for(uint8_t i=0;i < _hal->rangeFinders.getSize(); i++) _hal->rangeFinders[i]->read();
 		float frontDistance = _rangeFinderFront->distance/200.0; //convert for other adc
 		if (_rangeFinderFront && frontDistance < 2) {
+			_mode = MAV_NAV_VECTOR;
 			//airSpeedCommand = 0;
 			//groundSpeedCommand = 0;
 			_headingCommand -= 45*deg2Rad;

@@ -59,7 +59,7 @@ public:
 		 * the order of the channels has to match the enumeration above
 		 */
 		_hal->rc.push_back(
-		new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 7, 1100, 1500, 1900, RC_MODE_IN));
+				new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 5, 1100, 1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back(
 				new AP_RcChannel(k_chLeft, PSTR("LEFT_"), APM_RC, 0, 1100, 1100, 1900, RC_MODE_OUT));
 		_hal->rc.push_back(
@@ -74,7 +74,7 @@ public:
 				new AP_RcChannel(k_chPitch, PSTR("PITCH_"), APM_RC, 1, 1100, 1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back(
 				new AP_RcChannel(k_chYaw, PSTR("YAW_"), APM_RC, 2, 1100, 1500, 1900, RC_MODE_IN));
-		_hal->rc.push_back( // -1 -> 0 maps to 1200, linear 0-1 -> 1200-1800
+		_hal->rc.push_back(
 				new AP_RcChannel(k_chThr, PSTR("THRUST_"), APM_RC, 3, 1100, 1100, 1900, RC_MODE_IN));
 	}
 
@@ -86,19 +86,26 @@ public:
 				_hal->rc[CH_RIGHT]->setPosition(0);
 				_hal->rc[CH_FRONT]->setPosition(0);
 				_hal->rc[CH_BACK]->setPosition(0);
+				_hal->debug->printf_P(PSTR("comm lost, send heartbeat from gcs\n"));
 				return;
 			}
 
 			// read and set pwm so they can be read as positions later
-			_hal->rc[CH_MODE]->setPwm(_hal->rc[CH_MODE]->readRadio());
-			_hal->rc[CH_ROLL]->setPwm(_hal->rc[CH_ROLL]->readRadio());
-			_hal->rc[CH_PITCH]->setPwm(_hal->rc[CH_PITCH]->readRadio());
-			_hal->rc[CH_YAW]->setPwm(_hal->rc[CH_YAW]->readRadio());
-			_hal->rc[CH_THRUST]->setPwm(_hal->rc[CH_THRUST]->readRadio());
+			_hal->rc[CH_MODE]->setUsingRadio();
+			_hal->rc[CH_ROLL]->setUsingRadio();
+			_hal->rc[CH_PITCH]->setUsingRadio();
+			_hal->rc[CH_YAW]->setUsingRadio();
+			_hal->rc[CH_THRUST]->setUsingRadio();
 
 			// manual mode
 			float mixRemoteWeight = 0;
-			if (_hal->rc[CH_MODE]->getPwm() > 1350) mixRemoteWeight = 1;
+			if (_hal->rc[CH_MODE]->getPwm() > 1350) {
+				mixRemoteWeight = 1;
+				_mode = MAV_MODE_MANUAL;
+			}
+			else {
+				_mode = MAV_MODE_AUTO;
+			}
 
 			// "mix manual"
 			float cmdRoll = _hal->rc[CH_ROLL]->getPosition() * mixRemoteWeight;
@@ -148,11 +155,11 @@ public:
 			_hal->rc[CH_FRONT]->setPosition(thrustMix + pitchMix - yawMix);
 			_hal->rc[CH_BACK]->setPosition(thrustMix - pitchMix - yawMix);
 
-			_hal->debug->printf("L: %f\t R: %f\t F: %f\t B: %f\n",
-					_hal->rc[CH_LEFT]->getPosition(),
-					_hal->rc[CH_RIGHT]->getPosition(),
-					_hal->rc[CH_FRONT]->getPosition(),
-					_hal->rc[CH_BACK]->getPosition());
+//			_hal->debug->printf("L: %f\t R: %f\t F: %f\t B: %f\n",
+//					_hal->rc[CH_LEFT]->getPosition(),
+//					_hal->rc[CH_RIGHT]->getPosition(),
+//					_hal->rc[CH_FRONT]->getPosition(),
+//					_hal->rc[CH_BACK]->getPosition());
 
 			_hal->debug->printf("rollMix: %f\t pitchMix: %f\t yawMix: %f\t thrustMix: %f\n",
 								rollMix,
@@ -160,7 +167,11 @@ public:
 								yawMix,
 								thrustMix);
 
-//			_hal->debug->printf("thrust pwm: %d\n",_hal->rc[CH_THRUST]->readRadio());
+//			_hal->debug->printf("roll pwm: %d\t pitch pwm: %d\t yaw pwm: %d\t thrust pwm: %d\n",
+//					_hal->rc[CH_ROLL]->readRadio(),
+//					_hal->rc[CH_PITCH]->readRadio(),
+//					_hal->rc[CH_YAW]->readRadio(),
+//					_hal->rc[CH_THRUST]->readRadio());
 		}
 
 private:

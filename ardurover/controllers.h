@@ -45,8 +45,8 @@ public:
 		_hal->rc[CH_MODE]->setPwm(_hal->rc[CH_MODE]->readRadio());
 		// manual
 		if (_hal->rc[CH_MODE]->getPosition() > 0) {
-			_hal->rc[CH_STR]->setPwm(_hal->rc[CH_STR]->readRadio());
-			_hal->rc[CH_THR]->setPwm(_hal->rc[CH_THR]->readRadio());
+			_hal->rc[CH_STR]->setUsingRadio();
+			_hal->rc[CH_THR]->setUsingRadio();
 			//_hal->debug->println("manual");
 
 		} else { // auto

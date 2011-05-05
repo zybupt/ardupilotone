@@ -42,6 +42,7 @@ public:
 
 	// set
 	uint16_t readRadio();
+	void setUsingRadio();
 	void setPwm(uint16_t pwm);
 	void setPosition(float position);
 

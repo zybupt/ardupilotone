@@ -87,11 +87,11 @@ namespace apo {
 //			}
 //
 //			// read and set pwm so they can be read as positions later
-//			_hal->rc[CH_MODE]->setPwm(_hal->rc[CH_MODE]->readRadio());
-//			_hal->rc[CH_ROLL]->setPwm(_hal->rc[CH_ROLL]->readRadio());
-//			_hal->rc[CH_PITCH]->setPwm(_hal->rc[CH_PITCH]->readRadio());
-//			_hal->rc[CH_YAW]->setPwm(_hal->rc[CH_YAW]->readRadio());
-//			_hal->rc[CH_THRUST]->setPwm(_hal->rc[CH_THRUST]->readRadio());
+//			_hal->rc[CH_MODE]->setUsingRadio();
+//			_hal->rc[CH_ROLL]->setUsingRadio();
+//			_hal->rc[CH_PITCH]->setUsingRadio();
+//			_hal->rc[CH_YAW]->setUsingRadio();
+//			_hal->rc[CH_THRUST]->setUsingRadio();
 //
 //			// manual mode
 //			float mixRemoteWeight = 0;
