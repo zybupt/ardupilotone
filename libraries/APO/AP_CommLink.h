@@ -94,14 +94,14 @@ public:
 			break;
 		default:
 			// signal that number of channels exceeded
-			_channel = MAVLINK_COMM_NB_HIGH;
+			_channel = MAVLINK_COMM_3;
 			break;
 		}
 	}
 
 	virtual void send() {
 		// if number of channels exceeded return
-		if (_channel == MAVLINK_COMM_NB_HIGH)
+		if (_channel == MAVLINK_COMM_3)
 			return;
 	}
 
@@ -109,7 +109,7 @@ public:
 		//_hal->debug->printf_P(PSTR("send message\n"));
 
 		// if number of channels exceeded return
-		if (_channel == MAVLINK_COMM_NB_HIGH)
+		if (_channel == MAVLINK_COMM_3)
 			return;
 
 		uint64_t timeStamp = micros();
@@ -239,7 +239,7 @@ public:
 		//_hal->debug->printf_P(PSTR("receive\n"));
 		// if number of channels exceeded return
 		//
-		if (_channel == MAVLINK_COMM_NB_HIGH)
+		if (_channel == MAVLINK_COMM_3)
 			return;
 
 		// receive new packets
