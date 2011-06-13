@@ -1,12 +1,12 @@
 /*
- * traxxasStampede.h
+ * yourBoat.h
  *
  *  Created on: May 1, 2011
  *      Author: jgoppert
  */
 
-#ifndef TRAXXASSTAMPEDE_H_
-#define TRAXXASSTAMPEDE_H_
+#ifndef YOURBOAT_H_
+#define YOURBOAT_H_
 
 const float steeringP = 1.0;
 const float steeringI = 0.0;
@@ -21,4 +21,4 @@ const float throttleIMax = 0.0;
 const float throttleYMax = 0.0;
 const float throttleDFCut = 3.0;
 
-#endif /* TRAXXASSTAMPEDE_H_ */
+#endif /* YOURBOAT_H_ */

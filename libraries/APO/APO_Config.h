@@ -17,7 +17,7 @@ extern apo::halMode_t halMode;
 // select from, BOARD_ARDUPILOTMEGA
 extern apo::board_t board;
 
-// select from, VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE
+// select from, VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE, VEHICLE_BOAT
 extern apo::vehicle_t vehicle;
 
 //---------ADVANCED SECTION ----------------//

@@ -1,5 +1,5 @@
 /*
- * ardurover.pde
+ * arduboat.pde
  *
  *  Created on: Apr 30, 2011
  *      Author: jgoppert
@@ -22,7 +22,7 @@
 
 
 // Vehicle Configuration
-#include "vehicles/traxxasStampede.h"
+#include "vehicles/yourBoat.h"
 
 // Local Modules
 #include "controllers.h"
@@ -40,8 +40,8 @@ apo::halMode_t halMode = apo::MODE_LIVE;
 // select from, BOARD_ARDUPILOTMEGA
 apo::board_t board = apo::BOARD_ARDUPILOTMEGA;
 
-// select from, VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE
-apo::vehicle_t vehicle = apo::VEHICLE_CAR;
+// select from, VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE, VEHICLE_BOAT
+apo::vehicle_t vehicle = apo::VEHICLE_BOAT;
 
 // optional sensors
 static bool gpsEnabled = false;
@@ -205,7 +205,7 @@ void setup() {
 	 */
 	AP_Navigator * navigator = new DcmNavigator(hal);
 	AP_Guide * guide = new MavlinkGuide(k_guide,navigator,hal);
-	AP_Controller * controller = new CarController(k_cntrl,k_pidStr,
+	AP_Controller * controller = new BoatController(k_cntrl,k_pidStr,
 			k_pidGroundSpeed2Throttle,navigator,guide,hal);
 
 	/*

@@ -10,7 +10,7 @@
 
 namespace apo {
 
-class CarController: public AP_Controller {
+class BoatController: public AP_Controller {
 private:
 	// control mode
 	AP_Var_group _group;AP_Uint8 _mode;
@@ -20,7 +20,7 @@ private:
 	BlockPIDDfb pidStr;
 	BlockPID pidThr;
 public:
-	CarController(AP_Var::Key cntrlKey, AP_Var::Key pidStrKey,
+	BoatController(AP_Var::Key cntrlKey, AP_Var::Key pidStrKey,
 			AP_Var::Key pidThrKey, AP_Navigator * nav, AP_Guide * guide,
 			AP_HardwareAbstractionLayer * hal) :
 		AP_Controller(nav, guide, hal), _group(cntrlKey, PSTR("CNTRL_")),
@@ -31,7 +31,7 @@ public:
 				pidThr(new AP_Var_group(pidThrKey, PSTR("THR_")),1,
 						throttleP, throttleI, throttleD,
 						throttleIMax, throttleYMax, throttleDFCut) {
-		_hal->debug->println_P(PSTR("initializing car controller"));
+		_hal->debug->println_P(PSTR("initializing boat controller"));
 
 		_hal->rc.push_back(
 				new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 7,1100,1500,1900));
