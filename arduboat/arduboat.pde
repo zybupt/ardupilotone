@@ -22,7 +22,7 @@
 
 
 // Vehicle Configuration
-#include "vehicles/yourBoat.h"
+#include "yourBoat.h"
 
 // Local Modules
 #include "controllers.h"

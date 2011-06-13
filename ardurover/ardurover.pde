@@ -22,7 +22,7 @@
 
 
 // Vehicle Configuration
-#include "vehicles/traxxasStampede.h"
+#include "traxxasStampede.h"
 
 // Local Modules
 #include "controllers.h"

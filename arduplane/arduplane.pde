@@ -21,7 +21,7 @@
 #include <APM_BMP085.h>
 
 // Vehicle Configuration
-#include "vehicles/easystar.h"
+#include "easystar.h"
 //#include "vehicles/mikrokopter.h"
 
 // Local Modules

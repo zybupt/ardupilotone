@@ -21,8 +21,8 @@
 #include <APM_BMP085.h>
 
 // Vehicle Configuration
-#include "vehicles/arducopter.h"
-//#include "vehicles/mikrokopter.h"
+#include "arducopter.h"
+//#include "mikrokopter.h"
 
 // Local Modules
 #include "controllers.h"
