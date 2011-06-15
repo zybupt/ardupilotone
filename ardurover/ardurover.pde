@@ -89,7 +89,7 @@ void setup() {
 
 	using namespace apo;
 
-	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(halMode,board,vehicle);
+	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(halMode,board,vehicle,heartbeatTimeout);
 
 	/*
 	 * Communications

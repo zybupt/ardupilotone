@@ -16,6 +16,7 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	Loop(loop0Rate, callback0, this),
 			_navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
 
+	hal->setState(MAV_STATE_BOOT);
 
 	/*
 	 * Pins
@@ -95,6 +96,15 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 
 	hal->debug->println_P(PSTR("running"));
 	hal->gcs->sendText(SEVERITY_LOW,PSTR("running"));
+
+	if (hal->getMode()==MODE_LIVE)
+	{
+		hal->setState(MAV_STATE_ACTIVE);
+	}
+	else
+	{
+		hal->setState(MAV_STATE_HILSIM);
+	}
 }
 
 void AP_Autopilot::callback0(void * data) {
@@ -207,7 +217,6 @@ void AP_Autopilot::callback3(void * data) {
 	/*
 	 * load/loop rate/ram debug
 	 */
-
 	apo->getHal()->load = apo->load();
 	apo->getHal()->debug->printf_P(PSTR("load: %d%%\trate: %f Hz\tfree ram: %d bytes\n"),
 			apo->load(),1.0/apo->dt(),freeMemory());

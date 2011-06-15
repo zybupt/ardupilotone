@@ -2,6 +2,7 @@ sketches= \
 ardurover \
 arduquad \
 arduplane \
+arduboat \
 libraries/AP_Compass/examples/AP_Compass_test \
 libraries/APO/examples/ServoSweep \
 libraries/APO/examples/ServoManual \

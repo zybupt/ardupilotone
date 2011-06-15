@@ -67,7 +67,7 @@ const float loop4Rate = 0.1;
 
 // max time in seconds to allow flight without ground station comms
 // zero will ignore timeout
-const uint8_t heartbeatTimeout = 3;
+const uint8_t heartBeatTimeout = 3;
 
 //---------HARDWARE CONFIG ----------------//
 
@@ -89,7 +89,7 @@ void setup() {
 
 	using namespace apo;
 
-	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(halMode,board,vehicle);
+	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(halMode,board,vehicle,heartBeatTimeout);
 
 	/*
 	 * Communications

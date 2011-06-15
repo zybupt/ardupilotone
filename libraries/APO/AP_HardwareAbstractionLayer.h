@@ -44,11 +44,12 @@ class AP_HardwareAbstractionLayer {
 
 public:
 
-	AP_HardwareAbstractionLayer(halMode_t mode, board_t board, vehicle_t vehicle) :
-		adc(), gps(), baro(), compass(), rangeFinders(),
-		imu(), rc(), gcs(), hil(), debug(), load(), lastHeartBeat(),
-		_mode(mode), _board(board), _vehicle(vehicle), _state(MAV_STATE_UNINIT)
-	{
+	AP_HardwareAbstractionLayer(halMode_t mode, board_t board,
+			vehicle_t vehicle, uint8_t heartBeatTimeout) :
+		adc(), gps(), baro(), compass(), rangeFinders(), imu(), rc(), gcs(),
+				hil(), debug(), load(), lastHeartBeat(),
+				_heartBeatTimeout(heartBeatTimeout), _mode(mode),
+				_board(board), _vehicle(vehicle), _state(MAV_STATE_UNINIT) {
 	}
 
 	/**
@@ -81,14 +82,16 @@ public:
 	board_t getBoard() { return _board; }
 	vehicle_t getVehicle() { return _vehicle; }
 	MAV_STATE getState(){ return _state; }
+	void setState(MAV_STATE state) { _state = state; }
 
-	float getTimeSinceLastHeartBeat() {
-		return (micros() - lastHeartBeat)/1e6;
+	bool heartBeatLost() {
+		return ((micros() - lastHeartBeat)/1e6) > _heartBeatTimeout;
 	}
 
 private:
 
 	// enumerations
+	uint8_t _heartBeatTimeout;
 	halMode_t _mode;
 	board_t _board;
 	vehicle_t _vehicle;

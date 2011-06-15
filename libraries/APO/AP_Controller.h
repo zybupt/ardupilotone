@@ -35,17 +35,17 @@ public:
 		_nav(nav), _guide(guide), _hal(hal) {
 	}
 
-	bool commLost() {
-		if (_hal->getTimeSinceLastHeartBeat() > heartbeatTimeout) return true;
-		else return false;
-	}
-
 	virtual void update(const float & dt) = 0;
 
-	MAV_MODE getMode() { return _mode; }
+	virtual MAV_MODE getMode() = 0;
+
+	void setAllRadioChannelsToNeutral() {
+		for (int i=0;i<_hal->rc.getSize();i++) {
+			_hal->rc[i]->setPosition(0.0);
+		}
+	}
 
 protected:
-	MAV_MODE _mode;
 	AP_Navigator * _nav;
 	AP_Guide * _guide;
 	AP_HardwareAbstractionLayer * _hal;
