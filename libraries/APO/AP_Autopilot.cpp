@@ -11,18 +11,17 @@ namespace apo {
 
 class AP_HardwareAbstractionLayer;
 
-AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller,
-		AP_HardwareAbstractionLayer * hal) :
-	Loop(loop0Rate, callback0, this),
-			_navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
+AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
+		AP_Controller * controller, AP_HardwareAbstractionLayer * hal) :
+	Loop(loop0Rate, callback0, this), _navigator(navigator), _guide(guide),
+			_controller(controller), _hal(hal) {
 
 	hal->setState(MAV_STATE_BOOT);
 
 	/*
 	 * Pins
 	 */
-	if (hal->getBoard()==BOARD_ARDUPILOTMEGA)
-	{
+	if (hal->getBoard() == BOARD_ARDUPILOTMEGA) {
 		hal->debug->println_P(PSTR("settings pin modes"));
 		pinMode(A_LED_PIN, OUTPUT); //  extra led
 		pinMode(B_LED_PIN, OUTPUT); //  imu ledclass AP_CommLink;
@@ -55,20 +54,22 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 				if (hal->gps->fix) {
 					break;
 				} else {
-					hal->gcs->sendText(SEVERITY_LOW,PSTR("waiting for gps lock\n"));
+					hal->gcs->sendText(SEVERITY_LOW,
+							PSTR("waiting for gps lock\n"));
 					hal->debug->printf_P(PSTR("waiting for gps lock\n"));
 				}
 			} else { // no gps, can skip
 				break;
 			}
-		} else if(hal->getMode() == MODE_HIL_CNTL){ // hil
+		} else if (hal->getMode() == MODE_HIL_CNTL) { // hil
 			_hal->hil->receive();
 			Serial.println("HIL Recieve Called");
 			if (_navigator->getTimeStamp() != 0) {
 				// give hil a chance to send some packets
-				for (int i=0;i<5;i++) {
+				for (int i = 0; i < 5; i++) {
 					hal->debug->println_P(PSTR("reading initial hil packets"));
-					hal->gcs->sendText(SEVERITY_LOW,PSTR("reading initial hil packets"));
+					hal->gcs->sendText(SEVERITY_LOW,
+							PSTR("reading initial hil packets"));
 					delay(1000);
 				}
 				break;
@@ -95,14 +96,11 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide, AP_Contro
 	subLoops().push_back(new Loop(loop4Rate, callback4, this));
 
 	hal->debug->println_P(PSTR("running"));
-	hal->gcs->sendText(SEVERITY_LOW,PSTR("running"));
+	hal->gcs->sendText(SEVERITY_LOW, PSTR("running"));
 
-	if (hal->getMode()==MODE_LIVE)
-	{
+	if (hal->getMode() == MODE_LIVE) {
 		hal->setState(MAV_STATE_ACTIVE);
-	}
-	else
-	{
+	} else {
 		hal->setState(MAV_STATE_HILSIM);
 	}
 }
@@ -115,7 +113,7 @@ void AP_Autopilot::callback0(void * data) {
 	 * ahrs update
 	 */
 	if (apo->getNavigator())
-		apo->getNavigator()->updateFast(1.0/loop0Rate);
+		apo->getNavigator()->updateFast(1.0 / loop0Rate);
 }
 
 void AP_Autopilot::callback1(void * data) {
@@ -125,14 +123,13 @@ void AP_Autopilot::callback1(void * data) {
 	/*
 	 * hardware in the loop
 	 */
-	if (apo->getHal()->hil && apo->getHal()->getMode()!=MODE_LIVE)
-	{
+	if (apo->getHal()->hil && apo->getHal()->getMode() != MODE_LIVE) {
 		apo->getHal()->hil->receive();
 		apo->getHal()->hil->sendMessage(MAVLINK_MSG_ID_RC_CHANNELS_SCALED);
 	}
 
 	/*
-     * update control laws
+	 * update control laws
 	 */
 	if (apo->getGuide())
 		apo->getGuide()->update();
@@ -140,16 +137,15 @@ void AP_Autopilot::callback1(void * data) {
 	/*
 	 * update control laws
 	 */
-	if (apo->getController())
-	{
+	if (apo->getController()) {
 		//apo->hal()->debug->println_P(PSTR("updating controller"));
-		apo->getController()->update(1./loop1Rate);
+		apo->getController()->update(1. / loop1Rate);
 	}
 	/*
-	char msg[50];
-	sprintf(msg, "c_hdg: %f, c_thr: %f", apo->guide()->headingCommand, apo->guide()->groundSpeedCommand);
-	apo->hal()->gcs->sendText(AP_CommLink::SEVERITY_LOW, msg);
-	*/
+	 char msg[50];
+	 sprintf(msg, "c_hdg: %f, c_thr: %f", apo->guide()->headingCommand, apo->guide()->groundSpeedCommand);
+	 apo->hal()->gcs->sendText(AP_CommLink::SEVERITY_LOW, msg);
+	 */
 }
 
 void AP_Autopilot::callback2(void * data) {
@@ -173,7 +169,7 @@ void AP_Autopilot::callback2(void * data) {
 	 * slow navigation loop update
 	 */
 	if (apo->getNavigator()) {
-		apo->getNavigator()->updateSlow(1.0/loop2Rate);
+		apo->getNavigator()->updateSlow(1.0 / loop2Rate);
 	}
 
 	/*
@@ -193,14 +189,14 @@ void AP_Autopilot::callback2(void * data) {
 	 */
 	/*
 	 if (apo->navigator()) {
-		 apo->getHal()->debug->printf_P(PSTR("roll: %f deg\tpitch: %f deg\tyaw: %f deg\n"),
-				 apo->navigator()->getRoll()*rad2Deg,
-				 apo->navigator()->getPitch()*rad2Deg,
-				 apo->navigator()->getYaw()*rad2Deg);
-		 apo->getHal()->debug->printf_P(PSTR("lat: %f deg\tlon: %f deg\talt: %f m\n"),
-				 apo->navigator()->getLat()*rad2Deg,
-				 apo->navigator()->getLon()*rad2Deg,
-				 apo->navigator()->getAlt());
+	 apo->getHal()->debug->printf_P(PSTR("roll: %f deg\tpitch: %f deg\tyaw: %f deg\n"),
+	 apo->navigator()->getRoll()*rad2Deg,
+	 apo->navigator()->getPitch()*rad2Deg,
+	 apo->navigator()->getYaw()*rad2Deg);
+	 apo->getHal()->debug->printf_P(PSTR("lat: %f deg\tlon: %f deg\talt: %f m\n"),
+	 apo->navigator()->getLat()*rad2Deg,
+	 apo->navigator()->getLon()*rad2Deg,
+	 apo->navigator()->getAlt());
 	 }
 	 */
 }

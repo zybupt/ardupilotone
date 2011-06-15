@@ -13,7 +13,7 @@ const float MOTOR_MAX = 1;
 const float MOTOR_MIN = 0.1;
 
 // position control loop
-const float PID_POS_INTERVAL = 1/5; // 5 hz
+const float PID_POS_INTERVAL = 1 / 5; // 5 hz
 const float PID_POS_P = 0.02;
 const float PID_POS_I = 0;
 const float PID_POS_D = 0.1;
@@ -26,7 +26,7 @@ const float PID_POS_Z_LIM = 0.5;
 const float PID_POS_Z_AWU = 0.1;
 
 // attitude control loop
-const float PID_ATT_INTERVAL  = 1/20; // 20 hz
+const float PID_ATT_INTERVAL = 1 / 20; // 20 hz
 const float PID_ATT_P = 0.03; // 0.1
 const float PID_ATT_I = 0.03; // 0.0
 const float PID_ATT_D = 0.03; // 0.1
@@ -51,6 +51,5 @@ const float MIX_POSITION_Z_WEIGHT = 1;
 const float MIX_POSITION_YAW_WEIGHT = 1;
 
 const float THRUST_HOVER_OFFSET = 0.475;
-
 
 #endif /* MIKROKOPTER_H_ */

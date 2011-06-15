@@ -20,7 +20,6 @@
 #include <AP_IMU.h>
 #include <APM_BMP085.h>
 
-
 // Vehicle Configuration
 #include "yourBoat.h"
 
@@ -55,7 +54,6 @@ static bool rangeFinderRightEnabled = true;
 static bool rangeFinderUpEnabled = true;
 static bool rangeFinderDownEnabled = true;
 
-
 //---------ADVANCED SECTION ----------------//
 
 // loop rates
@@ -68,28 +66,27 @@ const float loop4Rate = 0.1;
 // max time in seconds to allow flight without ground station comms
 // zero will ignore timeout
 const uint8_t heartBeatTimeout = 3;
-
 //---------HARDWARE CONFIG ----------------//
-
 #define RANGE_FINDER_CLASS AP_RangeFinder_MaxsonarLV
-
 //---------MAIN ----------------//
-
-
 /*
  * Required Global Declarations
- */
-FastSerialPort0(Serial);
-FastSerialPort1(Serial1);
-FastSerialPort2(Serial2);
-FastSerialPort3(Serial3);
+ */FastSerialPort0(Serial)
+;
+FastSerialPort1(Serial1)
+;
+FastSerialPort2(Serial2)
+;
+FastSerialPort3(Serial3)
+;
 apo::AP_Autopilot * autoPilot;
 
 void setup() {
 
 	using namespace apo;
 
-	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(halMode,board,vehicle,heartBeatTimeout);
+	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(
+			halMode, board, vehicle, heartBeatTimeout);
 
 	/*
 	 * Communications
@@ -106,7 +103,7 @@ void setup() {
 	 * Initialize Comm Channels
 	 */
 	hal->debug->println_P(PSTR("initializing comm channels"));
-	if (hal->getMode()==MODE_LIVE) {
+	if (hal->getMode() == MODE_LIVE) {
 		Serial1.begin(38400, 128, 16); // gps
 	} else { // hil
 		Serial1.begin(57600, 128, 128);
@@ -115,15 +112,14 @@ void setup() {
 	/*
 	 * Sensor initialization
 	 */
-	if (hal->getMode()==MODE_LIVE)
-	{
+	if (hal->getMode() == MODE_LIVE) {
 		hal->debug->println_P(PSTR("initializing adc"));
-		hal->adc =  new AP_ADC_ADS7844;
+		hal->adc = new AP_ADC_ADS7844;
 		hal->adc->Init();
 
 		if (gpsEnabled) {
 			hal->debug->println_P(PSTR("initializing gps"));
-			AP_GPS_Auto gpsDriver(&Serial1,&(hal->gps));
+			AP_GPS_Auto gpsDriver(&Serial1, &(hal->gps));
 			hal->gps = &gpsDriver;
 			hal->gps->init();
 		}
@@ -156,7 +152,7 @@ void setup() {
 		hal->debug->println_P(PSTR("initializing front range finder"));
 		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
 		rangeFinder->init(1);
-		rangeFinder->set_orientation(1,0,0);
+		rangeFinder->set_orientation(1, 0, 0);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
@@ -164,7 +160,7 @@ void setup() {
 		hal->debug->println_P(PSTR("initializing back range finder"));
 		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
 		rangeFinder->init(2);
-		rangeFinder->set_orientation(-1,0,0);
+		rangeFinder->set_orientation(-1, 0, 0);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
@@ -172,7 +168,7 @@ void setup() {
 		hal->debug->println_P(PSTR("initializing left range finder"));
 		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
 		rangeFinder->init(3);
-		rangeFinder->set_orientation(0,-1,0);
+		rangeFinder->set_orientation(0, -1, 0);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
@@ -180,7 +176,7 @@ void setup() {
 		hal->debug->println_P(PSTR("initializing right range finder"));
 		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
 		rangeFinder->init(4);
-		rangeFinder->set_orientation(0,1,0);
+		rangeFinder->set_orientation(0, 1, 0);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
@@ -188,7 +184,7 @@ void setup() {
 		hal->debug->println_P(PSTR("initializing up range finder"));
 		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
 		rangeFinder->init(5);
-		rangeFinder->set_orientation(0,0,-1);
+		rangeFinder->set_orientation(0, 0, -1);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
@@ -196,7 +192,7 @@ void setup() {
 		hal->debug->println_P(PSTR("initializing down range finder"));
 		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
 		rangeFinder->init(6);
-		rangeFinder->set_orientation(0,0,1);
+		rangeFinder->set_orientation(0, 0, 1);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
@@ -204,22 +200,22 @@ void setup() {
 	 * Select guidance, navigation, control algorithms
 	 */
 	AP_Navigator * navigator = new DcmNavigator(hal);
-	AP_Guide * guide = new MavlinkGuide(k_guide,navigator,hal);
-	AP_Controller * controller = new BoatController(k_cntrl,k_pidStr,
-			k_pidGroundSpeed2Throttle,navigator,guide,hal);
+	AP_Guide * guide = new MavlinkGuide(k_guide, navigator, hal);
+	AP_Controller * controller = new BoatController(k_cntrl, k_pidStr,
+			k_pidGroundSpeed2Throttle, navigator, guide, hal);
 
 	/*
 	 * CommLinks
 	 */
-	hal->gcs = new MavlinkComm(&Serial3,navigator,guide,controller,hal);
-	hal->hil = new MavlinkComm(&Serial1,navigator,guide,controller,hal);
+	hal->gcs = new MavlinkComm(&Serial3, navigator, guide, controller, hal);
+	hal->hil = new MavlinkComm(&Serial1, navigator, guide, controller, hal);
 
 	/*
 	 * Start the autopilot
 	 */
 	hal->debug->printf_P(PSTR("initializing ArduPilotOne\n"));
 	hal->debug->printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
-	autoPilot = new apo::AP_Autopilot(navigator,guide,controller,hal);
+	autoPilot = new apo::AP_Autopilot(navigator, guide, controller, hal);
 }
 
 void loop() {

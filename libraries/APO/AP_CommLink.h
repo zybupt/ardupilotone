@@ -42,8 +42,10 @@ enum {
 class AP_CommLink {
 public:
 
-	AP_CommLink(FastSerial * link, AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller, AP_HardwareAbstractionLayer * hal) :
-		_link(link), _navigator(navigator), _guide(guide), _controller(controller), _hal(hal) {
+	AP_CommLink(FastSerial * link, AP_Navigator * navigator, AP_Guide * guide,
+			AP_Controller * controller, AP_HardwareAbstractionLayer * hal) :
+		_link(link), _navigator(navigator), _guide(guide),
+				_controller(controller), _hal(hal) {
 	}
 	virtual void send() = 0;
 	virtual void receive() = 0;
@@ -132,27 +134,30 @@ public:
 
 		case MAVLINK_MSG_ID_GLOBAL_POSITION: {
 			mavlink_msg_global_position_send(_channel, timeStamp,
-					_navigator->getLat()*rad2Deg, _navigator->getLon()*rad2Deg,
-					_navigator->getAlt(), _navigator->getVN(),
-					_navigator->getVE(), _navigator->getVD());
+					_navigator->getLat() * rad2Deg,
+					_navigator->getLon() * rad2Deg, _navigator->getAlt(),
+					_navigator->getVN(), _navigator->getVE(),
+					_navigator->getVD());
 			break;
 		}
 
 		case MAVLINK_MSG_ID_GPS_RAW: {
-			mavlink_msg_gps_raw_send(_channel,timeStamp,_hal->gps->status(),
-					_navigator->getLat()*rad2Deg, _navigator->getLon()*rad2Deg,_navigator->getAlt(), 0,0,
-					_navigator->getGroundSpeed(),_navigator->getYaw()*rad2Deg);
+			mavlink_msg_gps_raw_send(_channel, timeStamp, _hal->gps->status(),
+					_navigator->getLat() * rad2Deg,
+					_navigator->getLon() * rad2Deg, _navigator->getAlt(), 0, 0,
+					_navigator->getGroundSpeed(),
+					_navigator->getYaw() * rad2Deg);
 			break;
 		}
 
-		/*
-		case MAVLINK_MSG_ID_GPS_RAW_INT: {
-			mavlink_msg_gps_raw_int_send(_channel,timeStamp,_hal->gps->status(),
-					_navigator->getLat_degInt(), _navigator->getLon_degInt(),_navigator->getAlt_intM(), 0,0,
-					_navigator->getGroundSpeed(),_navigator->getYaw()*rad2Deg);
-			break;
-		}
-		*/
+			/*
+			 case MAVLINK_MSG_ID_GPS_RAW_INT: {
+			 mavlink_msg_gps_raw_int_send(_channel,timeStamp,_hal->gps->status(),
+			 _navigator->getLat_degInt(), _navigator->getLon_degInt(),_navigator->getAlt_intM(), 0,0,
+			 _navigator->getGroundSpeed(),_navigator->getYaw()*rad2Deg);
+			 break;
+			 }
+			 */
 
 		case MAVLINK_MSG_ID_SCALED_IMU: {
 			/*
@@ -166,17 +171,17 @@ public:
 			 */
 			Vector3f accel = _hal->imu->get_accel();
 			Vector3f gyro = _hal->imu->get_gyro();
-			mavlink_msg_raw_imu_send(_channel,timeStamp,1000*accel.x,1000*accel.y,1000*accel.z,
-					1000*gyro.x,1000*gyro.y,1000*gyro.z,
-					_hal->compass->mag_x,_hal->compass->mag_y,_hal->compass->mag_z); // XXX THIS IS NOT SCALED FOR MAG
+			mavlink_msg_raw_imu_send(_channel, timeStamp, 1000 * accel.x,
+					1000 * accel.y, 1000 * accel.z, 1000 * gyro.x,
+					1000 * gyro.y, 1000 * gyro.z, _hal->compass->mag_x,
+					_hal->compass->mag_y, _hal->compass->mag_z); // XXX THIS IS NOT SCALED FOR MAG
 		}
 
 		case MAVLINK_MSG_ID_RC_CHANNELS_SCALED: {
 			int16_t ch[8];
 			for (int i = 0; i < 8; i++)
 				ch[i] = 0;
-			for (uint8_t i = 0; i < 8 && i < _hal->rc.getSize(); i++)
-			{
+			for (uint8_t i = 0; i < 8 && i < _hal->rc.getSize(); i++) {
 				ch[i] = 10000 * _hal->rc[i]->getPosition();
 				//_hal->debug->printf_P(PSTR("ch: %d position: %d\n"),i,ch[i]);
 			}
@@ -196,17 +201,17 @@ public:
 			break;
 		}
 
-	      case MAVLINK_MSG_ID_SYS_STATUS: {
+		case MAVLINK_MSG_ID_SYS_STATUS: {
 
-	    	  float batteryVoltage, temp;
-	    	  temp = analogRead(0);
-	    	  batteryVoltage = ((temp*5/1023)/0.28);
+			float batteryVoltage, temp;
+			temp = analogRead(0);
+			batteryVoltage = ((temp * 5 / 1023) / 0.28);
 
-				mavlink_msg_sys_status_send(_channel, _controller->getMode(),
-								_guide->getMode(), _hal->getState(), _hal->load * 10,
-								batteryVoltage*1000,(batteryVoltage - 3.3)/(4.2-3.3)*1000,
-								_packetDrops);
-				break;
+			mavlink_msg_sys_status_send(_channel, _controller->getMode(),
+					_guide->getMode(), _hal->getState(), _hal->load * 10,
+					batteryVoltage * 1000,
+					(batteryVoltage - 3.3) / (4.2 - 3.3) * 1000, _packetDrops);
+			break;
 		}
 
 		case MAVLINK_MSG_ID_WAYPOINT_ACK: {
@@ -222,7 +227,8 @@ public:
 		}
 
 		case MAVLINK_MSG_ID_WAYPOINT_CURRENT: {
-			mavlink_msg_waypoint_current_send(_channel,_guide->getCurrentIndex());
+			mavlink_msg_waypoint_current_send(_channel,
+					_guide->getCurrentIndex());
 			break;
 		}
 
@@ -349,358 +355,359 @@ private:
 
 	void _handleMessage(mavlink_message_t * msg) {
 
-	uint32_t timeStamp = micros();
+		uint32_t timeStamp = micros();
 
 		switch (msg->msgid) {
 		//_hal->debug->printf_P(PSTR("message received: %d"), msg->msgid);
 
-	case MAVLINK_MSG_ID_HEARTBEAT: {
-		mavlink_heartbeat_t packet;
-		mavlink_msg_heartbeat_decode(msg, &packet);
-		_hal->lastHeartBeat = micros();
-		break;
-	}
-
-	case MAVLINK_MSG_ID_GPS_RAW: {
-		// decode
-		mavlink_gps_raw_t packet;
-		mavlink_msg_gps_raw_decode(msg, &packet);
-
-		_navigator->setTimeStamp(timeStamp);
-		_navigator->setLat(packet.lat*deg2Rad);
-		_navigator->setLon(packet.lon*deg2Rad);
-		_navigator->setAlt(packet.alt);
-		_navigator->setHeading(packet.hdg*deg2Rad);
-		_navigator->setGroundSpeed(packet.v);
-		_navigator->setAirSpeed(packet.v);
-		//_hal->debug->printf_P(PSTR("received hil gps raw packet\n"));
-		/*
-		_hal->debug->printf_P(PSTR("received lat: %f deg\tlon: %f deg\talt: %f m\n"),
-						 packet.lat,
-						 packet.lon,
-						 packet.alt);
-						 */
-		break;
-	}
-
-	case MAVLINK_MSG_ID_ATTITUDE: {
-		// decode
-		mavlink_attitude_t packet;
-		mavlink_msg_attitude_decode(msg, &packet);
-
-		// set dcm hil sensor
-		_navigator->setTimeStamp(timeStamp);
-		_navigator->setRoll(packet.roll);
-		_navigator->setPitch(packet.pitch);
-		_navigator->setYaw(packet.yaw);
-		_navigator->setRollRate(packet.rollspeed);
-		_navigator->setPitchRate(packet.pitchspeed);
-		_navigator->setYawRate(packet.yawspeed);
-		//_hal->debug->printf_P(PSTR("received hil attitude packet\n"));
-		break;
-	}
-
-	case MAVLINK_MSG_ID_ACTION: {
-		// decode
-		mavlink_action_t packet;
-		mavlink_msg_action_decode(msg, &packet);
-		if (_checkTarget(packet.target, packet.target_component))
-			break;
-
-		// do action
-		sendText(SEVERITY_LOW, PSTR("action received"));
-		switch (packet.action) {
-
-		case MAV_ACTION_STORAGE_READ:
-			AP_Var::load_all();
-			break;
-
-		case MAV_ACTION_STORAGE_WRITE:
-			AP_Var::save_all();
-			break;
-
-		case MAV_ACTION_CALIBRATE_RC:
-		case MAV_ACTION_CALIBRATE_GYRO:
-		case MAV_ACTION_CALIBRATE_MAG:
-		case MAV_ACTION_CALIBRATE_ACC:
-		case MAV_ACTION_CALIBRATE_PRESSURE:
-		case MAV_ACTION_REBOOT:
-		case MAV_ACTION_REC_START:
-		case MAV_ACTION_REC_PAUSE:
-		case MAV_ACTION_REC_STOP:
-		case MAV_ACTION_TAKEOFF:
-		case MAV_ACTION_LAND:
-		case MAV_ACTION_NAVIGATE:
-		case MAV_ACTION_LOITER:
-		case MAV_ACTION_MOTORS_START:
-		case MAV_ACTION_CONFIRM_KILL:
-		case MAV_ACTION_EMCY_KILL:
-		case MAV_ACTION_MOTORS_STOP:
-		case MAV_ACTION_SHUTDOWN:
-		case MAV_ACTION_CONTINUE:
-		case MAV_ACTION_SET_MANUAL:
-		case MAV_ACTION_SET_AUTO:
-		case MAV_ACTION_LAUNCH:
-		case MAV_ACTION_RETURN:
-		case MAV_ACTION_EMCY_LAND:
-		case MAV_ACTION_HALT:
-			sendText(SEVERITY_LOW, PSTR("action not implemented"));
-			break;
-		default:
-			sendText(SEVERITY_LOW, PSTR("unknown action"));
-			break;
-		}
-		break;
-	}
-
-	case MAVLINK_MSG_ID_WAYPOINT_REQUEST_LIST: {
-		sendText(SEVERITY_LOW, PSTR("waypoint request list"));
-
-		// decode
-		mavlink_waypoint_request_list_t packet;
-		mavlink_msg_waypoint_request_list_decode(msg, &packet);
-		if (_checkTarget(packet.target_system, packet.target_component))
-			break;
-
-		// Start sending waypoints
-		mavlink_msg_waypoint_count_send(_channel, msg->sysid, msg->compid,
-				_guide->getNumberOfCommands());
-
-		_cmdTimeLastSent = millis();
-		_cmdTimeLastReceived = millis();
-		_sendingCmds = true;
-		_receivingCmds = false;
-		_cmdDestSysId = msg->sysid;
-		_cmdDestCompId = msg->compid;
-		break;
-	}
-
-	case MAVLINK_MSG_ID_WAYPOINT_REQUEST: {
-		sendText(SEVERITY_LOW, PSTR("waypoint request"));
-
-		// Check if sending waypiont
-		if (!_sendingCmds)
-			break;
-
-		// decode
-		mavlink_waypoint_request_t packet;
-		mavlink_msg_waypoint_request_decode(msg, &packet);
-		if (_checkTarget(packet.target_system, packet.target_component))
-			break;
-
-		//_hal->debug->printf_P(PSTR("sequence: %d\n"),packet.seq);
-		AP_MavlinkCommand cmd(packet.seq);
-
-		mavlink_waypoint_t wp = cmd.convert(_guide->getCurrentIndex());
-		mavlink_msg_waypoint_send(_channel, _cmdDestSysId, _cmdDestCompId,
-				wp.seq, wp.frame, wp.command, wp.current, wp.autocontinue,
-				wp.param1, wp.param2, wp.param3, wp.param4, wp.x, wp.y,
-				wp.z);
-
-		// update last waypoint comm stamp
-		_cmdTimeLastSent = millis();
-		break;
-	}
-
-	case MAVLINK_MSG_ID_WAYPOINT_ACK: {
-		sendText(SEVERITY_LOW, PSTR("waypoint ack"));
-
-		// decode
-		mavlink_waypoint_ack_t packet;
-		mavlink_msg_waypoint_ack_decode(msg, &packet);
-		if (_checkTarget(packet.target_system, packet.target_component))
-			break;
-
-		// check for error
-		//uint8_t type = packet.type; // ok (0), error(1)
-
-		// turn off waypoint send
-		_sendingCmds = false;
-		break;
-	}
-
-	case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: {
-		sendText(SEVERITY_LOW, PSTR("param request list"));
-
-		// decode
-		mavlink_param_request_list_t packet;
-		mavlink_msg_param_request_list_decode(msg, &packet);
-		if (_checkTarget(packet.target_system, packet.target_component))
-			break;
-
-		// Start sending parameters - next call to ::update will kick the first one out
-
-		_queuedParameter = AP_Var::first();
-		_queuedParameterIndex = 0;
-		break;
-	}
-
-	case MAVLINK_MSG_ID_WAYPOINT_CLEAR_ALL: {
-		sendText(SEVERITY_LOW, PSTR("waypoint clear all"));
-
-		// decode
-		mavlink_waypoint_clear_all_t packet;
-		mavlink_msg_waypoint_clear_all_decode(msg, &packet);
-		if (_checkTarget(packet.target_system, packet.target_component))
-			break;
-
-		// clear all waypoints
-		uint8_t type = 0; // ok (0), error(1)
-		_guide->setNumberOfCommands(1);
-		_guide->setCurrentIndex(0);
-
-		// send acknowledgement 3 times to makes sure it is received
-		for (int i = 0; i < 3; i++)
-			mavlink_msg_waypoint_ack_send(_channel, msg->sysid, msg->compid,
-					type);
-
-		break;
-	}
-
-	case MAVLINK_MSG_ID_WAYPOINT_SET_CURRENT: {
-		sendText(SEVERITY_LOW, PSTR("waypoint set current"));
-
-		// decode
-		mavlink_waypoint_set_current_t packet;
-		mavlink_msg_waypoint_set_current_decode(msg, &packet);
-		if (_checkTarget(packet.target_system, packet.target_component))
-			break;
-
-		// set current waypoint
-		_guide->setCurrentIndex(packet.seq);
-		mavlink_msg_waypoint_current_send(_channel, _guide->getCurrentIndex());
-		break;
-	}
-
-	case MAVLINK_MSG_ID_WAYPOINT_COUNT: {
-		sendText(SEVERITY_LOW, PSTR("waypoint count"));
-
-		// decode
-		mavlink_waypoint_count_t packet;
-		mavlink_msg_waypoint_count_decode(msg, &packet);
-		if (_checkTarget(packet.target_system, packet.target_component))
-			break;
-
-		// start waypoint receiving
-		if (packet.count > _cmdMax) {
-			packet.count = _cmdMax;
-		}
-		_guide->setNumberOfCommands(packet.count);
-		_cmdTimeLastReceived = millis();
-		_receivingCmds = true;
-		_sendingCmds = false;
-		_cmdRequestIndex = 0;
-		break;
-	}
-
-	case MAVLINK_MSG_ID_WAYPOINT: {
-		sendText(SEVERITY_LOW, PSTR("waypoint"));
-
-		// Check if receiving waypiont
-		if (!_receivingCmds) {
-			//sendText(SEVERITY_HIGH, PSTR("not receiving commands"));
+		case MAVLINK_MSG_ID_HEARTBEAT: {
+			mavlink_heartbeat_t packet;
+			mavlink_msg_heartbeat_decode(msg, &packet);
+			_hal->lastHeartBeat = micros();
 			break;
 		}
 
-		// decode
-		mavlink_waypoint_t packet;
-		mavlink_msg_waypoint_decode(msg, &packet);
-		if (_checkTarget(packet.target_system, packet.target_component))
-			break;
+		case MAVLINK_MSG_ID_GPS_RAW: {
+			// decode
+			mavlink_gps_raw_t packet;
+			mavlink_msg_gps_raw_decode(msg, &packet);
 
-		// check if this is the requested waypoint
-		if (packet.seq != _cmdRequestIndex) {
+			_navigator->setTimeStamp(timeStamp);
+			_navigator->setLat(packet.lat * deg2Rad);
+			_navigator->setLon(packet.lon * deg2Rad);
+			_navigator->setAlt(packet.alt);
+			_navigator->setHeading(packet.hdg * deg2Rad);
+			_navigator->setGroundSpeed(packet.v);
+			_navigator->setAirSpeed(packet.v);
+			//_hal->debug->printf_P(PSTR("received hil gps raw packet\n"));
 			/*
-			char msg[50];
-			sprintf(msg,
-					"waypoint request out of sequence: (packet) %d / %d (ap)",
-					packet.seq, _cmdRequestIndex);
-			sendText(SEVERITY_HIGH, msg);
-			*/
+			 _hal->debug->printf_P(PSTR("received lat: %f deg\tlon: %f deg\talt: %f m\n"),
+			 packet.lat,
+			 packet.lon,
+			 packet.alt);
+			 */
 			break;
 		}
 
-		_hal->debug->printf_P(PSTR("received waypoint x: %f\ty: %f\tz: %f\n"),
-						 packet.x,
-						 packet.y,
-						 packet.z);
+		case MAVLINK_MSG_ID_ATTITUDE: {
+			// decode
+			mavlink_attitude_t packet;
+			mavlink_msg_attitude_decode(msg, &packet);
 
-		// store waypoint
-		AP_MavlinkCommand command(packet);
-		//sendText(SEVERITY_HIGH, PSTR("waypoint stored"));
-		_cmdRequestIndex++;
-		if (_cmdRequestIndex >= _guide->getNumberOfCommands()) {
-			sendMessage( MAVLINK_MSG_ID_WAYPOINT_ACK);
-			//sendText(SEVERITY_LOW, PSTR("waypoint ack sent"));
-		}
-		_cmdTimeLastReceived = millis();
-		break;
-	}
-
-	case MAVLINK_MSG_ID_PARAM_SET: {
-		sendText(SEVERITY_LOW, PSTR("param set"));
-		AP_Var *vp;
-		AP_Meta_class::Type_id var_type;
-
-		// decode
-		mavlink_param_set_t packet;
-		mavlink_msg_param_set_decode(msg, &packet);
-		if (_checkTarget(packet.target_system, packet.target_component))
+			// set dcm hil sensor
+			_navigator->setTimeStamp(timeStamp);
+			_navigator->setRoll(packet.roll);
+			_navigator->setPitch(packet.pitch);
+			_navigator->setYaw(packet.yaw);
+			_navigator->setRollRate(packet.rollspeed);
+			_navigator->setPitchRate(packet.pitchspeed);
+			_navigator->setYawRate(packet.yawspeed);
+			//_hal->debug->printf_P(PSTR("received hil attitude packet\n"));
 			break;
+		}
 
-		// set parameter
+		case MAVLINK_MSG_ID_ACTION: {
+			// decode
+			mavlink_action_t packet;
+			mavlink_msg_action_decode(msg, &packet);
+			if (_checkTarget(packet.target, packet.target_component))
+				break;
 
-		char key[_paramNameLengthMax + 1];
-		strncpy(key, (char *) packet.param_id, _paramNameLengthMax);
-		key[_paramNameLengthMax] = 0;
+			// do action
+			sendText(SEVERITY_LOW, PSTR("action received"));
+			switch (packet.action) {
 
-		// find the requested parameter
-		vp = AP_Var::find(key);
-		if ((NULL != vp) && // exists
-				!isnan(packet.param_value) && // not nan
-				!isinf(packet.param_value)) { // not inf
+			case MAV_ACTION_STORAGE_READ:
+				AP_Var::load_all();
+				break;
 
-			// add a small amount before casting parameter values
-			// from float to integer to avoid truncating to the
-			// next lower integer value.
-			const float rounding_addition = 0.01;
+			case MAV_ACTION_STORAGE_WRITE:
+				AP_Var::save_all();
+				break;
 
-			// fetch the variable type ID
-			var_type = vp->meta_type_id();
+			case MAV_ACTION_CALIBRATE_RC:
+			case MAV_ACTION_CALIBRATE_GYRO:
+			case MAV_ACTION_CALIBRATE_MAG:
+			case MAV_ACTION_CALIBRATE_ACC:
+			case MAV_ACTION_CALIBRATE_PRESSURE:
+			case MAV_ACTION_REBOOT:
+			case MAV_ACTION_REC_START:
+			case MAV_ACTION_REC_PAUSE:
+			case MAV_ACTION_REC_STOP:
+			case MAV_ACTION_TAKEOFF:
+			case MAV_ACTION_LAND:
+			case MAV_ACTION_NAVIGATE:
+			case MAV_ACTION_LOITER:
+			case MAV_ACTION_MOTORS_START:
+			case MAV_ACTION_CONFIRM_KILL:
+			case MAV_ACTION_EMCY_KILL:
+			case MAV_ACTION_MOTORS_STOP:
+			case MAV_ACTION_SHUTDOWN:
+			case MAV_ACTION_CONTINUE:
+			case MAV_ACTION_SET_MANUAL:
+			case MAV_ACTION_SET_AUTO:
+			case MAV_ACTION_LAUNCH:
+			case MAV_ACTION_RETURN:
+			case MAV_ACTION_EMCY_LAND:
+			case MAV_ACTION_HALT:
+				sendText(SEVERITY_LOW, PSTR("action not implemented"));
+				break;
+			default:
+				sendText(SEVERITY_LOW, PSTR("unknown action"));
+				break;
+			}
+			break;
+		}
 
-			// handle variables with standard type IDs
-			if (var_type == AP_Var::k_typeid_float) {
-				((AP_Float *) vp)->set_and_save(packet.param_value);
+		case MAVLINK_MSG_ID_WAYPOINT_REQUEST_LIST: {
+			sendText(SEVERITY_LOW, PSTR("waypoint request list"));
 
-			} else if (var_type == AP_Var::k_typeid_float16) {
-				((AP_Float16 *) vp)->set_and_save(packet.param_value);
+			// decode
+			mavlink_waypoint_request_list_t packet;
+			mavlink_msg_waypoint_request_list_decode(msg, &packet);
+			if (_checkTarget(packet.target_system, packet.target_component))
+				break;
 
-			} else if (var_type == AP_Var::k_typeid_int32) {
-				((AP_Int32 *) vp)->set_and_save(
-						packet.param_value + rounding_addition);
+			// Start sending waypoints
+			mavlink_msg_waypoint_count_send(_channel, msg->sysid, msg->compid,
+					_guide->getNumberOfCommands());
 
-			} else if (var_type == AP_Var::k_typeid_int16) {
-				((AP_Int16 *) vp)->set_and_save(
-						packet.param_value + rounding_addition);
+			_cmdTimeLastSent = millis();
+			_cmdTimeLastReceived = millis();
+			_sendingCmds = true;
+			_receivingCmds = false;
+			_cmdDestSysId = msg->sysid;
+			_cmdDestCompId = msg->compid;
+			break;
+		}
 
-			} else if (var_type == AP_Var::k_typeid_int8) {
-				((AP_Int8 *) vp)->set_and_save(
-						packet.param_value + rounding_addition);
-			} else {
-				// we don't support mavlink set on this parameter
+		case MAVLINK_MSG_ID_WAYPOINT_REQUEST: {
+			sendText(SEVERITY_LOW, PSTR("waypoint request"));
+
+			// Check if sending waypiont
+			if (!_sendingCmds)
+				break;
+
+			// decode
+			mavlink_waypoint_request_t packet;
+			mavlink_msg_waypoint_request_decode(msg, &packet);
+			if (_checkTarget(packet.target_system, packet.target_component))
+				break;
+
+			//_hal->debug->printf_P(PSTR("sequence: %d\n"),packet.seq);
+			AP_MavlinkCommand cmd(packet.seq);
+
+			mavlink_waypoint_t wp = cmd.convert(_guide->getCurrentIndex());
+			mavlink_msg_waypoint_send(_channel, _cmdDestSysId, _cmdDestCompId,
+					wp.seq, wp.frame, wp.command, wp.current, wp.autocontinue,
+					wp.param1, wp.param2, wp.param3, wp.param4, wp.x, wp.y,
+					wp.z);
+
+			// update last waypoint comm stamp
+			_cmdTimeLastSent = millis();
+			break;
+		}
+
+		case MAVLINK_MSG_ID_WAYPOINT_ACK: {
+			sendText(SEVERITY_LOW, PSTR("waypoint ack"));
+
+			// decode
+			mavlink_waypoint_ack_t packet;
+			mavlink_msg_waypoint_ack_decode(msg, &packet);
+			if (_checkTarget(packet.target_system, packet.target_component))
+				break;
+
+			// check for error
+			//uint8_t type = packet.type; // ok (0), error(1)
+
+			// turn off waypoint send
+			_sendingCmds = false;
+			break;
+		}
+
+		case MAVLINK_MSG_ID_PARAM_REQUEST_LIST: {
+			sendText(SEVERITY_LOW, PSTR("param request list"));
+
+			// decode
+			mavlink_param_request_list_t packet;
+			mavlink_msg_param_request_list_decode(msg, &packet);
+			if (_checkTarget(packet.target_system, packet.target_component))
+				break;
+
+			// Start sending parameters - next call to ::update will kick the first one out
+
+			_queuedParameter = AP_Var::first();
+			_queuedParameterIndex = 0;
+			break;
+		}
+
+		case MAVLINK_MSG_ID_WAYPOINT_CLEAR_ALL: {
+			sendText(SEVERITY_LOW, PSTR("waypoint clear all"));
+
+			// decode
+			mavlink_waypoint_clear_all_t packet;
+			mavlink_msg_waypoint_clear_all_decode(msg, &packet);
+			if (_checkTarget(packet.target_system, packet.target_component))
+				break;
+
+			// clear all waypoints
+			uint8_t type = 0; // ok (0), error(1)
+			_guide->setNumberOfCommands(1);
+			_guide->setCurrentIndex(0);
+
+			// send acknowledgement 3 times to makes sure it is received
+			for (int i = 0; i < 3; i++)
+				mavlink_msg_waypoint_ack_send(_channel, msg->sysid,
+						msg->compid, type);
+
+			break;
+		}
+
+		case MAVLINK_MSG_ID_WAYPOINT_SET_CURRENT: {
+			sendText(SEVERITY_LOW, PSTR("waypoint set current"));
+
+			// decode
+			mavlink_waypoint_set_current_t packet;
+			mavlink_msg_waypoint_set_current_decode(msg, &packet);
+			if (_checkTarget(packet.target_system, packet.target_component))
+				break;
+
+			// set current waypoint
+			_guide->setCurrentIndex(packet.seq);
+			mavlink_msg_waypoint_current_send(_channel,
+					_guide->getCurrentIndex());
+			break;
+		}
+
+		case MAVLINK_MSG_ID_WAYPOINT_COUNT: {
+			sendText(SEVERITY_LOW, PSTR("waypoint count"));
+
+			// decode
+			mavlink_waypoint_count_t packet;
+			mavlink_msg_waypoint_count_decode(msg, &packet);
+			if (_checkTarget(packet.target_system, packet.target_component))
+				break;
+
+			// start waypoint receiving
+			if (packet.count > _cmdMax) {
+				packet.count = _cmdMax;
+			}
+			_guide->setNumberOfCommands(packet.count);
+			_cmdTimeLastReceived = millis();
+			_receivingCmds = true;
+			_sendingCmds = false;
+			_cmdRequestIndex = 0;
+			break;
+		}
+
+		case MAVLINK_MSG_ID_WAYPOINT: {
+			sendText(SEVERITY_LOW, PSTR("waypoint"));
+
+			// Check if receiving waypiont
+			if (!_receivingCmds) {
+				//sendText(SEVERITY_HIGH, PSTR("not receiving commands"));
 				break;
 			}
 
-			// Report back the new value if we accepted the change
-			// we send the value we actually set, which could be
-			// different from the value sent, in case someone sent
-			// a fractional value to an integer type
-			mavlink_msg_param_value_send(_channel, (int8_t *) key,
-					vp->cast_to_float(), _countParameters(), -1); // XXX we don't actually know what its index is...
+			// decode
+			mavlink_waypoint_t packet;
+			mavlink_msg_waypoint_decode(msg, &packet);
+			if (_checkTarget(packet.target_system, packet.target_component))
+				break;
+
+			// check if this is the requested waypoint
+			if (packet.seq != _cmdRequestIndex) {
+				/*
+				 char msg[50];
+				 sprintf(msg,
+				 "waypoint request out of sequence: (packet) %d / %d (ap)",
+				 packet.seq, _cmdRequestIndex);
+				 sendText(SEVERITY_HIGH, msg);
+				 */
+				break;
+			}
+
+			_hal->debug->printf_P(PSTR("received waypoint x: %f\ty: %f\tz: %f\n"),
+					packet.x,
+					packet.y,
+					packet.z);
+
+			// store waypoint
+			AP_MavlinkCommand command(packet);
+			//sendText(SEVERITY_HIGH, PSTR("waypoint stored"));
+			_cmdRequestIndex++;
+			if (_cmdRequestIndex >= _guide->getNumberOfCommands()) {
+				sendMessage(MAVLINK_MSG_ID_WAYPOINT_ACK);
+				//sendText(SEVERITY_LOW, PSTR("waypoint ack sent"));
+			}
+			_cmdTimeLastReceived = millis();
+			break;
 		}
 
-		break;
-	} // end case
+		case MAVLINK_MSG_ID_PARAM_SET: {
+			sendText(SEVERITY_LOW, PSTR("param set"));
+			AP_Var *vp;
+			AP_Meta_class::Type_id var_type;
+
+			// decode
+			mavlink_param_set_t packet;
+			mavlink_msg_param_set_decode(msg, &packet);
+			if (_checkTarget(packet.target_system, packet.target_component))
+				break;
+
+			// set parameter
+
+			char key[_paramNameLengthMax + 1];
+			strncpy(key, (char *) packet.param_id, _paramNameLengthMax);
+			key[_paramNameLengthMax] = 0;
+
+			// find the requested parameter
+			vp = AP_Var::find(key);
+			if ((NULL != vp) && // exists
+					!isnan(packet.param_value) && // not nan
+					!isinf(packet.param_value)) { // not inf
+
+				// add a small amount before casting parameter values
+				// from float to integer to avoid truncating to the
+				// next lower integer value.
+				const float rounding_addition = 0.01;
+
+				// fetch the variable type ID
+				var_type = vp->meta_type_id();
+
+				// handle variables with standard type IDs
+				if (var_type == AP_Var::k_typeid_float) {
+					((AP_Float *) vp)->set_and_save(packet.param_value);
+
+				} else if (var_type == AP_Var::k_typeid_float16) {
+					((AP_Float16 *) vp)->set_and_save(packet.param_value);
+
+				} else if (var_type == AP_Var::k_typeid_int32) {
+					((AP_Int32 *) vp)->set_and_save(
+							packet.param_value + rounding_addition);
+
+				} else if (var_type == AP_Var::k_typeid_int16) {
+					((AP_Int16 *) vp)->set_and_save(
+							packet.param_value + rounding_addition);
+
+				} else if (var_type == AP_Var::k_typeid_int8) {
+					((AP_Int8 *) vp)->set_and_save(
+							packet.param_value + rounding_addition);
+				} else {
+					// we don't support mavlink set on this parameter
+					break;
+				}
+
+				// Report back the new value if we accepted the change
+				// we send the value we actually set, which could be
+				// different from the value sent, in case someone sent
+				// a fractional value to an integer type
+				mavlink_msg_param_value_send(_channel, (int8_t *) key,
+						vp->cast_to_float(), _countParameters(), -1); // XXX we don't actually know what its index is...
+			}
+
+			break;
+		} // end case
 
 
 		}
@@ -748,11 +755,11 @@ private:
 	// check the target
 	uint8_t _checkTarget(uint8_t sysid, uint8_t compid) {
 		/*
-		char msg[50];
-		sprintf(msg, "target = %d / %d\tcomp = %d / %d", sysid,
-				mavlink_system.sysid, compid, mavlink_system.compid);
-		sendText(SEVERITY_LOW, msg);
-		*/
+		 char msg[50];
+		 sprintf(msg, "target = %d / %d\tcomp = %d / %d", sysid,
+		 mavlink_system.sysid, compid, mavlink_system.compid);
+		 sendText(SEVERITY_LOW, msg);
+		 */
 		if (sysid != mavlink_system.sysid) {
 			//sendText(SEVERITY_LOW, PSTR("system id mismatch"));
 			return 1;
@@ -767,7 +774,6 @@ private:
 	}
 
 };
-
 
 } // namespace apo
 

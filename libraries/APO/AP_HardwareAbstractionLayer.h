@@ -36,9 +36,15 @@ class AP_RcChannel;
 class AP_CommLink;
 
 // enumerations
-enum halMode_t {MODE_LIVE, MODE_HIL_CNTL, /*MODE_HIL_NAV*/};
-enum board_t {BOARD_ARDUPILOTMEGA};
-enum vehicle_t {VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE, VEHICLE_BOAT};
+enum halMode_t {
+	MODE_LIVE, MODE_HIL_CNTL,
+/*MODE_HIL_NAV*/};
+enum board_t {
+	BOARD_ARDUPILOTMEGA
+};
+enum vehicle_t {
+	VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE, VEHICLE_BOAT
+};
 
 class AP_HardwareAbstractionLayer {
 
@@ -78,14 +84,27 @@ public:
 	uint32_t lastHeartBeat;
 
 	// accessors
-	halMode_t getMode() { return _mode; }
-	board_t getBoard() { return _board; }
-	vehicle_t getVehicle() { return _vehicle; }
-	MAV_STATE getState(){ return _state; }
-	void setState(MAV_STATE state) { _state = state; }
+	halMode_t getMode() {
+		return _mode;
+	}
+	board_t getBoard() {
+		return _board;
+	}
+	vehicle_t getVehicle() {
+		return _vehicle;
+	}
+	MAV_STATE getState() {
+		return _state;
+	}
+	void setState(MAV_STATE state) {
+		_state = state;
+	}
 
 	bool heartBeatLost() {
-		return ((micros() - lastHeartBeat)/1e6) > _heartBeatTimeout;
+		if (_heartBeatTimeout == 0)
+			return false;
+		else
+			return ((micros() - lastHeartBeat) / 1e6) > _heartBeatTimeout;
 	}
 
 private:

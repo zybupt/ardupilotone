@@ -32,50 +32,55 @@ public:
 	QuadController(AP_Navigator * nav, AP_Guide * guide,
 			AP_HardwareAbstractionLayer * hal) :
 				AP_Controller(nav, guide, hal),
-				pidRoll(new AP_Var_group(k_pidRoll, PSTR("ROLL_")),1,
-						PID_ATT_P, PID_ATT_I,PID_ATT_D,
-						PID_ATT_AWU, PID_ATT_LIM),
-				pidPitch(new AP_Var_group(k_pidPitch, PSTR("PITCH_")),1,
-						PID_ATT_P, PID_ATT_I,PID_ATT_D,
-						PID_ATT_AWU, PID_ATT_LIM),
-				pidYaw(new AP_Var_group(k_pidYaw, PSTR("YAW_")),1,
-						PID_YAWPOS_P, PID_YAWPOS_I,PID_YAWPOS_D,
+				pidRoll(new AP_Var_group(k_pidRoll, PSTR("ROLL_")), 1,
+						PID_ATT_P, PID_ATT_I, PID_ATT_D, PID_ATT_AWU,
+						PID_ATT_LIM),
+				pidPitch(new AP_Var_group(k_pidPitch, PSTR("PITCH_")), 1,
+						PID_ATT_P, PID_ATT_I, PID_ATT_D, PID_ATT_AWU,
+						PID_ATT_LIM),
+				pidYaw(new AP_Var_group(k_pidYaw, PSTR("YAW_")), 1,
+						PID_YAWPOS_P, PID_YAWPOS_I, PID_YAWPOS_D,
 						PID_YAWPOS_AWU, PID_YAWPOS_LIM),
-				pidYawRate(new AP_Var_group(k_pidYawRate, PSTR("YAWRATE_")),1,
-						PID_YAWSPEED_P,PID_YAWSPEED_I, PID_YAWSPEED_D,
-						PID_YAWSPEED_AWU,PID_YAWSPEED_LIM, PID_YAWSPEED_DFCUT),
-				pidPN(new AP_Var_group(k_pidPN, PSTR("NORTH_")),1,
-						PID_POS_P,PID_POS_I, PID_POS_D,
-						PID_POS_AWU, PID_POS_LIM),
-				pidPE(new AP_Var_group(k_pidPE, PSTR("EAST_")),1,
-						PID_POS_P, PID_POS_I,PID_POS_D,
-						PID_POS_AWU, PID_POS_LIM),
-				pidPD(new AP_Var_group(k_pidPD, PSTR("DOWN_")),1,
-						PID_POS_Z_P, PID_POS_Z_I,PID_POS_Z_D,
-						PID_POS_Z_AWU, PID_POS_Z_LIM)
-	{
+				pidYawRate(new AP_Var_group(k_pidYawRate, PSTR("YAWRATE_")), 1,
+						PID_YAWSPEED_P, PID_YAWSPEED_I, PID_YAWSPEED_D,
+						PID_YAWSPEED_AWU, PID_YAWSPEED_LIM, PID_YAWSPEED_DFCUT),
+				pidPN(new AP_Var_group(k_pidPN, PSTR("NORTH_")), 1, PID_POS_P,
+						PID_POS_I, PID_POS_D, PID_POS_AWU, PID_POS_LIM),
+				pidPE(new AP_Var_group(k_pidPE, PSTR("EAST_")), 1, PID_POS_P,
+						PID_POS_I, PID_POS_D, PID_POS_AWU, PID_POS_LIM),
+				pidPD(new AP_Var_group(k_pidPD, PSTR("DOWN_")), 1, PID_POS_Z_P,
+						PID_POS_Z_I, PID_POS_Z_D, PID_POS_Z_AWU, PID_POS_Z_LIM) {
 		/*
 		 * allocate radio channels
 		 * the order of the channels has to match the enumeration above
 		 */
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 5, 1100, 1500, 1900, RC_MODE_IN));
+				new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 5, 1100,
+						1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chLeft, PSTR("LEFT_"), APM_RC, 0, 1100, 1100, 1900, RC_MODE_OUT));
+				new AP_RcChannel(k_chLeft, PSTR("LEFT_"), APM_RC, 0, 1100,
+						1100, 1900, RC_MODE_OUT));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chRight, PSTR("RIGHT_"), APM_RC, 1, 1100, 1100, 1900, RC_MODE_OUT));
+				new AP_RcChannel(k_chRight, PSTR("RIGHT_"), APM_RC, 1, 1100,
+						1100, 1900, RC_MODE_OUT));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chFront, PSTR("FRONT_"), APM_RC, 2, 1100, 1100, 1900, RC_MODE_OUT));
+				new AP_RcChannel(k_chFront, PSTR("FRONT_"), APM_RC, 2, 1100,
+						1100, 1900, RC_MODE_OUT));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chBack, PSTR("BACK_"), APM_RC, 3, 1100, 1100, 1900, RC_MODE_OUT));
+				new AP_RcChannel(k_chBack, PSTR("BACK_"), APM_RC, 3, 1100,
+						1100, 1900, RC_MODE_OUT));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chRoll, PSTR("ROLL_"), APM_RC, 0, 1100, 1500, 1900, RC_MODE_IN));
+				new AP_RcChannel(k_chRoll, PSTR("ROLL_"), APM_RC, 0, 1100,
+						1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chPitch, PSTR("PITCH_"), APM_RC, 1, 1100, 1500, 1900, RC_MODE_IN));
+				new AP_RcChannel(k_chPitch, PSTR("PITCH_"), APM_RC, 1, 1100,
+						1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chYaw, PSTR("YAW_"), APM_RC, 2, 1100, 1500, 1900, RC_MODE_IN));
+				new AP_RcChannel(k_chYaw, PSTR("YAW_"), APM_RC, 2, 1100, 1500,
+						1900, RC_MODE_IN));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chThr, PSTR("THRUST_"), APM_RC, 3, 1100, 1100, 1900, RC_MODE_IN));
+				new AP_RcChannel(k_chThr, PSTR("THRUST_"), APM_RC, 3, 1100,
+						1100, 1900, RC_MODE_IN));
 	}
 
 	virtual void update(const float & dt) {
@@ -90,11 +95,9 @@ public:
 			_hal->setState(MAV_STATE_EMERGENCY);
 			_hal->debug->printf_P(PSTR("comm lost, send heartbeat from gcs\n"));
 			return;
-		}
-		else if (_hal->getMode() == MODE_LIVE) {
+		} else if (_hal->getMode() == MODE_LIVE) {
 			_hal->setState(MAV_STATE_ACTIVE);
-		}
-		else if (_hal->getMode() == MODE_HIL_CNTL) {
+		} else if (_hal->getMode() == MODE_HIL_CNTL) {
 			_hal->setState(MAV_STATE_HILSIM);
 		}
 
@@ -180,7 +183,9 @@ public:
 		//					_hal->rc[CH_YAW]->readRadio(),
 		//					_hal->rc[CH_THRUST]->readRadio());
 	}
-	virtual MAV_MODE getMode() { return (MAV_MODE)_mode.get(); }
+	virtual MAV_MODE getMode() {
+		return (MAV_MODE) _mode.get();
+	}
 private:
 	AP_Uint8 _mode;
 	BlockPIDDfb pidRoll, pidPitch, pidYaw;

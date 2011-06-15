@@ -37,224 +37,180 @@ class AP_Navigator {
 public:
 	AP_Navigator(AP_HardwareAbstractionLayer * hal) :
 		_hal(hal), _timeStamp(0), _roll(0), _rollRate(0), _pitch(0),
-		_pitchRate(0), _yaw(0), _yawRate(0), _airSpeed(0), _groundSpeed(0),
-		_heading(0), _vD(0),
-		_lat_degInt(0), _lon_degInt(0), _alt_intM(0)
-	{
+				_pitchRate(0), _yaw(0), _yawRate(0), _airSpeed(0),
+				_groundSpeed(0), _heading(0), _vD(0), _lat_degInt(0),
+				_lon_degInt(0), _alt_intM(0) {
 	}
-	virtual void calibrate()
-	{
+	virtual void calibrate() {
 		_hal->setState(MAV_STATE_CALIBRATING);
 	}
 	virtual void updateFast(float dt) = 0;
 	virtual void updateSlow(float dt) = 0;
-    float getPD() const
-    {
-        return AP_MavlinkCommand::home.getPD(getAlt_intM());
-    }
+	float getPD() const {
+		return AP_MavlinkCommand::home.getPD(getAlt_intM());
+	}
 
-    float getPE() const
-    {
-        return AP_MavlinkCommand::home.getPE(getLat_degInt(),getLon_degInt());
-    }
+	float getPE() const {
+		return AP_MavlinkCommand::home.getPE(getLat_degInt(), getLon_degInt());
+	}
 
-    float getPN() const
-    {
-        return AP_MavlinkCommand::home.getPN(getLat_degInt(),getLon_degInt());
-    }
+	float getPN() const {
+		return AP_MavlinkCommand::home.getPN(getLat_degInt(), getLon_degInt());
+	}
 
-    void setPD(float _pD)
-    {
-        setAlt(AP_MavlinkCommand::home.getAlt(_pD));
-    }
+	void setPD(float _pD) {
+		setAlt(AP_MavlinkCommand::home.getAlt(_pD));
+	}
 
-    void setPE(float _pE)
-    {
-    	setLat(AP_MavlinkCommand::home.getLat(_pE));
-    }
+	void setPE(float _pE) {
+		setLat(AP_MavlinkCommand::home.getLat(_pE));
+	}
 
-    void setPN(float _pN)
-    {
-    	setLon(AP_MavlinkCommand::home.getLon(_pN));
-    }
+	void setPN(float _pN) {
+		setLon(AP_MavlinkCommand::home.getLon(_pN));
+	}
 
-    float getAirSpeed() const
-    {
-        return _airSpeed;
-    }
+	float getAirSpeed() const {
+		return _airSpeed;
+	}
 
-    int32_t getAlt_intM() const
-    {
-        return _alt_intM;
-    }
+	int32_t getAlt_intM() const {
+		return _alt_intM;
+	}
 
-    float getAlt() const
-    {
-        return _alt_intM / scale_m;
-    }
+	float getAlt() const {
+		return _alt_intM / scale_m;
+	}
 
-    void setAlt(float _alt)
-    {
-        this->_alt_intM = _alt * scale_m;
-    }
+	void setAlt(float _alt) {
+		this->_alt_intM = _alt * scale_m;
+	}
 
-    float getLat() const
-    {
-        return _lat_degInt * degInt2Rad;
-    }
+	float getLat() const {
+		return _lat_degInt * degInt2Rad;
+	}
 
-    void setLat(float _lat)
-    {
-        this->_lat_degInt = _lat * rad2DegInt;
-    }
+	void setLat(float _lat) {
+		this->_lat_degInt = _lat * rad2DegInt;
+	}
 
-    float getLon() const
-    {
-        return _lon_degInt * degInt2Rad;
-    }
+	float getLon() const {
+		return _lon_degInt * degInt2Rad;
+	}
 
-    void setLon(float _lon)
-    {
-        this->_lon_degInt = _lon * rad2DegInt;
-    }
+	void setLon(float _lon) {
+		this->_lon_degInt = _lon * rad2DegInt;
+	}
 
-    float getVD() const
-    {
-        return _vD;
-    }
+	float getVD() const {
+		return _vD;
+	}
 
-    float getHeading() const
-    {
-    	return _heading;
-    }
+	float getHeading() const {
+		return _heading;
+	}
 
-    float getVE() const
-    {
-        return sin(getHeading())*getGroundSpeed();
-    }
+	float getVE() const {
+		return sin(getHeading()) * getGroundSpeed();
+	}
 
-    float getGroundSpeed() const
-    {
-        return _groundSpeed;
-    }
+	float getGroundSpeed() const {
+		return _groundSpeed;
+	}
 
-    int32_t getLat_degInt() const
-    {
-        return _lat_degInt;
-    }
+	int32_t getLat_degInt() const {
+		return _lat_degInt;
+	}
 
-    int32_t getLon_degInt() const
-    {
-        return _lon_degInt;
-    }
+	int32_t getLon_degInt() const {
+		return _lon_degInt;
+	}
 
-    float getVN() const
-    {
-        return cos(getHeading())*getGroundSpeed();
-    }
+	float getVN() const {
+		return cos(getHeading()) * getGroundSpeed();
+	}
 
-    float getPitch() const
-    {
-        return _pitch;
-    }
+	float getPitch() const {
+		return _pitch;
+	}
 
-    float getPitchRate() const
-    {
-        return _pitchRate;
-    }
+	float getPitchRate() const {
+		return _pitchRate;
+	}
 
-    float getRoll() const
-    {
-        return _roll;
-    }
+	float getRoll() const {
+		return _roll;
+	}
 
-    float getRollRate() const
-    {
-        return _rollRate;
-    }
+	float getRollRate() const {
+		return _rollRate;
+	}
 
-    float getYaw() const
-    {
-        return _yaw;
-    }
+	float getYaw() const {
+		return _yaw;
+	}
 
-    float getYawRate() const
-    {
-        return _yawRate;
-    }
+	float getYawRate() const {
+		return _yawRate;
+	}
 
-    void setAirSpeed(float airSpeed)
-    {
-        _airSpeed = airSpeed;
-    }
+	void setAirSpeed(float airSpeed) {
+		_airSpeed = airSpeed;
+	}
 
-    void setHeading(float heading)
-    {
-    	_heading = heading;
-    }
+	void setHeading(float heading) {
+		_heading = heading;
+	}
 
-    void setAlt_intM(int32_t alt_intM)
-    {
-        _alt_intM = alt_intM;
-    }
+	void setAlt_intM(int32_t alt_intM) {
+		_alt_intM = alt_intM;
+	}
 
-    void setVD(float vD)
-    {
-        _vD = vD;
-    }
+	void setVD(float vD) {
+		_vD = vD;
+	}
 
-    void setGroundSpeed(float groundSpeed)
-    {
-        _groundSpeed = groundSpeed;
-    }
+	void setGroundSpeed(float groundSpeed) {
+		_groundSpeed = groundSpeed;
+	}
 
-    void setLat_degInt(int32_t lat_degInt)
-    {
-        _lat_degInt = lat_degInt;
-    }
+	void setLat_degInt(int32_t lat_degInt) {
+		_lat_degInt = lat_degInt;
+	}
 
-    void setLon_degInt(int32_t lon_degInt)
-    {
-        _lon_degInt = lon_degInt;
-    }
+	void setLon_degInt(int32_t lon_degInt) {
+		_lon_degInt = lon_degInt;
+	}
 
-    void setPitch(float pitch)
-    {
-        _pitch = pitch;
-    }
+	void setPitch(float pitch) {
+		_pitch = pitch;
+	}
 
-    void setPitchRate(float pitchRate)
-    {
-        _pitchRate = pitchRate;
-    }
+	void setPitchRate(float pitchRate) {
+		_pitchRate = pitchRate;
+	}
 
-    void setRoll(float roll)
-    {
-        _roll = roll;
-    }
+	void setRoll(float roll) {
+		_roll = roll;
+	}
 
-    void setRollRate(float rollRate)
-    {
-        _rollRate = rollRate;
-    }
+	void setRollRate(float rollRate) {
+		_rollRate = rollRate;
+	}
 
-    void setYaw(float yaw)
-    {
-        _yaw = yaw;
-    }
+	void setYaw(float yaw) {
+		_yaw = yaw;
+	}
 
-    void setYawRate(float yawRate)
-    {
-       _yawRate = yawRate;
-    }
-    void setTimeStamp(int32_t timeStamp)
-    {
-        _timeStamp = timeStamp;
-    }
-    int32_t getTimeStamp() const
-    {
-        return _timeStamp;
-    }
+	void setYawRate(float yawRate) {
+		_yawRate = yawRate;
+	}
+	void setTimeStamp(int32_t timeStamp) {
+		_timeStamp = timeStamp;
+	}
+	int32_t getTimeStamp() const {
+		return _timeStamp;
+	}
 
 protected:
 	AP_HardwareAbstractionLayer * _hal;
@@ -351,7 +307,7 @@ public:
 				setAlt(_rangeFinderDown->distance);
 
 			else {
-				float tmp = (_hal->baro->Press/ 101325.0);
+				float tmp = (_hal->baro->Press / 101325.0);
 				tmp = pow(tmp, 0.190295);
 				//setAlt(44330 * (1.0 - tmp)); //sets the altitude in meters XXX wrong, baro reads 0 press
 				setAlt(0.0);
@@ -391,14 +347,14 @@ public:
 			if (_hal->gps->fix && _hal->gps->new_data) {
 				setLat_degInt(_hal->gps->latitude);
 				setLon_degInt(_hal->gps->longitude);
-				setAlt_intM(_hal->gps->altitude*10); // gps in cm, intM in mm
-				setGroundSpeed(_hal->gps->ground_speed/100.0); // gps is in cm/s
+				setAlt_intM(_hal->gps->altitude * 10); // gps in cm, intM in mm
+				setGroundSpeed(_hal->gps->ground_speed / 100.0); // gps is in cm/s
 			}
 		}
 
 		if (_hal->compass) {
 			_hal->compass->read();
-			_hal->compass->calculate(getRoll(),getPitch());
+			_hal->compass->calculate(getRoll(), getPitch());
 			_hal->compass->null_offsets(_dcm->get_dcm_matrix());
 		}
 	}
@@ -428,7 +384,6 @@ public:
 			break;
 		}
 	}
-
 
 };
 

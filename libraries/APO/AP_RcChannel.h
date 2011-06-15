@@ -14,31 +14,25 @@
 namespace apo {
 
 enum rcMode_t {
-	RC_MODE_IN,
-	RC_MODE_OUT,
-	RC_MODE_INOUT
+	RC_MODE_IN, RC_MODE_OUT, RC_MODE_INOUT
 };
 
 /// @class	AP_RcChannel
 /// @brief	Object managing one RC channel
-class AP_RcChannel : public AP_Var_group {
- 
-public:	
+class AP_RcChannel: public AP_Var_group {
 
+public:
 
 	/// Constructor
-	AP_RcChannel(AP_Var::Key key, const prog_char_t * name, APM_RC_Class & rc, const uint8_t & ch,
-			const uint16_t & pwmMin,const uint16_t & pwmNeutral, const uint16_t & pwmMax,
-			const rcMode_t & rcMode=RC_MODE_INOUT, const bool & reverse=false);
+	AP_RcChannel(AP_Var::Key key, const prog_char_t * name, APM_RC_Class & rc,
+			const uint8_t & ch, const uint16_t & pwmMin,
+			const uint16_t & pwmNeutral, const uint16_t & pwmMax,
+			const rcMode_t & rcMode = RC_MODE_INOUT,
+			const bool & reverse = false);
 
 	// configuration
-	AP_Uint8 _ch;
-	AP_Uint16 _pwmMin;
-	AP_Uint16 _pwmNeutral;
-	AP_Uint16 _pwmMax;
-	rcMode_t _rcMode;
-	AP_Bool _reverse;
-
+	AP_Uint8 _ch;AP_Uint16 _pwmMin;AP_Uint16 _pwmNeutral;AP_Uint16 _pwmMax;
+	rcMode_t _rcMode;AP_Bool _reverse;
 
 	// set
 	uint16_t readRadio();
@@ -47,14 +41,18 @@ public:
 	void setPosition(float position);
 
 	// get
-	uint16_t getPwm() { return _pwm; }
-	float getPosition() { return _pwmToPosition(_pwm); }
+	uint16_t getPwm() {
+		return _pwm;
+	}
+	float getPosition() {
+		return _pwmToPosition(_pwm);
+	}
 
 private:
 
 	// configuration
 	APM_RC_Class & _rc;
-		
+
 	// internal states
 	uint16_t _pwm; // this is the internal state, position is just created when needed
 

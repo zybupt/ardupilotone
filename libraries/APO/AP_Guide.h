@@ -31,7 +31,6 @@
 
 namespace apo {
 
-
 /// Guide class
 class AP_Guide {
 public:
@@ -41,67 +40,81 @@ public:
 	 * @param navigator This is the navigator pointer.
 	 */
 	AP_Guide(AP_Navigator * navigator, AP_HardwareAbstractionLayer * hal) :
-		_navigator(navigator), _hal(hal),
-		_command(0), _previousCommand(0),
-		_headingCommand(0), _airSpeedCommand(0),
-		_groundSpeedCommand(0), _altitudeCommand(0), _pNCmd(0), _pECmd(0),
-		_pDCmd(0), _mode(MAV_NAV_LOST), _numberOfCommands(1), _cmdIndex(0)
-	{
+		_navigator(navigator), _hal(hal), _command(0), _previousCommand(0),
+				_headingCommand(0), _airSpeedCommand(0),
+				_groundSpeedCommand(0), _altitudeCommand(0), _pNCmd(0),
+				_pECmd(0), _pDCmd(0), _mode(MAV_NAV_LOST),
+				_numberOfCommands(1), _cmdIndex(0) {
 	}
 
 	virtual void update() = 0;
 	virtual void nextCommand() = 0;
 
-	MAV_NAV getMode() const
-	{
-	   	return _mode;
+	MAV_NAV getMode() const {
+		return _mode;
 	}
-	uint8_t getCurrentIndex()
-	{
+	uint8_t getCurrentIndex() {
 		return _cmdIndex;
 	}
 
-	void setCurrentIndex(uint8_t val)
-	{
+	void setCurrentIndex(uint8_t val) {
 		_cmdIndex.set_and_save(val);
 		_command = AP_MavlinkCommand(getCurrentIndex());
 		_previousCommand = AP_MavlinkCommand(getPreviousIndex());
 		//_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 
-	uint8_t getNumberOfCommands()
-	{
+	uint8_t getNumberOfCommands() {
 		return _numberOfCommands;
 	}
 
-	void setNumberOfCommands(uint8_t val)
-	{
+	void setNumberOfCommands(uint8_t val) {
 		_numberOfCommands.set_and_save(val);
 	}
 
 	uint8_t getPreviousIndex() {
-			// find previous waypoint, TODO, handle non-nav commands
-			int16_t prevIndex = int16_t(getCurrentIndex()) -1 ;
-			if (prevIndex < 0) prevIndex = getNumberOfCommands()-1;
-			return (uint8_t)prevIndex;
-		}
+		// find previous waypoint, TODO, handle non-nav commands
+		int16_t prevIndex = int16_t(getCurrentIndex()) - 1;
+		if (prevIndex < 0)
+			prevIndex = getNumberOfCommands() - 1;
+		return (uint8_t) prevIndex;
+	}
 
 	uint8_t getNextIndex() {
 		// find previous waypoint, TODO, handle non-nav commands
-		int16_t nextIndex = int16_t(getCurrentIndex()) + 1 ;
-		if (nextIndex > (getNumberOfCommands() -1)) nextIndex = 0;
+		int16_t nextIndex = int16_t(getCurrentIndex()) + 1;
+		if (nextIndex > (getNumberOfCommands() - 1))
+			nextIndex = 0;
 		return nextIndex;
 	}
 
-	float getHeadingCommand() { return _headingCommand;}
-	float getAirSpeedCommand() { return _airSpeedCommand;}
-	float getGroundSpeedCommand() { return _groundSpeedCommand;}
-	float getAltitudeCommand() { return _altitudeCommand;}
-	float getPNCmd() { return _pNCmd;}
-	float getPECmd() { return _pECmd;}
-	float getPDCmd() { return _pDCmd;}
-	MAV_NAV getMode() { return _mode;}
-	uint8_t getCommandIndex() { return _cmdIndex;}
+	float getHeadingCommand() {
+		return _headingCommand;
+	}
+	float getAirSpeedCommand() {
+		return _airSpeedCommand;
+	}
+	float getGroundSpeedCommand() {
+		return _groundSpeedCommand;
+	}
+	float getAltitudeCommand() {
+		return _altitudeCommand;
+	}
+	float getPNCmd() {
+		return _pNCmd;
+	}
+	float getPECmd() {
+		return _pECmd;
+	}
+	float getPDCmd() {
+		return _pDCmd;
+	}
+	MAV_NAV getMode() {
+		return _mode;
+	}
+	uint8_t getCommandIndex() {
+		return _cmdIndex;
+	}
 
 protected:
 	AP_Navigator * _navigator;
@@ -114,21 +127,19 @@ protected:
 	float _pNCmd;
 	float _pECmd;
 	float _pDCmd;
-	MAV_NAV _mode;
-	AP_Uint8 _numberOfCommands;
-	AP_Uint8 _cmdIndex;
+	MAV_NAV _mode;AP_Uint8 _numberOfCommands;AP_Uint8 _cmdIndex;
 };
 
 class MavlinkGuide: public AP_Guide {
 public:
-	MavlinkGuide(AP_Var::Key key, AP_Navigator * navigator, AP_HardwareAbstractionLayer * hal) :
+	MavlinkGuide(AP_Var::Key key, AP_Navigator * navigator,
+			AP_HardwareAbstractionLayer * hal) :
 		AP_Guide(navigator, hal), _rangeFinderFront(), _rangeFinderBack(),
 				_rangeFinderLeft(), _rangeFinderRight(),
-				_group(key,PSTR("GUIDE_")),
+				_group(key, PSTR("GUIDE_")),
 				_velocityCommand(&_group, 1, 1, PSTR("VELCMD")),
 				_crossTrackGain(&_group, 2, 2, PSTR("XTK")),
-				_crossTrackLim(&_group, 3, 10, PSTR("XTLIM"))
-		{
+				_crossTrackLim(&_group, 3, 10, PSTR("XTLIM")) {
 
 		for (uint8_t i = 0; i < _hal->rangeFinders.getSize(); i++) {
 			RangeFinder * rF = _hal->rangeFinders[i];
@@ -152,54 +163,60 @@ public:
 
 	virtual void update() {
 		/*_hal->debug->printf_P(
-				PSTR("guide loop, number: %d, current index: %d, previous index: %d\n"),
-				getNumberOfCommands(),
-				getCurrentIndex(),
-				getPreviousIndex());*/
-
-
+		 PSTR("guide loop, number: %d, current index: %d, previous index: %d\n"),
+		 getNumberOfCommands(),
+		 getCurrentIndex(),
+		 getPreviousIndex());*/
 
 		// if we don't have enough waypoint for cross track calcs
 		// go home
 		if (_numberOfCommands == 1) {
 			_mode = MAV_NAV_RETURNING;
-			_headingCommand = AP_MavlinkCommand::home.bearingTo(_navigator->getLat_degInt(),
-					_navigator->getLon_degInt()) + 180*deg2Rad;
-			if (_headingCommand > 360*deg2Rad) _headingCommand -= 360*deg2Rad;
+			_headingCommand = AP_MavlinkCommand::home.bearingTo(
+					_navigator->getLat_degInt(), _navigator->getLon_degInt())
+					+ 180 * deg2Rad;
+			if (_headingCommand > 360 * deg2Rad)
+				_headingCommand -= 360 * deg2Rad;
 			/*
-			_hal->debug->printf_P(PSTR("going home: bearing: %f distance: %f\n"),
-					headingCommand,AP_MavlinkCommand::home.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt()));
-					*/
+			 _hal->debug->printf_P(PSTR("going home: bearing: %f distance: %f\n"),
+			 headingCommand,AP_MavlinkCommand::home.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt()));
+			 */
 		} else {
 			_mode = MAV_NAV_WAYPOINT;
 			// TODO wrong behavior if 0 selected as waypoint, says previous 0
 			float dXt = AP_MavlinkCommand::crossTrack(_previousCommand,
 					_command, _navigator->getLat_degInt(),
 					_navigator->getLon_degInt());
-			float temp = dXt*_crossTrackGain*deg2Rad; // crosstrack gain, rad/m
+			float temp = dXt * _crossTrackGain * deg2Rad; // crosstrack gain, rad/m
 			if (temp > _crossTrackLim * deg2Rad)
 				temp = _crossTrackLim * deg2Rad;
 			if (temp < -_crossTrackLim * deg2Rad)
 				temp = -_crossTrackLim * deg2Rad;
 			float bearing = _previousCommand.bearingTo(_command);
 			_headingCommand = bearing - temp;
-			float alongTrack = AP_MavlinkCommand::alongTrack(_previousCommand,_command,
-					_navigator->getLat_degInt(),_navigator->getLon_degInt());
-			float distanceToNext = _command.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt());
+			float alongTrack = AP_MavlinkCommand::alongTrack(_previousCommand,
+					_command, _navigator->getLat_degInt(),
+					_navigator->getLon_degInt());
+			float distanceToNext = _command.distanceTo(
+					_navigator->getLat_degInt(), _navigator->getLon_degInt());
 			float segmentLength = _previousCommand.distanceTo(_command);
-			if (distanceToNext < _command.getRadius()  || alongTrack > segmentLength) nextCommand();
+			if (distanceToNext < _command.getRadius() || alongTrack
+					> segmentLength)
+				nextCommand();
 			/*
-			_hal->debug->printf_P(
-					PSTR("nav: bCurrent2Dest: %f\tdXt: %f\tcmdHeading: %f\tnextWpDistance: %f\talongTrack: %f\n"),
-					bearing * rad2Deg, dXt, headingCommand * rad2Deg, distanceToNext, alongTrack);
-					*/
+			 _hal->debug->printf_P(
+			 PSTR("nav: bCurrent2Dest: %f\tdXt: %f\tcmdHeading: %f\tnextWpDistance: %f\talongTrack: %f\n"),
+			 bearing * rad2Deg, dXt, headingCommand * rad2Deg, distanceToNext, alongTrack);
+			 */
 		}
 
 		_groundSpeedCommand = _velocityCommand;
 
 		// TODO : calculate pN,pE,pD from home and gps coordinates
-		_pNCmd = _command.getPN(_navigator->getLat_degInt(),_navigator->getLon_degInt());
-		_pECmd = _command.getPE(_navigator->getLat_degInt(),_navigator->getLon_degInt());
+		_pNCmd = _command.getPN(_navigator->getLat_degInt(),
+				_navigator->getLon_degInt());
+		_pECmd = _command.getPE(_navigator->getLat_degInt(),
+				_navigator->getLon_degInt());
 		_pDCmd = _command.getPD(_navigator->getAlt_intM());
 
 		// process mavlink commands
@@ -207,20 +224,21 @@ public:
 
 		// obstacle avoidance overrides
 		// stop if your going to drive into something in front of you
-		for(uint8_t i=0;i < _hal->rangeFinders.getSize(); i++) _hal->rangeFinders[i]->read();
-		float frontDistance = _rangeFinderFront->distance/200.0; //convert for other adc
+		for (uint8_t i = 0; i < _hal->rangeFinders.getSize(); i++)
+			_hal->rangeFinders[i]->read();
+		float frontDistance = _rangeFinderFront->distance / 200.0; //convert for other adc
 		if (_rangeFinderFront && frontDistance < 2) {
 			_mode = MAV_NAV_VECTOR;
 			//airSpeedCommand = 0;
 			//groundSpeedCommand = 0;
-			_headingCommand -= 45*deg2Rad;
-//			_hal->debug->print("Obstacle Distance (m): ");
-//			_hal->debug->println(frontDistance);
-//			_hal->debug->print("Obstacle avoidance Heading Command: ");
-//			_hal->debug->println(headingCommand);
-//			_hal->debug->printf_P(
-//											PSTR("Front Distance, %f\n"),
-//											frontDistance);
+			_headingCommand -= 45 * deg2Rad;
+			//			_hal->debug->print("Obstacle Distance (m): ");
+			//			_hal->debug->println(frontDistance);
+			//			_hal->debug->print("Obstacle avoidance Heading Command: ");
+			//			_hal->debug->println(headingCommand);
+			//			_hal->debug->printf_P(
+			//											PSTR("Front Distance, %f\n"),
+			//											frontDistance);
 		}
 		if (_rangeFinderBack && _rangeFinderBack->distance < 5) {
 			_airSpeedCommand = 0;

@@ -9,6 +9,6 @@
 
 namespace apo {
 
-AP_MavlinkCommand AP_MavlinkCommand::home =  AP_MavlinkCommand(0);
+AP_MavlinkCommand AP_MavlinkCommand::home = AP_MavlinkCommand(0);
 
 }

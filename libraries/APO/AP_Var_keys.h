@@ -41,7 +41,6 @@ enum keys {
 	k_pidAirSpeed2Elevator,
 	k_pidYawRate2Rudder,
 
-
 	// 200-256 reserved for commands
 	k_commands = 200
 };

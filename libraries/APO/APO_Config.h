@@ -44,6 +44,5 @@ extern const uint8_t heartbeatTimeout;
 #define EEPROM_MAX_ADDR	2048
 #define RANGE_FINDER_CLASS AP_RangeFinder_MaxsonarLV
 
-
 #endif
 // vim:ts=4:sw=4:expandtab

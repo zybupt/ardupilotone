@@ -40,7 +40,7 @@ public:
 	virtual MAV_MODE getMode() = 0;
 
 	void setAllRadioChannelsToNeutral() {
-		for (int i=0;i<_hal->rc.getSize();i++) {
+		for (int i = 0; i < _hal->rc.getSize(); i++) {
 			_hal->rc[i]->setPosition(0.0);
 		}
 	}
@@ -53,23 +53,27 @@ protected:
 
 class AP_ControllerBlock {
 public:
-        AP_ControllerBlock(AP_Var_group * group, uint8_t groupStart, uint8_t groupLength) :
-                _group(group), _groupStart(groupStart), _groupEnd(groupStart+groupLength)
-        {
-        }
-        uint8_t getGroupEnd() { return _groupEnd; }
+	AP_ControllerBlock(AP_Var_group * group, uint8_t groupStart,
+			uint8_t groupLength) :
+		_group(group), _groupStart(groupStart),
+				_groupEnd(groupStart + groupLength) {
+	}
+	uint8_t getGroupEnd() {
+		return _groupEnd;
+	}
 protected:
-        AP_Var_group * _group; /// helps with parameter management
-        uint8_t _groupStart;
-        uint8_t _groupEnd;
+	AP_Var_group * _group; /// helps with parameter management
+	uint8_t _groupStart;
+	uint8_t _groupEnd;
 };
 
-class BlockLowPass : public AP_ControllerBlock {
+class BlockLowPass: public AP_ControllerBlock {
 public:
 	BlockLowPass(AP_Var_group * group, uint8_t groupStart, float fCut,
 			const prog_char_t * fCutLabel = NULL) :
-		AP_ControllerBlock(group,groupStart,1),
-		_fCut(group, groupStart, fCut, fCutLabel ? : PSTR("FCUT")), _y(0) {
+		AP_ControllerBlock(group, groupStart, 1),
+				_fCut(group, groupStart, fCut, fCutLabel ? : PSTR("FCUT")),
+				_y(0) {
 	}
 	float update(const float & input, const float & dt) {
 		float RC = 1 / (2 * M_PI * _fCut); // low pass filter
@@ -81,12 +85,12 @@ protected:
 	float _y;
 };
 
-class BlockSaturation : public AP_ControllerBlock {
+class BlockSaturation: public AP_ControllerBlock {
 public:
 	BlockSaturation(AP_Var_group * group, uint8_t groupStart, float yMax,
 			const prog_char_t * yMaxLabel = NULL) :
-		AP_ControllerBlock(group,groupStart,1),
-		_yMax(group, groupStart, yMax, yMaxLabel ? : PSTR("YMAX")) {
+		AP_ControllerBlock(group, groupStart, 1),
+				_yMax(group, groupStart, yMax, yMaxLabel ? : PSTR("YMAX")) {
 	}
 	float update(const float & input) {
 
@@ -106,16 +110,17 @@ protected:
 
 class BlockDerivative {
 public:
-	BlockDerivative() : _lastInput(0), firstRun(true) {
+	BlockDerivative() :
+		_lastInput(0), firstRun(true) {
 	}
 	float update(const float & input, const float & dt) {
-		float derivative = (input - _lastInput)/dt;
+		float derivative = (input - _lastInput) / dt;
 		_lastInput = input;
 		if (firstRun) {
 			firstRun = false;
 			return 0;
-		}
-		else return derivative;
+		} else
+			return derivative;
 	}
 protected:
 	float _lastInput; /// last input
@@ -124,7 +129,8 @@ protected:
 
 class BlockIntegral {
 public:
-	BlockIntegral() : _i(0) {
+	BlockIntegral() :
+		_i(0) {
 	}
 	float update(const float & input, const float & dt) {
 		_i += input * dt;
@@ -134,11 +140,11 @@ protected:
 	float _i; /// integral
 };
 
-class BlockP : public AP_ControllerBlock {
+class BlockP: public AP_ControllerBlock {
 public:
 	BlockP(AP_Var_group * group, uint8_t groupStart, float kP,
 			const prog_char_t * kPLabel = NULL) :
-				AP_ControllerBlock(group,groupStart,1),
+		AP_ControllerBlock(group, groupStart, 1),
 				_kP(group, groupStart, kP, kPLabel ? : PSTR("P")) {
 	}
 
@@ -149,15 +155,14 @@ protected:
 	AP_Float _kP; /// proportional gain
 };
 
-class BlockI : public AP_ControllerBlock {
+class BlockI: public AP_ControllerBlock {
 public:
-	BlockI(AP_Var_group * group, uint8_t groupStart,
-			float kI, float iMax,
+	BlockI(AP_Var_group * group, uint8_t groupStart, float kI, float iMax,
 			const prog_char_t * kILabel = NULL,
 			const prog_char_t * iMaxLabel = NULL) :
-				AP_ControllerBlock(group,groupStart,2),
+		AP_ControllerBlock(group, groupStart, 2),
 				_kI(group, groupStart, kI, kILabel ? : PSTR("I")),
-				_blockSaturation(group,groupStart+1,iMax,iMaxLabel),
+				_blockSaturation(group, groupStart + 1, iMax, iMaxLabel),
 				_eI(0) {
 	}
 
@@ -168,25 +173,24 @@ public:
 	}
 protected:
 	AP_Float _kI; /// integral gain
-	BlockSaturation _blockSaturation;  /// integrator saturation
+	BlockSaturation _blockSaturation; /// integrator saturation
 	float _eI; /// integral of input
 };
 
-class BlockD : public AP_ControllerBlock {
+class BlockD: public AP_ControllerBlock {
 public:
-	BlockD(AP_Var_group * group, uint8_t groupStart,
-			float kD,
-			uint8_t dFCut,
+	BlockD(AP_Var_group * group, uint8_t groupStart, float kD, uint8_t dFCut,
 			const prog_char_t * kDLabel = NULL,
 			const prog_char_t * dFCutLabel = NULL) :
-				AP_ControllerBlock(group,groupStart,2),
-				_blockLowPass(group,groupStart,dFCut, dFCutLabel ? : PSTR("DFCUT")),
-				_kD(group, _blockLowPass.getGroupEnd(), kD, kDLabel ? : PSTR("D")),
-				_eP(0) {
+				AP_ControllerBlock(group, groupStart, 2),
+				_blockLowPass(group, groupStart, dFCut,
+						dFCutLabel ? : PSTR("DFCUT")),
+				_kD(group, _blockLowPass.getGroupEnd(), kD,
+						kDLabel ? : PSTR("D")), _eP(0) {
 	}
 	float update(const float & input, const float & dt) {
 		// derivative with low pass
-		float _eD = _blockLowPass.update((_eP - input) / dt,dt);
+		float _eD = _blockLowPass.update((_eP - input) / dt, dt);
 		// proportional, note must come after derivative
 		// because derivatve uses _eP as previous value
 		_eP = input;
@@ -198,22 +202,21 @@ protected:
 	float _eP; /// input
 };
 
-class BlockPID : public AP_ControllerBlock {
+class BlockPID: public AP_ControllerBlock {
 public:
-	BlockPID(AP_Var_group * group, uint8_t groupStart,
-			float kP, float kI, float kD, float iMax,
-			float yMax, uint8_t dFcut) :
-				AP_ControllerBlock(group,groupStart,6),
-				_blockP(group,groupStart,kP),
-				_blockI(group,_blockP.getGroupEnd(),kI,iMax),
-				_blockD(group,_blockI.getGroupEnd(),kD,dFcut),
-				_blockSaturation(group,_blockD.getGroupEnd(),yMax) {
+	BlockPID(AP_Var_group * group, uint8_t groupStart, float kP, float kI,
+			float kD, float iMax, float yMax, uint8_t dFcut) :
+		AP_ControllerBlock(group, groupStart, 6),
+				_blockP(group, groupStart, kP),
+				_blockI(group, _blockP.getGroupEnd(), kI, iMax),
+				_blockD(group, _blockI.getGroupEnd(), kD, dFcut),
+				_blockSaturation(group, _blockD.getGroupEnd(), yMax) {
 	}
 
 	float update(const float & input, const float & dt) {
-		return _blockSaturation.update(_blockP.update(input) +
-				_blockI.update(input,dt) +
-				_blockD.update(input,dt));
+		return _blockSaturation.update(
+				_blockP.update(input) + _blockI.update(input, dt)
+						+ _blockD.update(input, dt));
 	}
 protected:
 	BlockP _blockP;
@@ -222,20 +225,19 @@ protected:
 	BlockSaturation _blockSaturation;
 };
 
-class BlockPI : public AP_ControllerBlock {
+class BlockPI: public AP_ControllerBlock {
 public:
-	BlockPI(AP_Var_group * group, uint8_t groupStart,
-			float kP, float kI, float iMax, float yMax) :
-				AP_ControllerBlock(group,groupStart,4),
-				_blockP(group,groupStart,kP),
-				_blockI(group,_blockP.getGroupEnd(),kI,iMax),
-				_blockSaturation(group,_blockI.getGroupEnd(),yMax) {
+	BlockPI(AP_Var_group * group, uint8_t groupStart, float kP, float kI,
+			float iMax, float yMax) :
+		AP_ControllerBlock(group, groupStart, 4),
+				_blockP(group, groupStart, kP),
+				_blockI(group, _blockP.getGroupEnd(), kI, iMax),
+				_blockSaturation(group, _blockI.getGroupEnd(), yMax) {
 	}
 
 	float update(const float & input, const float & dt) {
 
-		float y = _blockP.update(input) +
-				_blockI.update(input,dt);
+		float y = _blockP.update(input) + _blockI.update(input, dt);
 		return _blockSaturation.update(y);
 	}
 protected:
@@ -244,21 +246,19 @@ protected:
 	BlockSaturation _blockSaturation;
 };
 
-class BlockPD : public AP_ControllerBlock {
+class BlockPD: public AP_ControllerBlock {
 public:
-	BlockPD(AP_Var_group * group, uint8_t groupStart,
-			float kP, float kI, float kD, float iMax,
-			float yMax, uint8_t dFcut) :
-				AP_ControllerBlock(group,groupStart,4),
-				_blockP(group,groupStart,kP),
-				_blockD(group,_blockP.getGroupEnd(),kD,dFcut),
-				_blockSaturation(group,_blockD.getGroupEnd(),yMax) {
+	BlockPD(AP_Var_group * group, uint8_t groupStart, float kP, float kI,
+			float kD, float iMax, float yMax, uint8_t dFcut) :
+		AP_ControllerBlock(group, groupStart, 4),
+				_blockP(group, groupStart, kP),
+				_blockD(group, _blockP.getGroupEnd(), kD, dFcut),
+				_blockSaturation(group, _blockD.getGroupEnd(), yMax) {
 	}
 
 	float update(const float & input, const float & dt) {
 
-		float y = _blockP.update(input) +
-				_blockD.update(input,dt);
+		float y = _blockP.update(input) + _blockD.update(input, dt);
 		return _blockSaturation.update(y);
 	}
 protected:
@@ -268,19 +268,20 @@ protected:
 };
 
 /// PID with derivative feedback (ignores reference derivative)
-class BlockPIDDfb : public AP_ControllerBlock {
+class BlockPIDDfb: public AP_ControllerBlock {
 public:
-	BlockPIDDfb(AP_Var_group * group, uint8_t groupStart,
-			float kP, float kI, float kD, float iMax, float yMax) :
-				AP_ControllerBlock(group,groupStart,5),
-				_blockP(group,groupStart,kP),
-				_blockI(group,_blockP.getGroupEnd(),kI,iMax),
-				_blockSaturation(group,_blockI.getGroupEnd(),yMax),
+	BlockPIDDfb(AP_Var_group * group, uint8_t groupStart, float kP, float kI,
+			float kD, float iMax, float yMax) :
+		AP_ControllerBlock(group, groupStart, 5),
+				_blockP(group, groupStart, kP),
+				_blockI(group, _blockP.getGroupEnd(), kI, iMax),
+				_blockSaturation(group, _blockI.getGroupEnd(), yMax),
 				_kD(group, _blockSaturation.getGroupEnd(), kD) {
 	}
-	float update(const float & input, const float & derivative, const float & dt) {
-		float y = _blockP.update(input) +
-				_blockI.update(input,dt) - _kD * derivative;
+	float update(const float & input, const float & derivative,
+			const float & dt) {
+		float y = _blockP.update(input) + _blockI.update(input, dt) - _kD
+				* derivative;
 		return _blockSaturation.update(y);
 	}
 protected:

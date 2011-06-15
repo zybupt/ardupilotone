@@ -68,8 +68,8 @@ public:
 	/**
 	 * Default constructor
 	 */
-	AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide, AP_Controller * controller,
-			AP_HardwareAbstractionLayer * hal);
+	AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
+			AP_Controller * controller, AP_HardwareAbstractionLayer * hal);
 
 	/**
 	 * Accessors
