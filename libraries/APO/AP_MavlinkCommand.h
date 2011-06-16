@@ -12,6 +12,7 @@
 #include "../AP_Common/AP_Common.h"
 #include "AP_Var_keys.h"
 #include "constants.h"
+#include "HardwareSerial.h"
 
 namespace apo {
 
@@ -31,7 +32,6 @@ private:
 	};
 	AP_VarS<CommandStorage> _data;
 	uint16_t _seq;
-	//static AP_Var_group _group;
 public:
 	static AP_MavlinkCommand home;
 	/**
@@ -40,7 +40,6 @@ public:
 	 */
 	AP_MavlinkCommand(uint16_t index) :
 		_data(k_commands + index), _seq(index) {
-		_data.load();
 		//Serial.print("x: "); Serial.println(_data.get().x);
 	}
 
@@ -52,7 +51,7 @@ public:
 		_data(k_commands + cmd.seq), _seq(cmd.seq) {
 		setCommand(MAV_CMD(cmd.command));
 		setAutocontinue(cmd.autocontinue);
-		setFrame((MAV_FRAME) cmd.frame);
+		setFrame(MAV_FRAME(cmd.frame));
 		setParam1(cmd.param1);
 		setParam2(cmd.param2);
 		setParam3(cmd.param3);
@@ -60,32 +59,32 @@ public:
 		setX(cmd.x);
 		setY(cmd.y);
 		setZ(cmd.z);
-		_data.save();
-		/*
-		 Serial.println("============================================================");
-		 Serial.println("storing new command from mavlink_waypoint_t");
-		 Serial.print("key: "); Serial.println(_data.key(),DEC);
-		 Serial.print("number: "); Serial.println(cmd.seq,DEC);
-		 Serial.print("command: "); Serial.println(getCommand());
-		 Serial.print("autocontinue: "); Serial.println(getAutocontinue(),DEC);
-		 Serial.print("frame: "); Serial.println(getFrame(),DEC);
-		 Serial.print("1000*param1: "); Serial.println(int(1000*getParam1()),DEC);
-		 Serial.print("1000*param2: "); Serial.println(int(1000*getParam2()),DEC);
-		 Serial.print("1000*param3: "); Serial.println(int(1000*getParam3()),DEC);
-		 Serial.print("1000*param4: "); Serial.println(int(1000*getParam4()),DEC);
-		 Serial.print("1000*x0: "); Serial.println(int(1000*cmd.x),DEC);
-		 Serial.print("1000*y0: "); Serial.println(int(1000*cmd.y),DEC);
-		 Serial.print("1000*z0: "); Serial.println(int(1000*cmd.z),DEC);
-		 Serial.print("1000*x: "); Serial.println(int(1000*getX()),DEC);
-		 Serial.print("1000*y: "); Serial.println(int(1000*getY()),DEC);
-		 Serial.print("1000*z: "); Serial.println(int(1000*getZ()),DEC);
-		 */
-		_data.load();
-		/*
-		 Serial.print("1000*x1: "); Serial.println(int(1000*getX()),DEC);
-		 Serial.print("1000*y1: "); Serial.println(int(1000*getY()),DEC);
-		 Serial.print("1000*z1: "); Serial.println(int(1000*getZ()),DEC);
-		 */
+		save();
+
+		Serial.println("============================================================");
+		Serial.println("storing new command from mavlink_waypoint_t");
+		Serial.print("key: "); Serial.println(_data.key(),DEC);
+		Serial.print("number: "); Serial.println(cmd.seq,DEC);
+		Serial.print("command: "); Serial.println(getCommand());
+		Serial.print("autocontinue: "); Serial.println(getAutocontinue(),DEC);
+		Serial.print("frame: "); Serial.println(getFrame(),DEC);
+	    Serial.print("1000*param1: "); Serial.println(int(1000*getParam1()),DEC);
+		Serial.print("1000*param2: "); Serial.println(int(1000*getParam2()),DEC);
+		Serial.print("1000*param3: "); Serial.println(int(1000*getParam3()),DEC);
+		Serial.print("1000*param4: "); Serial.println(int(1000*getParam4()),DEC);
+		Serial.print("1000*x0: "); Serial.println(int(1000*cmd.x),DEC);
+		Serial.print("1000*y0: "); Serial.println(int(1000*cmd.y),DEC);
+		Serial.print("1000*z0: "); Serial.println(int(1000*cmd.z),DEC);
+		Serial.print("1000*x: "); Serial.println(int(1000*getX()),DEC);
+		Serial.print("1000*y: "); Serial.println(int(1000*getY()),DEC);
+		Serial.print("1000*z: "); Serial.println(int(1000*getZ()),DEC);
+
+		load();
+
+	    Serial.print("1000*x1: "); Serial.println(int(1000*getX()),DEC);
+		Serial.print("1000*y1: "); Serial.println(int(1000*getY()),DEC);
+		Serial.print("1000*z1: "); Serial.println(int(1000*getZ()),DEC);
+
 	}
 	bool save() {
 		return _data.save();

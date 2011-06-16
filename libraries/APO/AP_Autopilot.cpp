@@ -118,7 +118,7 @@ void AP_Autopilot::callback0(void * data) {
 
 void AP_Autopilot::callback1(void * data) {
 	AP_Autopilot * apo = (AP_Autopilot *) data;
-	//apo->hal()->debug->println_P(PSTR("callback 1"));
+	//apo->getHal()->debug->println_P(PSTR("callback 1"));
 
 	/*
 	 * hardware in the loop
@@ -129,16 +129,19 @@ void AP_Autopilot::callback1(void * data) {
 	}
 
 	/*
-	 * update control laws
+	 * update guidance laws
 	 */
 	if (apo->getGuide())
+	{
+		//apo->getHal()->debug->println_P(PSTR("updating guide"));
 		apo->getGuide()->update();
+	}
 
 	/*
 	 * update control laws
 	 */
 	if (apo->getController()) {
-		//apo->hal()->debug->println_P(PSTR("updating controller"));
+		//apo->getHal()->debug->println_P(PSTR("updating controller"));
 		apo->getController()->update(1. / loop1Rate);
 	}
 	/*
@@ -150,7 +153,7 @@ void AP_Autopilot::callback1(void * data) {
 
 void AP_Autopilot::callback2(void * data) {
 	AP_Autopilot * apo = (AP_Autopilot *) data;
-	//apo->hal()->debug->println_P(PSTR("callback 2"));
+	//apo->getHal()->debug->println_P(PSTR("callback 2"));
 
 	/*
 	 * send telemetry
@@ -230,7 +233,7 @@ void AP_Autopilot::callback3(void * data) {
 
 void AP_Autopilot::callback4(void * data) {
 	//AP_Autopilot * apo = (AP_Autopilot *) data;
-	//apo->hal()->debug->println_P(PSTR("callback 4"));
+	//apo->getHal()->debug->println_P(PSTR("callback 4"));
 }
 
 } // apo

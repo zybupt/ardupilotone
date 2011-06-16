@@ -162,11 +162,11 @@ public:
 	}
 
 	virtual void update() {
-		/*_hal->debug->printf_P(
-		 PSTR("guide loop, number: %d, current index: %d, previous index: %d\n"),
-		 getNumberOfCommands(),
-		 getCurrentIndex(),
-		 getPreviousIndex());*/
+//		_hal->debug->printf_P(
+//				PSTR("guide loop, number: %d, current index: %d, previous index: %d\n"),
+//				getNumberOfCommands(),
+//				getCurrentIndex(),
+//				getPreviousIndex());
 
 		// if we don't have enough waypoint for cross track calcs
 		// go home
@@ -177,10 +177,9 @@ public:
 					+ 180 * deg2Rad;
 			if (_headingCommand > 360 * deg2Rad)
 				_headingCommand -= 360 * deg2Rad;
-			/*
-			 _hal->debug->printf_P(PSTR("going home: bearing: %f distance: %f\n"),
-			 headingCommand,AP_MavlinkCommand::home.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt()));
-			 */
+
+//			_hal->debug->printf_P(PSTR("going home: bearing: %f distance: %f\n"),
+//			headingCommand,AP_MavlinkCommand::home.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt()));
 		} else {
 			_mode = MAV_NAV_WAYPOINT;
 			// TODO wrong behavior if 0 selected as waypoint, says previous 0
@@ -203,11 +202,9 @@ public:
 			if (distanceToNext < _command.getRadius() || alongTrack
 					> segmentLength)
 				nextCommand();
-			/*
-			 _hal->debug->printf_P(
-			 PSTR("nav: bCurrent2Dest: %f\tdXt: %f\tcmdHeading: %f\tnextWpDistance: %f\talongTrack: %f\n"),
-			 bearing * rad2Deg, dXt, headingCommand * rad2Deg, distanceToNext, alongTrack);
-			 */
+//			_hal->debug->printf_P(
+//					PSTR("nav: bCurrent2Dest: %f\tdXt: %f\tcmdHeading: %f\tnextWpDistance: %f\talongTrack: %f\n"),
+//					bearing * rad2Deg, dXt, _headingCommand * rad2Deg, distanceToNext, alongTrack);
 		}
 
 		_groundSpeedCommand = _velocityCommand;
@@ -231,14 +228,14 @@ public:
 			_mode = MAV_NAV_VECTOR;
 			//airSpeedCommand = 0;
 			//groundSpeedCommand = 0;
-			_headingCommand -= 45 * deg2Rad;
-			//			_hal->debug->print("Obstacle Distance (m): ");
-			//			_hal->debug->println(frontDistance);
-			//			_hal->debug->print("Obstacle avoidance Heading Command: ");
-			//			_hal->debug->println(headingCommand);
-			//			_hal->debug->printf_P(
-			//											PSTR("Front Distance, %f\n"),
-			//											frontDistance);
+//			_headingCommand -= 45 * deg2Rad;
+//			_hal->debug->print("Obstacle Distance (m): ");
+//			_hal->debug->println(frontDistance);
+//			_hal->debug->print("Obstacle avoidance Heading Command: ");
+//			_hal->debug->println(headingCommand);
+//			_hal->debug->printf_P(
+//					PSTR("Front Distance, %f\n"),
+//					frontDistance);
 		}
 		if (_rangeFinderBack && _rangeFinderBack->distance < 5) {
 			_airSpeedCommand = 0;
@@ -261,7 +258,7 @@ public:
 		_cmdIndex = getNextIndex();
 		_command = AP_MavlinkCommand(getCurrentIndex());
 		_previousCommand = AP_MavlinkCommand(getPreviousIndex());
-		//_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
+//		_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 
 	void handleCommand(AP_MavlinkCommand command,
@@ -277,36 +274,34 @@ public:
 			}
 			break;
 		}
-			/*
-			 case MAV_CMD_CONDITION_CHANGE_ALT:
-			 case MAV_CMD_CONDITION_DELAY:
-			 case MAV_CMD_CONDITION_DISTANCE:
-			 case MAV_CMD_CONDITION_LAST:
-			 case MAV_CMD_CONDITION_YAW:
-			 case MAV_CMD_DO_CHANGE_SPEED:
-			 case MAV_CMD_DO_CONTROL_VIDEO:
-			 case MAV_CMD_DO_JUMP:
-			 case MAV_CMD_DO_LAST:
-			 case MAV_CMD_DO_LAST:
-			 case MAV_CMD_DO_REPEAT_RELAY:
-			 case MAV_CMD_DO_REPEAT_SERVO:
-			 case MAV_CMD_DO_SET_HOME:
-			 case MAV_CMD_DO_SET_MODE:
-			 case MAV_CMD_DO_SET_PARAMETER:
-			 case MAV_CMD_DO_SET_RELAY:
-			 case MAV_CMD_DO_SET_SERVO:
-			 case MAV_CMD_PREFLIGHT_CALIBRATION:
-			 case MAV_CMD_PREFLIGHT_STORAGE:
-			 case MAV_CMD_NAV_LAND:
-			 case MAV_CMD_NAV_LAST:
-			 case MAV_CMD_NAV_LOITER_TIME:
-			 case MAV_CMD_NAV_LOITER_TURNS:
-			 case MAV_CMD_NAV_LOITER_UNLIM:
-			 case MAV_CMD_NAV_ORIENTATION_TARGET:
-			 case MAV_CMD_NAV_PATHPLANNING:
-			 case MAV_CMD_NAV_RETURN_TO_LAUNCH:
-			 case MAV_CMD_NAV_TAKEOFF:
-			 */
+//		case MAV_CMD_CONDITION_CHANGE_ALT:
+//		case MAV_CMD_CONDITION_DELAY:
+//		case MAV_CMD_CONDITION_DISTANCE:
+//		case MAV_CMD_CONDITION_LAST:
+//		case MAV_CMD_CONDITION_YAW:
+//		case MAV_CMD_DO_CHANGE_SPEED:
+//		case MAV_CMD_DO_CONTROL_VIDEO:
+//		case MAV_CMD_DO_JUMP:
+//	    case MAV_CMD_DO_LAST:
+//		case MAV_CMD_DO_LAST:
+//		case MAV_CMD_DO_REPEAT_RELAY:
+//		case MAV_CMD_DO_REPEAT_SERVO:
+//		case MAV_CMD_DO_SET_HOME:
+//		case MAV_CMD_DO_SET_MODE:
+//		case MAV_CMD_DO_SET_PARAMETER:
+//		case MAV_CMD_DO_SET_RELAY:
+//		case MAV_CMD_DO_SET_SERVO:
+//		case MAV_CMD_PREFLIGHT_CALIBRATION:
+//		case MAV_CMD_PREFLIGHT_STORAGE:
+//		case MAV_CMD_NAV_LAND:
+//		case MAV_CMD_NAV_LAST:
+//		case MAV_CMD_NAV_LOITER_TIME:
+//		case MAV_CMD_NAV_LOITER_TURNS:
+//		case MAV_CMD_NAV_LOITER_UNLIM:
+//		case MAV_CMD_NAV_ORIENTATION_TARGET:
+//		case MAV_CMD_NAV_PATHPLANNING:
+//		case MAV_CMD_NAV_RETURN_TO_LAUNCH:
+//		case MAV_CMD_NAV_TAKEOFF:
 		default:
 			// unhandled command, skip
 			nextCommand();

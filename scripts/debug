@@ -1,9 +1,9 @@
 #!/bin/bash
 
-echo -n -e 'enter sketch (i.e. ArduPilotOne) : '
+echo -n -e 'enter sketch (i.e. ardurover) : '
 read sketch
 if [[ $sketch = '' ]]; then
-	sketch='ArduPilotOne'
+	sketch='ardurover'
 fi
 echo -e "sketch entered: >>$sketch<<"
 
