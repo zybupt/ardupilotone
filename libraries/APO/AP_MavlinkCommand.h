@@ -35,7 +35,7 @@ private:
 public:
 	static AP_MavlinkCommand home;
 	/**
-	 * Constructor for loading from memory.
+	 * Basic Constructor
 	 * @param index Start at zero.
 	 */
 	AP_MavlinkCommand(uint16_t index) :
@@ -44,7 +44,7 @@ public:
 	}
 
 	/**
-	 * Constructor for saving from command a mavlink waypoint.
+	 * Constructor for copying/ saving from a mavlink waypoint.
 	 * @param cmd The mavlink_waopint_t structure for the command.
 	 */
 	AP_MavlinkCommand(mavlink_waypoint_t cmd) :
@@ -60,6 +60,9 @@ public:
 		setY(cmd.y);
 		setZ(cmd.z);
 		save();
+
+		// reload home if sent
+		if (cmd.seq == 0) home.load();
 
 		Serial.println("============================================================");
 		Serial.println("storing new command from mavlink_waypoint_t");

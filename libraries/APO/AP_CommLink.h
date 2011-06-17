@@ -494,8 +494,9 @@ private:
 			if (_checkTarget(packet.target_system, packet.target_component))
 				break;
 
-			//_hal->debug->printf_P(PSTR("sequence: %d\n"),packet.seq);
+			_hal->debug->printf_P(PSTR("sequence: %d\n"),packet.seq);
 			AP_MavlinkCommand cmd(packet.seq);
+			cmd.load();
 
 			mavlink_waypoint_t wp = cmd.convert(_guide->getCurrentIndex());
 			mavlink_msg_waypoint_send(_channel, _cmdDestSysId, _cmdDestCompId,
@@ -617,13 +618,11 @@ private:
 
 			// check if this is the requested waypoint
 			if (packet.seq != _cmdRequestIndex) {
-				/*
-				 char msg[50];
-				 sprintf(msg,
-				 "waypoint request out of sequence: (packet) %d / %d (ap)",
-				 packet.seq, _cmdRequestIndex);
-				 sendText(SEVERITY_HIGH, msg);
-				 */
+				char msg[50];
+				sprintf(msg,
+				"waypoint request out of sequence: (packet) %d / %d (ap)",
+				packet.seq, _cmdRequestIndex);
+				sendText(SEVERITY_HIGH, msg);
 				break;
 			}
 

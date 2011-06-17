@@ -77,14 +77,18 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 			hal->debug->println_P(PSTR("waiting for hil packet"));
 		}
 	}
-	AP_MavlinkCommand home(0);
-	home.setAlt(_navigator->getAlt());
-	home.setLat(_navigator->getLat());
-	home.setLon(_navigator->getLon());
-	home.save();
-	_hal->debug->printf_P(PSTR("home before load lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
-	home.load();
-	_hal->debug->printf_P(PSTR("home after load lat: %f deg, lon: %f deg\n"), home.getLat()*rad2Deg,home.getLon()*rad2Deg);
+
+	AP_MavlinkCommand::home.setAlt(_navigator->getAlt());
+	AP_MavlinkCommand::home.setLat(_navigator->getLat());
+	AP_MavlinkCommand::home.setLon(_navigator->getLon());
+	AP_MavlinkCommand::home.save();
+	_hal->debug->printf_P(PSTR("\nhome before load lat: %f deg, lon: %f deg\n"),
+			AP_MavlinkCommand::home.getLat()*rad2Deg,
+			AP_MavlinkCommand::home.getLon()*rad2Deg);
+	AP_MavlinkCommand::home.load();
+	_hal->debug->printf_P(PSTR("home after load lat: %f deg, lon: %f deg\n"),
+			AP_MavlinkCommand::home.getLat()*rad2Deg,
+			AP_MavlinkCommand::home.getLon()*rad2Deg);
 
 	/*
 	 * Attach loops

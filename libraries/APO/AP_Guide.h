@@ -60,7 +60,9 @@ public:
 	void setCurrentIndex(uint8_t val) {
 		_cmdIndex.set_and_save(val);
 		_command = AP_MavlinkCommand(getCurrentIndex());
+		_command.load();
 		_previousCommand = AP_MavlinkCommand(getPreviousIndex());
+		_previousCommand.load();
 		//_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 
@@ -257,7 +259,9 @@ public:
 	void nextCommand() {
 		_cmdIndex = getNextIndex();
 		_command = AP_MavlinkCommand(getCurrentIndex());
+		_command.load();
 		_previousCommand = AP_MavlinkCommand(getPreviousIndex());
+		_previousCommand.load();
 //		_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 
