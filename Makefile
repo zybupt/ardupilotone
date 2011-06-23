@@ -3,19 +3,21 @@ TMPDIR=$(SKETCHBOOK)/build
 
 include $(SKETCHBOOK)/config.mk
 
-all: $(SKETCHBOOK)/config.mk
+all: upload
+
+build: $(SKETCHBOOK)/config.mk
 	SKETCHBOOK=$(SKETCHBOOK) TMPDIR=$(TMPDIR) make -e -C $(SKETCH_PATH)
 	
 clean:
 	rm -rf build
 	
-upload:
+upload: build $(SKETCHBOOK)/config.mk
 	SKETCHBOOK=$(SKETCHBOOK) TMPDIR=$(TMPDIR) make -e -C $(SKETCH_PATH) upload
 	
-debug:
+debug: build $(SKETCHBOOK)/config.mk
 	SKETCHBOOK=$(SKETCHBOOK) TMPDIR=$(TMPDIR) make -e -C $(SKETCH_PATH) debug
 	
-configure: 
+configure:
 	rm $(SKETCHBOOK)/config.mk
 	make $(SKETCHBOOK)/config.mk
 
