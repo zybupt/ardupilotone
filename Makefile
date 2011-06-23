@@ -1,25 +1,28 @@
-sketches= \
-ardurover \
-arduquad \
-arduplane \
-arduboat \
-libraries/AP_Compass/examples/AP_Compass_test \
-libraries/APO/examples/ServoSweep \
-libraries/APO/examples/ServoManual \
-libraries/AP_RangeFinder/examples/AP_RangeFinder_test \
-
-BOARD=mega
-TMPDIR=${PWD}/build
 SKETCHBOOK=${PWD}
+TMPDIR=$(SKETCHBOOK)/build
 
-all:
-	for sketch in $(sketches); do echo "\nbuilding $$sketch\n"; BOARD=${BOARD} SKETCHBOOK=${SKETCHBOOK} TMPDIR=${TMPDIR} make -e -C $$sketch; done
+include $(SKETCHBOOK)/config.mk
+
+all: $(SKETCHBOOK)/config.mk
+	SKETCHBOOK=$(SKETCHBOOK) TMPDIR=$(TMPDIR) make -e -C $(SKETCH_PATH)
 	
 clean:
-	for sketch in $(sketches); do echo "\ncleaning $$sketch\n"; BOARD=${BOARD} SKETCHBOOK=${SKETCHBOOK} TMPDIR=${TMPDIR} make -e -C $$sketch clean; done
+	rm -rf build
 	
 upload:
-	bash ../scripts/upload
+	SKETCHBOOK=$(SKETCHBOOK) TMPDIR=$(TMPDIR) make -e -C $(SKETCH_PATH) upload
 	
 debug:
-	bash ../scripts/debug
+	SKETCHBOOK=$(SKETCHBOOK) TMPDIR=$(TMPDIR) make -e -C $(SKETCH_PATH) debug
+	
+configure: 
+	rm $(SKETCHBOOK)/config.mk
+	make $(SKETCHBOOK)/config.mk
+
+$(SKETCHBOOK)/config.mk:
+	@echo 'creating $(SKETCHBOOK)/config.mk'; \
+	echo -n 'sketch [i.e. arduquad, ardurover] : '; read sketchPath; echo SKETCH_PATH=$$sketchPath > $(SKETCHBOOK)/config.mk; \
+	echo -n 'port [i.e. /dev/ttyUSB0] : '; read port; echo PORT=$$port >> $(SKETCHBOOK)/config.mk; \
+	echo -n 'board [i.e. mega, mega2560] : '; read board; echo BOARD=$$board >> $(SKETCHBOOK)/config.mk; \
+	echo config file written to $(SKETCHBOOK)/config.mk
+	cat $(SKETCHBOOK)/config.mk
