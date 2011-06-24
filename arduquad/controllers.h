@@ -95,20 +95,14 @@ public:
 		if (_hal->heartBeatLost()) {
 			// heartbeat lost, go to failsafe mode
 			_mode = MAV_MODE_FAILSAFE;
-			_hal->rc[CH_LEFT]->setPosition(0);
-			_hal->rc[CH_RIGHT]->setPosition(0);
-			_hal->rc[CH_FRONT]->setPosition(0);
-			_hal->rc[CH_BACK]->setPosition(0);
+			setAllRadioChannelsToNeutral();
 			_hal->setState(MAV_STATE_EMERGENCY);
 			_hal->debug->printf_P(PSTR("comm lost, send heartbeat from gcs\n"));
 			return;
 		} else if (_hal->rc[CH_THRUST]->getPosition() < 0.05) {
 			// if throttle less than 5% cut motor power
 			_mode = MAV_MODE_LOCKED;
-			_hal->rc[CH_LEFT]->setPosition(0);
-			_hal->rc[CH_RIGHT]->setPosition(0);
-			_hal->rc[CH_FRONT]->setPosition(0);
-			_hal->rc[CH_BACK]->setPosition(0);
+			setAllRadioChannelsToNeutral();
 			_hal->setState(MAV_STATE_STANDBY);
 			return;
 		} else if (_hal->getMode() == MODE_LIVE) {
