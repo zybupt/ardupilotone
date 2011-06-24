@@ -27,9 +27,9 @@ const float PID_POS_Z_AWU = 0;
 
 // attitude control loop
 const float PID_ATT_INTERVAL = 1 / 100; // 100 hz
-const float PID_ATT_P = .1; // 0.1
+const float PID_ATT_P = 0.1; // 0.1
 const float PID_ATT_I = 0; // 0.0
-const float PID_ATT_D = 0; // 0.1
+const float PID_ATT_D = 0.1; // 0.1
 const float PID_ATT_LIM = 1; // 0.01 // 10 % #define MOTORs
 const float PID_ATT_AWU = 0; // 0.0
 const float PID_YAWPOS_P = 0;
@@ -37,7 +37,7 @@ const float PID_YAWPOS_I = 0;
 const float PID_YAWPOS_D = 0;
 const float PID_YAWPOS_LIM = 0; // 1 rad/s
 const float PID_YAWPOS_AWU = 0; // 1 rad/s
-const float PID_YAWSPEED_P = .1;
+const float PID_YAWSPEED_P = .2;
 const float PID_YAWSPEED_I = 0;
 const float PID_YAWSPEED_D = 0;
 const float PID_YAWSPEED_LIM = .3; // 0.01 // 10 % MOTORs

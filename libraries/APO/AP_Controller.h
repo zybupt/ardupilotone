@@ -162,14 +162,15 @@ public:
 			const prog_char_t * iMaxLabel = NULL) :
 		AP_ControllerBlock(group, groupStart, 2),
 				_kI(group, groupStart, kI, kILabel ? : PSTR("I")),
-				_blockSaturation(group, groupStart + 1, iMax, iMaxLabel),
+				_blockSaturation(group, groupStart + 1, iMax, iMaxLabel ? : PSTR("IMAX")),
 				_eI(0) {
 	}
 
 	float update(const float & input, const float & dt) {
 		// integral
 		_eI += input * dt;
-		return _blockSaturation.update(_eI);
+		_eI = _blockSaturation.update(_eI);
+		return _kI * _eI;
 	}
 protected:
 	AP_Float _kI; /// integral gain
@@ -271,12 +272,12 @@ protected:
 class BlockPIDDfb: public AP_ControllerBlock {
 public:
 	BlockPIDDfb(AP_Var_group * group, uint8_t groupStart, float kP, float kI,
-			float kD, float iMax, float yMax) :
+			float kD, float iMax, float yMax, const prog_char_t * dLabel = NULL) :
 		AP_ControllerBlock(group, groupStart, 5),
 				_blockP(group, groupStart, kP),
 				_blockI(group, _blockP.getGroupEnd(), kI, iMax),
 				_blockSaturation(group, _blockI.getGroupEnd(), yMax),
-				_kD(group, _blockSaturation.getGroupEnd(), kD) {
+				_kD(group, _blockSaturation.getGroupEnd(), kD, dLabel ? : PSTR("D")) {
 	}
 	float update(const float & input, const float & derivative,
 			const float & dt) {

@@ -127,9 +127,9 @@ public:
 		}
 
 		// "mix manual"
-		float cmdRoll = _hal->rc[CH_ROLL]->getPosition() * mixRemoteWeight;
-		float cmdPitch = _hal->rc[CH_PITCH]->getPosition() * mixRemoteWeight;
-		float cmdYawRate = _hal->rc[CH_YAW]->getPosition() * mixRemoteWeight;
+		float cmdRoll = 0.5*_hal->rc[CH_ROLL]->getPosition() * mixRemoteWeight;
+		float cmdPitch = 0.5*_hal->rc[CH_PITCH]->getPosition() * mixRemoteWeight;
+		float cmdYawRate = 0.5*_hal->rc[CH_YAW]->getPosition() * mixRemoteWeight;
 		float thrustMix = _hal->rc[CH_THRUST]->getPosition() * mixRemoteWeight;
 
 		// position loop
@@ -166,8 +166,9 @@ public:
 
 		// attitude loop
 		// XXX negative sign added to nav roll, not sure why this is necessary
+		// XXX negative sign added to nav roll rate, not sure why this is necessary
 		float rollMix = pidRoll.update(cmdRoll + _nav->getRoll(),
-				_nav->getRollRate(), dt);
+				-_nav->getRollRate(), dt);
 		// XXX negative sign added to cmdPitch, not sure why this is necessary
 		float pitchMix = pidPitch.update(-cmdPitch - _nav->getPitch(),
 				_nav->getPitchRate(), dt);
