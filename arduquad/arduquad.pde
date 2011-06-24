@@ -67,19 +67,20 @@ const float loop4Rate = 0.1;
 // max time in seconds to allow flight without ground station comms
 // zero will ignore timeout
 const uint8_t heartBeatTimeout = 3;
+
 //---------HARDWARE CONFIG ----------------//
+
 #define RANGE_FINDER_CLASS AP_RangeFinder_MaxsonarLV
+
 //---------MAIN ----------------//
+
 /*
  * Required Global Declarations
- */FastSerialPort0(Serial)
-;
-FastSerialPort1(Serial1)
-;
-FastSerialPort2(Serial2)
-;
-FastSerialPort3(Serial3)
-;
+ */
+FastSerialPort0(Serial);
+FastSerialPort1(Serial1);
+FastSerialPort2(Serial2);
+FastSerialPort3(Serial3);
 apo::AP_Autopilot * autoPilot;
 
 void setup() {
