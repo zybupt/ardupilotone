@@ -43,3 +43,5 @@ $(SKETCHBOOK)/config.mk:
 	echo -n 'board [i.e. mega, mega2560] : '; read board; echo BOARD=$$board >> $(SKETCHBOOK)/config.mk; \
 	echo config file written to $(SKETCHBOOK)/config.mk
 	cat $(SKETCHBOOK)/config.mk
+	
+.PHONY: build upload debug configure clean help all

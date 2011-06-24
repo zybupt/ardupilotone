@@ -41,7 +41,7 @@ public:
 				pidYaw(new AP_Var_group(k_pidYaw, PSTR("YAW_")), 1,
 						PID_YAWPOS_P, PID_YAWPOS_I, PID_YAWPOS_D,
 						PID_YAWPOS_AWU, PID_YAWPOS_LIM),
-				pidYawRate(new AP_Var_group(k_pidYawRate, PSTR("YAWRATE_")), 1,
+				pidYawRate(new AP_Var_group(k_pidYawRate, PSTR("YAWRT_")), 1,
 						PID_YAWSPEED_P, PID_YAWSPEED_I, PID_YAWSPEED_D,
 						PID_YAWSPEED_AWU, PID_YAWSPEED_LIM, PID_YAWSPEED_DFCUT),
 				pidPN(new AP_Var_group(k_pidPN, PSTR("NORTH_")), 1, PID_POS_P,
@@ -85,8 +85,15 @@ public:
 
 	virtual void update(const float & dt) {
 
-		// check for heartbeat
+		// read and set pwm so they can be read as positions later
+		_hal->rc[CH_MODE]->setUsingRadio();
+		_hal->rc[CH_ROLL]->setUsingRadio();
+		_hal->rc[CH_PITCH]->setUsingRadio();
+		_hal->rc[CH_YAW]->setUsingRadio();
+		_hal->rc[CH_THRUST]->setUsingRadio();
+
 		if (_hal->heartBeatLost()) {
+			// heartbeat lost, go to failsafe mode
 			_mode = MAV_MODE_FAILSAFE;
 			_hal->rc[CH_LEFT]->setPosition(0);
 			_hal->rc[CH_RIGHT]->setPosition(0);
@@ -95,18 +102,20 @@ public:
 			_hal->setState(MAV_STATE_EMERGENCY);
 			_hal->debug->printf_P(PSTR("comm lost, send heartbeat from gcs\n"));
 			return;
+		} else if (_hal->rc[CH_THRUST]->getPosition() < 0.05) {
+			// if throttle less than 5% cut motor power
+			_mode = MAV_MODE_LOCKED;
+			_hal->rc[CH_LEFT]->setPosition(0);
+			_hal->rc[CH_RIGHT]->setPosition(0);
+			_hal->rc[CH_FRONT]->setPosition(0);
+			_hal->rc[CH_BACK]->setPosition(0);
+			_hal->setState(MAV_STATE_STANDBY);
+			return;
 		} else if (_hal->getMode() == MODE_LIVE) {
 			_hal->setState(MAV_STATE_ACTIVE);
 		} else if (_hal->getMode() == MODE_HIL_CNTL) {
 			_hal->setState(MAV_STATE_HILSIM);
 		}
-
-		// read and set pwm so they can be read as positions later
-		_hal->rc[CH_MODE]->setUsingRadio();
-		_hal->rc[CH_ROLL]->setUsingRadio();
-		_hal->rc[CH_PITCH]->setUsingRadio();
-		_hal->rc[CH_YAW]->setUsingRadio();
-		_hal->rc[CH_THRUST]->setUsingRadio();
 
 		// manual mode
 		float mixRemoteWeight = 0;
@@ -156,22 +165,25 @@ public:
 		 */
 
 		// attitude loop
-		float rollMix = pidRoll.update(cmdRoll - _nav->getRoll(),
+		// XXX negative sign added to nav roll, not sure why this is necessary
+		float rollMix = pidRoll.update(cmdRoll + _nav->getRoll(),
 				_nav->getRollRate(), dt);
-		float pitchMix = pidPitch.update(cmdPitch - _nav->getPitch(),
+		// XXX negative sign added to cmdPitch, not sure why this is necessary
+		float pitchMix = pidPitch.update(-cmdPitch - _nav->getPitch(),
 				_nav->getPitchRate(), dt);
-		float yawMix = pidYawRate.update(cmdYawRate - _nav->getYawRate(), dt);
+		// XXX negative sign added to cmdYawRate, not sure why this is necessary
+		float yawMix = pidYawRate.update(-cmdYawRate - _nav->getYawRate(), dt);
 
 		_hal->rc[CH_LEFT]->setPosition(thrustMix + rollMix + yawMix);
 		_hal->rc[CH_RIGHT]->setPosition(thrustMix - rollMix + yawMix);
 		_hal->rc[CH_FRONT]->setPosition(thrustMix + pitchMix - yawMix);
 		_hal->rc[CH_BACK]->setPosition(thrustMix - pitchMix - yawMix);
 
-		//			_hal->debug->printf("L: %f\t R: %f\t F: %f\t B: %f\n",
-		//					_hal->rc[CH_LEFT]->getPosition(),
-		//					_hal->rc[CH_RIGHT]->getPosition(),
-		//					_hal->rc[CH_FRONT]->getPosition(),
-		//					_hal->rc[CH_BACK]->getPosition());
+//		_hal->debug->printf("L: %f\t R: %f\t F: %f\t B: %f\n",
+//				_hal->rc[CH_LEFT]->getPosition(),
+//				_hal->rc[CH_RIGHT]->getPosition(),
+//				_hal->rc[CH_FRONT]->getPosition(),
+//				_hal->rc[CH_BACK]->getPosition());
 
 		_hal->debug->printf(
 				"rollMix: %f\t pitchMix: %f\t yawMix: %f\t thrustMix: %f\n",
