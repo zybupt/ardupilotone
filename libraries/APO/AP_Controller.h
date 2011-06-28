@@ -40,8 +40,14 @@ public:
 	virtual MAV_MODE getMode() = 0;
 
 	void setAllRadioChannelsToNeutral() {
-		for (int i = 0; i < _hal->rc.getSize(); i++) {
+		for (uint8_t i = 0; i < _hal->rc.getSize(); i++) {
 			_hal->rc[i]->setPosition(0.0);
+		}
+	}
+
+	void setAllRadioChannelsManually() {
+		for (uint8_t i = 0; i < _hal->rc.getSize(); i++) {
+			_hal->rc[i]->setUsingRadio();
 		}
 	}
 

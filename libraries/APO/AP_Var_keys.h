@@ -9,37 +9,11 @@ enum keys {
 	k_guide,
 	k_sensorCalib,
 
-	// radio channels
-	k_chMode = 20,
-	k_chLeft,
-	k_chRight,
-	k_chFront,
-	k_chBack,
-	k_chRoll,
-	k_chPitch,
-	k_chYaw,
-	k_chThr,
-	k_chStr,
+	k_radioChannelsStart=10,
 
-	// pids
-	k_pidGroundSpeed2Throttle = 40,
-	k_pidStr,
-	k_pidPN,
-	k_pidPE,
-	k_pidPD,
-	k_pidRoll,
-	k_pidPitch,
-	k_pidYawRate,
-	k_pidYaw,
+	k_controllersStart=30,
 
-	//				PidDFB pidHdng2Bank, pidBank2Aileron;
-	//					Pid pidAlt2Thr, pidSpeed2Elevator,  pidYawRate2Rudder;
-
-	k_pidHdng2Bank,
-	k_pidBank2Aileron,
-	k_pidAltitude2Throttle,
-	k_pidAirSpeed2Elevator,
-	k_pidYawRate2Rudder,
+	k_customStart=100,
 
 	// 200-256 reserved for commands
 	k_commands = 200

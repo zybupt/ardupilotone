@@ -1,12 +1,14 @@
 /*
  * controllers.h
  *
- *  Created on: May 1, 2011
+ *  Created on: Jun 28, 2011
  *      Author: jgoppert
  */
 
 #ifndef CONTROLLERS_H_
 #define CONTROLLERS_H_
+
+#include "../APO/AP_Controller.h"
 
 namespace apo {
 
@@ -17,7 +19,7 @@ public:
 	 * note that these are not the controller radio channel numbers, they are just
 	 * unique keys so they can be reaccessed from the hal rc vector
 	 */
-	enum autoChannel_t {
+	enum {
 		CH_MODE = 0, // note scicoslab channels set mode, left, right, front, back order
 		CH_LEFT, // this enum must match this
 		CH_RIGHT,
@@ -27,6 +29,30 @@ public:
 		CH_PITCH,
 		CH_YAW,
 		CH_THRUST
+	};
+
+	enum {
+		k_chMode = k_radioChannelsStart,
+		k_chLeft,
+		k_chRight,
+		k_chFront,
+		k_chBack,
+		k_chRoll,
+		k_chPitch,
+		k_chYaw,
+		k_chThr
+	};
+
+	enum {
+		k_pidGroundSpeed2Throttle = k_controllersStart,
+		k_pidStr,
+		k_pidPN,
+		k_pidPE,
+		k_pidPD,
+		k_pidRoll,
+		k_pidPitch,
+		k_pidYawRate,
+		k_pidYaw,
 	};
 
 	QuadController(AP_Navigator * nav, AP_Guide * guide,
@@ -121,9 +147,12 @@ public:
 		}
 
 		// "mix manual"
-		float cmdRoll = 0.5*_hal->rc[CH_ROLL]->getPosition() * mixRemoteWeight;
-		float cmdPitch = 0.5*_hal->rc[CH_PITCH]->getPosition() * mixRemoteWeight;
-		float cmdYawRate = 0.5*_hal->rc[CH_YAW]->getPosition() * mixRemoteWeight;
+		float cmdRoll = 0.5 * _hal->rc[CH_ROLL]->getPosition()
+				* mixRemoteWeight;
+		float cmdPitch = 0.5 * _hal->rc[CH_PITCH]->getPosition()
+				* mixRemoteWeight;
+		float cmdYawRate = 0.5 * _hal->rc[CH_YAW]->getPosition()
+				* mixRemoteWeight;
 		float thrustMix = _hal->rc[CH_THRUST]->getPosition() * mixRemoteWeight;
 
 		// position loop
@@ -174,11 +203,11 @@ public:
 		_hal->rc[CH_FRONT]->setPosition(thrustMix + pitchMix - yawMix);
 		_hal->rc[CH_BACK]->setPosition(thrustMix - pitchMix - yawMix);
 
-//		_hal->debug->printf("L: %f\t R: %f\t F: %f\t B: %f\n",
-//				_hal->rc[CH_LEFT]->getPosition(),
-//				_hal->rc[CH_RIGHT]->getPosition(),
-//				_hal->rc[CH_FRONT]->getPosition(),
-//				_hal->rc[CH_BACK]->getPosition());
+		//		_hal->debug->printf("L: %f\t R: %f\t F: %f\t B: %f\n",
+		//				_hal->rc[CH_LEFT]->getPosition(),
+		//				_hal->rc[CH_RIGHT]->getPosition(),
+		//				_hal->rc[CH_FRONT]->getPosition(),
+		//				_hal->rc[CH_BACK]->getPosition());
 
 		_hal->debug->printf(
 				"rollMix: %f\t pitchMix: %f\t yawMix: %f\t thrustMix: %f\n",
@@ -204,4 +233,3 @@ private:
 } // namespace apo
 
 #endif /* CONTROLLERS_H_ */
-// vim:ts=4:sw=4:expandtab

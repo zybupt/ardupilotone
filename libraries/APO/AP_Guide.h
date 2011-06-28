@@ -134,11 +134,11 @@ protected:
 
 class MavlinkGuide: public AP_Guide {
 public:
-	MavlinkGuide(AP_Var::Key key, AP_Navigator * navigator,
+	MavlinkGuide(AP_Navigator * navigator,
 			AP_HardwareAbstractionLayer * hal) :
 		AP_Guide(navigator, hal), _rangeFinderFront(), _rangeFinderBack(),
 				_rangeFinderLeft(), _rangeFinderRight(),
-				_group(key, PSTR("GUIDE_")),
+				_group(k_guide, PSTR("GUIDE_")),
 				_velocityCommand(&_group, 1, 1, PSTR("VELCMD")),
 				_crossTrackGain(&_group, 2, 2, PSTR("XTK")),
 				_crossTrackLim(&_group, 3, 10, PSTR("XTLIM")) {

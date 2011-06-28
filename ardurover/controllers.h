@@ -1,12 +1,14 @@
 /*
  * controllers.h
  *
- *  Created on: May 1, 2011
+ *  Created on: Jun 28, 2011
  *      Author: jgoppert
  */
 
 #ifndef CONTROLLERS_H_
 #define CONTROLLERS_H_
+
+#include "../APO/AP_Controller.h"
 
 namespace apo {
 
@@ -15,20 +17,28 @@ private:
 	AP_Var_group _group;
 	AP_Uint8 _mode;
 	enum {
+		k_chMode = k_radioChannelsStart,
+		k_chStr,
+		k_chThr
+	};
+	enum {
+		k_pidStr = k_controllersStart,
+		k_pidThr
+	};
+	enum {
 		CH_MODE = 0, CH_STR, CH_THR
 	};
 	BlockPIDDfb pidStr;
 	BlockPID pidThr;
 public:
-	CarController(AP_Var::Key cntrlKey, AP_Var::Key pidStrKey,
-			AP_Var::Key pidThrKey, AP_Navigator * nav, AP_Guide * guide,
+	CarController(AP_Navigator * nav, AP_Guide * guide,
 			AP_HardwareAbstractionLayer * hal) :
 				AP_Controller(nav, guide, hal),
-				_group(cntrlKey, PSTR("CNTRL_")),
+				_group(k_cntrl, PSTR("CNTRL_")),
 				_mode(&_group, 1, MAV_MODE_UNINIT, PSTR("MODE")),
-				pidStr(new AP_Var_group(pidStrKey, PSTR("STR_")), 1, steeringP,
+				pidStr(new AP_Var_group(k_pidStr, PSTR("STR_")), 1, steeringP,
 						steeringI, steeringD, steeringIMax, steeringYMax),
-				pidThr(new AP_Var_group(pidThrKey, PSTR("THR_")), 1, throttleP,
+				pidThr(new AP_Var_group(k_pidThr, PSTR("THR_")), 1, throttleP,
 						throttleI, throttleD, throttleIMax, throttleYMax,
 						throttleDFCut) {
 		_hal->debug->println_P(PSTR("initializing car controller"));
@@ -55,8 +65,8 @@ public:
 			_hal->setState(MAV_STATE_EMERGENCY);
 			_hal->debug->printf_P(PSTR("comm lost, send heartbeat from gcs\n"));
 			return;
-		} else if (fabs(_hal->rc[CH_THR]->getPosition()) < 0.05) {
-			// if the absolute value of the throttle is less than 5% cut motor power
+		} else if (_hal->rc[CH_THR]->getPosition() < 0.05) {
+			// if throttle less than 5% cut motor power
 			_mode = MAV_MODE_LOCKED;
 			setAllRadioChannelsToNeutral();
 			_hal->setState(MAV_STATE_STANDBY);
@@ -79,8 +89,7 @@ public:
 		switch (_mode) {
 
 		case MAV_MODE_MANUAL: {
-			_hal->rc[CH_STR]->setUsingRadio();
-			_hal->rc[CH_THR]->setUsingRadio();
+			setAllRadioChannelsManually();
 			//_hal->debug->println("manual");
 			break;
 		}
@@ -116,4 +125,3 @@ public:
 } // namespace apo
 
 #endif /* CONTROLLERS_H_ */
-// vim:ts=4:sw=4:expandtab

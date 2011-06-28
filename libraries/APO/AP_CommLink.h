@@ -618,11 +618,11 @@ private:
 
 			// check if this is the requested waypoint
 			if (packet.seq != _cmdRequestIndex) {
-				char msg[50];
-				sprintf(msg,
+				char warningMsg[50];
+				sprintf(warningMsg,
 				"waypoint request out of sequence: (packet) %d / %d (ap)",
 				packet.seq, _cmdRequestIndex);
-				sendText(SEVERITY_HIGH, msg);
+				sendText(SEVERITY_HIGH, warningMsg);
 				break;
 			}
 

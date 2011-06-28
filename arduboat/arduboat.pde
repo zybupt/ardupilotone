@@ -201,9 +201,8 @@ void setup() {
 	 * Select guidance, navigation, control algorithms
 	 */
 	AP_Navigator * navigator = new DcmNavigator(hal);
-	AP_Guide * guide = new MavlinkGuide(k_guide, navigator, hal);
-	AP_Controller * controller = new BoatController(k_cntrl, k_pidStr,
-			k_pidGroundSpeed2Throttle, navigator, guide, hal);
+	AP_Guide * guide = new MavlinkGuide(navigator, hal);
+	AP_Controller * controller = new BoatController(navigator, guide, hal);
 
 	/*
 	 * CommLinks
