@@ -17,6 +17,8 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 			_controller(controller), _hal(hal) {
 
 	hal->setState(MAV_STATE_BOOT);
+	hal->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
+	hal->gcs->sendMessage(MAVLINK_MSG_ID_SYS_STATUS);
 
 	/*
 	 * Pins
@@ -34,6 +36,9 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 	/*
 	 * Calibration
 	 */
+	hal->setState(MAV_STATE_CALIBRATING);
+	hal->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
+	hal->gcs->sendMessage(MAVLINK_MSG_ID_SYS_STATUS);
 	navigator->calibrate();
 
 	// start clock
@@ -46,6 +51,7 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 	while (1) {
 		// letc gcs known we are alive
 		hal->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
+		hal->gcs->sendMessage(MAVLINK_MSG_ID_SYS_STATUS);
 		hal->hil->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 		delay(1000);
 		if (hal->getMode() == MODE_LIVE) {
@@ -107,6 +113,13 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 	} else {
 		hal->setState(MAV_STATE_HILSIM);
 	}
+
+	/*
+	 * Radio setup
+	 */
+	hal->debug->println_P(PSTR("initializing radio"));
+	APM_RC.Init(); // APM Radio initialization,
+	// start this after control loop is running
 }
 
 void AP_Autopilot::callback0(void * data) {

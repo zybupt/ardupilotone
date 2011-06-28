@@ -43,7 +43,7 @@ public:
 	pidBnk2Alr(new AP_Var_group(k_pidBnk2Alr, PSTR("BNK2ALR_")), 1,
 			pidBnk2AlrP, pidBnk2AlrI, pidBnk2AlrD, pidBnk2AlrAwu,
 			pidBnk2AlrLim),
-	pidSpd2Elv(new AP_Var_group(k_pidSpd2Elv, PSTR("SPD2ELV")), 1,
+	pidSpd2Elv(new AP_Var_group(k_pidSpd2Elv, PSTR("SPD2ELV_")), 1,
 			pidSpd2ElvP, pidSpd2ElvI, pidSpd2ElvD, pidSpd2ElvAwu,
 			pidSpd2ElvLim, pidSpd2ElvDFCut),
 	pidYawRt2Rddr(new AP_Var_group(k_pidYawRt2Rddr, PSTR("YAWRT2RDDR_")), 1,
@@ -60,35 +60,35 @@ public:
 		_hal->debug->println_P(PSTR("initializing car controller"));
 
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 7, 1100,
-						1500, 1900));
+				new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 5, 1100,
+						1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chRoll, PSTR("ROLL_"), APM_RC, 0, 1100,
-						1500, 1900));
+				new AP_RcChannel(k_chRoll, PSTR("ROLL_"), APM_RC, 0, 1200,
+						1500, 1800, RC_MODE_INOUT));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chPitch, PSTR("PITCH_"), APM_RC, 0, 1100,
-						1500, 1900));
+				new AP_RcChannel(k_chPitch, PSTR("PITCH_"), APM_RC, 1, 1200,
+						1500, 1800, RC_MODE_INOUT));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chYaw, PSTR("YAW_"), APM_RC, 0, 1100,
-						1500, 1900));
+				new AP_RcChannel(k_chYaw, PSTR("YAW_"), APM_RC, 2, 1200,
+						1500, 1800, RC_MODE_INOUT));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chThr, PSTR("THR_"), APM_RC, 1, 1100, 1100,
-						1900));
+				new AP_RcChannel(k_chThr, PSTR("THR_"), APM_RC, 3, 1100, 1100,
+						1900, RC_MODE_INOUT));
 	}
 	virtual MAV_MODE getMode() {
 		return (MAV_MODE) _mode.get();
 	}
 	virtual void update(const float & dt) {
 
-		// check for heartbeat
 		if (_hal->heartBeatLost()) {
+			// check for heartbeat
 			_mode = MAV_MODE_FAILSAFE;
 			setAllRadioChannelsToNeutral();
 			_hal->setState(MAV_STATE_EMERGENCY);
 			_hal->debug->printf_P(PSTR("comm lost, send heartbeat from gcs\n"));
 			return;
-		} else if (fabs(_hal->rc[CH_THR]->getPosition()) < 0.05) {
-			// if the absolute value of the throttle is less than 5% cut motor power
+		} else if (_hal->rc[CH_THR]->getRadioPosition() < 0.05) {
+			// if the value of the throttle is less than 5% cut motor power
 			_mode = MAV_MODE_LOCKED;
 			setAllRadioChannelsToNeutral();
 			_hal->setState(MAV_STATE_STANDBY);
@@ -100,8 +100,7 @@ public:
 		}
 
 		// read switch to set mode
-		_hal->rc[CH_MODE]->setPwm(_hal->rc[CH_MODE]->readRadio());
-		if (_hal->rc[CH_MODE]->getPosition() > 0) {
+		if (_hal->rc[CH_MODE]->getRadioPosition() > 0) {
 			_mode = MAV_MODE_MANUAL;
 		} else {
 			_mode = MAV_MODE_AUTO;

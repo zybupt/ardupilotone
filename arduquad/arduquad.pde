@@ -98,8 +98,6 @@ void setup() {
 
 	hal->debug = &Serial;
 	hal->debug->println_P(PSTR("initializing debug line"));
-	hal->debug->println_P(PSTR("initializing radio"));
-	APM_RC.Init(); // APM Radio initialization
 
 	/*
 	 * Initialize Comm Channels

@@ -1,5 +1,5 @@
 /*
- * arduplane.pde
+ * arduplane
  *
  *  Created on: Apr 30, 2011
  *      Author: jgoppert
@@ -22,7 +22,6 @@
 
 // Vehicle Configuration
 #include "easystar.h"
-//#include "vehicles/mikrokopter.h"
 
 // Local Modules
 #include "controllers.h"
@@ -58,8 +57,8 @@ static bool rangeFinderDownEnabled = true;
 //---------ADVANCED SECTION ----------------//
 
 // loop rates
-const float loop0Rate = 200;
-const float loop1Rate = 50;
+const float loop0Rate = 150;
+const float loop1Rate = 100;
 const float loop2Rate = 10;
 const float loop3Rate = 1;
 const float loop4Rate = 0.1;
@@ -98,8 +97,6 @@ void setup() {
 
 	hal->debug = &Serial;
 	hal->debug->println_P(PSTR("initializing debug line"));
-	hal->debug->println_P(PSTR("initializing radio"));
-	APM_RC.Init(); // APM Radio initialization
 
 	/*
 	 * Initialize Comm Channels
@@ -203,7 +200,7 @@ void setup() {
 	 */
 	AP_Navigator * navigator = new DcmNavigator(hal);
 	AP_Guide * guide = new MavlinkGuide(navigator, hal);
-	AP_Controller * controller = new PlaneController(navigator,guide,hal);
+	AP_Controller * controller = new PlaneController(navigator, guide, hal);
 
 	/*
 	 * CommLinks
@@ -214,7 +211,7 @@ void setup() {
 	/*
 	 * Start the autopilot
 	 */
-	hal->debug->printf_P(PSTR("initializing ArduPilotOne\n"));
+	hal->debug->printf_P(PSTR("initializing arduplane\n"));
 	hal->debug->printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
 	autoPilot = new apo::AP_Autopilot(navigator, guide, controller, hal);
 }

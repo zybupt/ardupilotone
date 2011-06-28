@@ -42,7 +42,6 @@ public:
 				_lon_degInt(0), _alt_intM(0) {
 	}
 	virtual void calibrate() {
-		_hal->setState(MAV_STATE_CALIBRATING);
 	}
 	virtual void updateFast(float dt) = 0;
 	virtual void updateSlow(float dt) = 0;

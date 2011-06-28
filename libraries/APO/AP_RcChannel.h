@@ -47,6 +47,9 @@ public:
 	float getPosition() {
 		return _pwmToPosition(_pwm);
 	}
+	float getRadioPosition() {
+		return _pwmToPosition(readRadio());
+	}
 
 private:
 
