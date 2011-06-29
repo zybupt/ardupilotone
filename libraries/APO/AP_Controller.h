@@ -78,7 +78,7 @@ public:
 	BlockLowPass(AP_Var_group * group, uint8_t groupStart, float fCut,
 			const prog_char_t * fCutLabel = NULL) :
 		AP_ControllerBlock(group, groupStart, 1),
-				_fCut(group, groupStart, fCut, fCutLabel ? : PSTR("FCUT")),
+				_fCut(group, groupStart, fCut, fCutLabel ? : PSTR("fCut")),
 				_y(0) {
 	}
 	float update(const float & input, const float & dt) {
@@ -96,7 +96,7 @@ public:
 	BlockSaturation(AP_Var_group * group, uint8_t groupStart, float yMax,
 			const prog_char_t * yMaxLabel = NULL) :
 		AP_ControllerBlock(group, groupStart, 1),
-				_yMax(group, groupStart, yMax, yMaxLabel ? : PSTR("YMAX")) {
+				_yMax(group, groupStart, yMax, yMaxLabel ? : PSTR("yMax")) {
 	}
 	float update(const float & input) {
 
@@ -151,7 +151,7 @@ public:
 	BlockP(AP_Var_group * group, uint8_t groupStart, float kP,
 			const prog_char_t * kPLabel = NULL) :
 		AP_ControllerBlock(group, groupStart, 1),
-				_kP(group, groupStart, kP, kPLabel ? : PSTR("P")) {
+				_kP(group, groupStart, kP, kPLabel ? : PSTR("p")) {
 	}
 
 	float update(const float & input) {
@@ -167,8 +167,8 @@ public:
 			const prog_char_t * kILabel = NULL,
 			const prog_char_t * iMaxLabel = NULL) :
 		AP_ControllerBlock(group, groupStart, 2),
-				_kI(group, groupStart, kI, kILabel ? : PSTR("I")),
-				_blockSaturation(group, groupStart + 1, iMax, iMaxLabel ? : PSTR("IMAX")),
+				_kI(group, groupStart, kI, kILabel ? : PSTR("i")),
+				_blockSaturation(group, groupStart + 1, iMax, iMaxLabel ? : PSTR("iMax")),
 				_eI(0) {
 	}
 
@@ -191,9 +191,9 @@ public:
 			const prog_char_t * dFCutLabel = NULL) :
 				AP_ControllerBlock(group, groupStart, 2),
 				_blockLowPass(group, groupStart, dFCut,
-						dFCutLabel ? : PSTR("DFCUT")),
+						dFCutLabel ? : PSTR("dFCut")),
 				_kD(group, _blockLowPass.getGroupEnd(), kD,
-						kDLabel ? : PSTR("D")), _eP(0) {
+						kDLabel ? : PSTR("d")), _eP(0) {
 	}
 	float update(const float & input, const float & dt) {
 		// derivative with low pass
@@ -283,7 +283,7 @@ public:
 				_blockP(group, groupStart, kP),
 				_blockI(group, _blockP.getGroupEnd(), kI, iMax),
 				_blockSaturation(group, _blockI.getGroupEnd(), yMax),
-				_kD(group, _blockSaturation.getGroupEnd(), kD, dLabel ? : PSTR("D")) {
+				_kD(group, _blockSaturation.getGroupEnd(), kD, dLabel ? : PSTR("d")) {
 	}
 	float update(const float & input, const float & derivative,
 			const float & dt) {

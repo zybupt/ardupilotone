@@ -138,10 +138,10 @@ public:
 			AP_HardwareAbstractionLayer * hal) :
 		AP_Guide(navigator, hal), _rangeFinderFront(), _rangeFinderBack(),
 				_rangeFinderLeft(), _rangeFinderRight(),
-				_group(k_guide, PSTR("GUIDE_")),
-				_velocityCommand(&_group, 1, 1, PSTR("VELCMD")),
-				_crossTrackGain(&_group, 2, 2, PSTR("XTK")),
-				_crossTrackLim(&_group, 3, 10, PSTR("XTLIM")) {
+				_group(k_guide, PSTR("guide_")),
+				_velocityCommand(&_group, 1, 1, PSTR("velCmd")),
+				_crossTrackGain(&_group, 2, 2, PSTR("xt")),
+				_crossTrackLim(&_group, 3, 10, PSTR("xtLim")) {
 
 		for (uint8_t i = 0; i < _hal->rangeFinders.getSize(); i++) {
 			RangeFinder * rF = _hal->rangeFinders[i];

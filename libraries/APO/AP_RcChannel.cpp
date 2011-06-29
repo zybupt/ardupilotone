@@ -21,11 +21,11 @@ AP_RcChannel::AP_RcChannel(AP_Var::Key keyValue, const prog_char_t * name,
 		APM_RC_Class & rc, const uint8_t & ch, const uint16_t & pwmMin,
 		const uint16_t & pwmNeutral, const uint16_t & pwmMax,
 		const rcMode_t & rcMode, const bool & reverse) :
-	AP_Var_group(keyValue, name), _ch(this, 0, ch, PSTR("CH")),
-			_pwmMin(this, 1, pwmMin, PSTR("PMIN")),
-			_pwmNeutral(this, 3, pwmNeutral, PSTR("PNTRL")),
-			_pwmMax(this, 2, pwmMax, PSTR("PMAX")), _rcMode(rcMode),
-			_reverse(this, 4, reverse, PSTR("REV")), _rc(rc), _pwm(pwmNeutral) {
+	AP_Var_group(keyValue, name), _ch(this, 1, ch, PSTR("ch")),
+			_pwmMin(this, 2, pwmMin, PSTR("pMin")),
+			_pwmNeutral(this, 3, pwmNeutral, PSTR("pNtrl")),
+			_pwmMax(this, 4, pwmMax, PSTR("pMax")), _rcMode(rcMode),
+			_reverse(this, 5, reverse, PSTR("rev")), _rc(rc), _pwm(pwmNeutral) {
 	//Serial.print("pwm after ctor: "); Serial.println(pwmNeutral);
 	if (rcMode == RC_MODE_IN)
 		return;

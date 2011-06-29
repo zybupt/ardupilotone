@@ -8,44 +8,60 @@
 #ifndef EASYSTAR_H_
 #define EASYSTAR_H_
 
-const float heading2BankP = 0.0;
-const float heading2BankI = 0.0;
-const float heading2BankD = 0.0;
-const float heading2BankIMax = 0.0;
-const float heading2BankYMax = 0.0;
+const float rdrAilMix = 1.0; // since there are no ailerons
 
-const float pidBnk2AlrP = 0.0;
-const float pidBnk2AlrI = 0.0;
-const float pidBnk2AlrD = 0.0;
-const float pidBnk2AlrAwu = 0.0;
-const float pidBnk2AlrLim = 0.0;
+// bank error to roll servo
+const float pidBnkRllP = 0.5;
+const float pidBnkRllI = 0.0;
+const float pidBnkRllD = 0.0;
+const float pidBnkRllAwu = 0.0;
+const float pidBnkRllLim = 1.0;
+const float pidBnkRllDFCut = 0.0;
 
-const float pidSpd2ElvP = 0.0;
-const float pidSpd2ElvI = 0.0;
-const float pidSpd2ElvD = 0.0;
-const float pidSpd2ElvAwu = 0.0;
-const float pidSpd2ElvLim = 0.0;
-const float pidSpd2ElvDFCut = 0.0;
+// pitch error to pitch servo
+const float pidPitPitP = 0.5;
+const float pidPitPitI = 0.0;
+const float pidPitPitD = 0.0;
+const float pidPitPitAwu = 0.0;
+const float pidPitPitLim = 1.0;
+const float pidPitPitDFCut = 0.0;
 
-const float pidYawRt2RddrP = 0.0;
-const float pidYawRt2RddrI = 0.0;
-const float pidYawRt2RddrD = 0.0;
-const float pidYawRt2RddrAwu = 0.0;
-const float pidYawRt2RddrLim = 0.0;
-const float pidYawRt2RddrDFCut = 0.0;
+// speed error to pitch command
+const float pidSpdPitP = 0.1;
+const float pidSpdPitI = 0.0;
+const float pidSpdPitD = 0.0;
+const float pidSpdPitAwu = 0.0;
+const float pidSpdPitLim = 1.0;
+const float pidSpdPitDFCut = 0.0;
 
-const float pidHdng2BnkP = 0.0;
-const float pidHdng2BnkI = 0.0;
-const float pidHdng2BnkD = 0.0;
-const float pidHdng2BnkAwu = 0.0;
-const float pidHdng2BnkLim = 0.0;
-const float pidHdng2BnkDFCut = 0.0;
+// yaw rate error to yaw servo
+const float pidYwrYawP = 0.5;
+const float pidYwrYawI = 0.0;
+const float pidYwrYawD = 0.0;
+const float pidYwrYawAwu = 0.0;
+const float pidYwrYawLim = 1.0;
+const float pidYwrYawDFCut = 0.0;
 
-const float pidAlt2ThrP = 0.0;
-const float pidAlt2ThrI = 0.0;
-const float pidAlt2ThrD = 0.0;
-const float pidAlt2ThrAwu = 0.0;
-const float pidAlt2ThrLim = 0.0;
-const float pidAlt2ThrDFCut = 0.0;
+// heading error to bank angle command
+const float pidHdgBnkP = 0.0;
+const float pidHdgBnkI = 0.0;
+const float pidHdgBnkD = 0.0;
+const float pidHdgBnkAwu = 0.0;
+const float pidHdgBnkLim = 0.0;
+const float pidHdgBnkDFCut = 0.0;
+
+// altitude error to throttle command
+const float pidAltThrP = 0.1;
+const float pidAltThrI = 0.0;
+const float pidAltThrD = 0.0;
+const float pidAltThrAwu = 0.0;
+const float pidAltThrLim = 0.1;
+const float pidAltThrDFCut = 0.0;
+
+// trim control positions (-1,1)
+const float ailTrim = 0.0;
+const float elvTrim = 0.0;
+const float rdrTrim = 0.0;
+const float thrTrim = 0.2;
 
 #endif /* EASYSTAR_H_ */
