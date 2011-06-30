@@ -1,5 +1,5 @@
 /*
- * arduplane
+ * ardupilotone
  *
  *  Created on: Apr 30, 2011
  *      Author: jgoppert
@@ -20,11 +20,8 @@
 #include <AP_IMU.h>
 #include <APM_BMP085.h>
 
-// Default Vehicle Configuration
-#include "easystar.h"
-
-// Local Modules
-#include "controllers.h"
+// Vehicle Configuration
+#include "PlaneEasystar.h"
 
 /*
  * Required Global Declarations
@@ -45,8 +42,8 @@ void setup() {
 	/*
 	 * Communications
 	 */
-	Serial.begin(57600, 128, 128); // debug
-	Serial3.begin(57600, 128, 128); // gcs
+	Serial.begin(DEBUG_BAUD, 128, 128); // debug
+	Serial3.begin(TELEM_BAUD, 128, 128); // gcs
 
 	hal->debug = &Serial;
 	hal->debug->println_P(PSTR("initializing debug line"));
@@ -56,9 +53,9 @@ void setup() {
 	 */
 	hal->debug->println_P(PSTR("initializing comm channels"));
 	if (hal->getMode() == MODE_LIVE) {
-		Serial1.begin(38400, 128, 16); // gps
+		Serial1.begin(GPS_BAUD, 128, 16); // gps
 	} else { // hil
-		Serial1.begin(57600, 128, 128);
+		Serial1.begin(HIL_BAUD, 128, 128);
 	}
 
 	/*
@@ -66,7 +63,7 @@ void setup() {
 	 */
 	if (hal->getMode() == MODE_LIVE) {
 		hal->debug->println_P(PSTR("initializing adc"));
-		hal->adc = new AP_ADC_ADS7844;
+		hal->adc = new ADC_CLASS;
 		hal->adc->Init();
 
 		if (gpsEnabled) {
@@ -78,13 +75,13 @@ void setup() {
 
 		if (baroEnabled) {
 			hal->debug->println_P(PSTR("initializing baro"));
-			hal->baro = new APM_BMP085_Class;
+			hal->baro = new BARO_CLASS;
 			hal->baro->Init();
 		}
 
 		if (compassEnabled) {
 			hal->debug->println_P(PSTR("initializing compass"));
-			hal->compass = new AP_Compass_HMC5843;
+			hal->compass = new COMPASS_CLASS;
 			hal->compass->set_orientation(AP_COMPASS_COMPONENTS_UP_PINS_FORWARD);
 			hal->compass->init();
 		}
@@ -151,15 +148,15 @@ void setup() {
 	/*
 	 * Select guidance, navigation, control algorithms
 	 */
-	AP_Navigator * navigator = new DcmNavigator(hal);
-	AP_Guide * guide = new MavlinkGuide(navigator, hal);
+	AP_Navigator * navigator = new NAVIGATOR_CLASS(hal);
+	AP_Guide * guide = new GUIDE_CLASS(navigator, hal);
 	AP_Controller * controller = new CONTROLLER_CLASS(navigator, guide, hal);
 
 	/*
 	 * CommLinks
 	 */
-	hal->gcs = new MavlinkComm(&Serial3, navigator, guide, controller, hal);
-	hal->hil = new MavlinkComm(&Serial1, navigator, guide, controller, hal);
+	hal->gcs = new COMMLINK_CLASS(&Serial3, navigator, guide, controller, hal);
+	hal->hil = new COMMLINK_CLASS(&Serial1, navigator, guide, controller, hal);
 
 	/*
 	 * Start the autopilot

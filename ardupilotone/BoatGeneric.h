@@ -1,20 +1,34 @@
 /*
- * yourBoat.h
+ * BoatGeneric.h
  *
  *  Created on: May 1, 2011
  *      Author: jgoppert
  */
 
-#ifndef YOURBOAT_H_
-#define YOURBOAT_H_
+#ifndef BOATGENERIC_H_
+#define BOATGENERIC_H_
 
 // vehicle options
 static const apo::vehicle_t vehicle = apo::VEHICLE_BOAT;
 static const apo::halMode_t halMode = apo::MODE_LIVE;
 static const apo::board_t board = apo::BOARD_ARDUPILOTMEGA_2560;
 static const uint8_t heartBeatTimeout = 3;
-#define CONTROLLER_CLASS BoatController
+
+// algorithm selection
+#define CONTROLLER_CLASS ControllerBoat
+#define GUIDE_CLASS MavlinkGuide
+#define NAVIGATOR_CLASS DcmNavigator
+#define COMMLINK_CLASS MavlinkComm
+
+// hardware selection
+#define ADC_CLASS AP_ADC_ADS7844
+#define COMPASS_CLASS AP_Compass_HMC5843
+#define BARO_CLASS APM_BMP085_Class
 #define RANGE_FINDER_CLASS AP_RangeFinder_MaxsonarLV
+#define DEBUG_BAUD 57600
+#define TELEM_BAUD 57600
+#define GPS_BAUD 38400
+#define HIL_BAUD 57600
 
 // optional sensors
 static bool gpsEnabled = false;
@@ -49,4 +63,6 @@ const float throttleIMax = 0.0;
 const float throttleYMax = 0.0;
 const float throttleDFCut = 3.0;
 
-#endif /* YOURBOAT_H_ */
+#include "ControllerBoat.h"
+
+#endif /* BOATGENERIC_H_ */

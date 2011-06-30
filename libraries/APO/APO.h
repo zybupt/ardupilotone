@@ -16,6 +16,5 @@
 #include "AP_Navigator.h"
 #include "AP_RcChannel.h"
 //#include "AP_Var_keys.h"
-//#include "APO_Config.h"
 
 #endif /* APO_H_ */

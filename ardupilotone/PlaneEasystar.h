@@ -1,20 +1,35 @@
 /*
- * easystar.h
+ * PlaneEasystar.h
  *
  *  Created on: May 1, 2011
  *      Author: jgoppert
  */
 
-#ifndef EASYSTAR_H_
-#define EASYSTAR_H_
+#ifndef PLANEEASYSTAR_H_
+#define PLANEEASYSTAR_H_
+
 
 // vehicle options
 static const apo::vehicle_t vehicle = apo::VEHICLE_PLANE;
 static const apo::halMode_t halMode = apo::MODE_LIVE;
 static const apo::board_t board = apo::BOARD_ARDUPILOTMEGA_2560;
 static const uint8_t heartBeatTimeout = 3;
-#define CONTROLLER_CLASS PlaneController
+
+// algorithm selection
+#define CONTROLLER_CLASS ControllerPlane
+#define GUIDE_CLASS MavlinkGuide
+#define NAVIGATOR_CLASS DcmNavigator
+#define COMMLINK_CLASS MavlinkComm
+
+// hardware selection
+#define ADC_CLASS AP_ADC_ADS7844
+#define COMPASS_CLASS AP_Compass_HMC5843
+#define BARO_CLASS APM_BMP085_Class
 #define RANGE_FINDER_CLASS AP_RangeFinder_MaxsonarLV
+#define DEBUG_BAUD 57600
+#define TELEM_BAUD 57600
+#define GPS_BAUD 38400
+#define HIL_BAUD 57600
 
 // optional sensors
 static bool gpsEnabled = false;
@@ -63,33 +78,35 @@ static const float pidSpdPitLim = 1.0;
 static const float pidSpdPitDFCut = 0.0;
 
 // yaw rate error to yaw servo
-const float pidYwrYawP = 0.5;
-const float pidYwrYawI = 0.0;
-const float pidYwrYawD = 0.0;
-const float pidYwrYawAwu = 0.0;
-const float pidYwrYawLim = 1.0;
-const float pidYwrYawDFCut = 0.0;
+static const float pidYwrYawP = 0.5;
+static const float pidYwrYawI = 0.0;
+static const float pidYwrYawD = 0.0;
+static const float pidYwrYawAwu = 0.0;
+static const float pidYwrYawLim = 1.0;
+static const float pidYwrYawDFCut = 0.0;
 
 // heading error to bank angle command
-const float pidHdgBnkP = 0.0;
-const float pidHdgBnkI = 0.0;
-const float pidHdgBnkD = 0.0;
-const float pidHdgBnkAwu = 0.0;
-const float pidHdgBnkLim = 0.0;
-const float pidHdgBnkDFCut = 0.0;
+static const float pidHdgBnkP = 0.0;
+static const float pidHdgBnkI = 0.0;
+static const float pidHdgBnkD = 0.0;
+static const float pidHdgBnkAwu = 0.0;
+static const float pidHdgBnkLim = 0.0;
+static const float pidHdgBnkDFCut = 0.0;
 
 // altitude error to throttle command
-const float pidAltThrP = 0.1;
-const float pidAltThrI = 0.0;
-const float pidAltThrD = 0.0;
-const float pidAltThrAwu = 0.0;
-const float pidAltThrLim = 0.1;
-const float pidAltThrDFCut = 0.0;
+static const float pidAltThrP = 0.1;
+static const float pidAltThrI = 0.0;
+static const float pidAltThrD = 0.0;
+static const float pidAltThrAwu = 0.0;
+static const float pidAltThrLim = 0.1;
+static const float pidAltThrDFCut = 0.0;
 
 // trim control positions (-1,1)
-const float ailTrim = 0.0;
-const float elvTrim = 0.0;
-const float rdrTrim = 0.0;
-const float thrTrim = 0.2;
+static const float ailTrim = 0.0;
+static const float elvTrim = 0.0;
+static const float rdrTrim = 0.0;
+static const float thrTrim = 0.2;
 
-#endif /* EASYSTAR_H_ */
+#include "ControllerPlane.h"
+
+#endif /* PLANEEASYSTAR_H_ */
