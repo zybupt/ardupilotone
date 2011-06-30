@@ -25,7 +25,6 @@
 #include "../AP_Compass/AP_Compass.h"
 #include "AP_MavlinkCommand.h"
 #include "constants.h"
-#include "APO_Config.h"
 #include "AP_Var_keys.h"
 #include "../AP_RangeFinder/AP_RangeFinder.h"
 #include "../AP_IMU/AP_IMU.h"
@@ -363,23 +362,23 @@ public:
 		static bool GPS_light = false;
 		switch (_hal->gps->status()) {
 		case (2):
-			digitalWrite(C_LED_PIN, HIGH); //Turn LED C on when gps has valid fix.
+			//digitalWrite(C_LED_PIN, HIGH); //Turn LED C on when gps has valid fix.
 			break;
 
 		case (1):
 			if (_hal->gps->valid_read == true) {
 				GPS_light = !GPS_light; // Toggle light on and off to indicate gps messages being received, but no GPS fix lock
 				if (GPS_light) {
-					digitalWrite(C_LED_PIN, LOW);
+					digitalWrite(_hal->cLedPin, LOW);
 				} else {
-					digitalWrite(C_LED_PIN, HIGH);
+					digitalWrite(_hal->cLedPin, HIGH);
 				}
 				_hal->gps->valid_read = false;
 			}
 			break;
 
 		default:
-			digitalWrite(C_LED_PIN, LOW);
+			digitalWrite(_hal->cLedPin, LOW);
 			break;
 		}
 	}

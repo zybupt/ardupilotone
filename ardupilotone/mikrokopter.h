@@ -8,6 +8,33 @@
 #ifndef MIKROKOPTER_H_
 #define MIKROKOPTER_H_
 
+// vehicle options
+static const apo::vehicle_t vehicle = apo::VEHICLE_QUAD;
+static const apo::halMode_t halMode = apo::MODE_LIVE;
+static const apo::board_t board = apo::BOARD_ARDUPILOTMEGA_2560;
+static const uint8_t heartBeatTimeout = 3;
+#define CONTROLLER_CLASS QuadController
+#define RANGE_FINDER_CLASS AP_RangeFinder_MaxsonarLV
+
+// optional sensors
+static bool gpsEnabled = false;
+static bool baroEnabled = true;
+static bool compassEnabled = true;
+
+static bool rangeFinderFrontEnabled = true;
+static bool rangeFinderBackEnabled = true;
+static bool rangeFinderLeftEnabled = true;
+static bool rangeFinderRightEnabled = true;
+static bool rangeFinderUpEnabled = true;
+static bool rangeFinderDownEnabled = true;
+
+// loop rates
+static const float loop0Rate = 150;
+static const float loop1Rate = 100;
+static const float loop2Rate = 10;
+static const float loop3Rate = 1;
+static const float loop4Rate = 0.1;
+
 //motor parameters
 const float MOTOR_MAX = 1;
 const float MOTOR_MIN = 0.1;

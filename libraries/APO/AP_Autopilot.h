@@ -69,7 +69,8 @@ public:
 	 * Default constructor
 	 */
 	AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
-			AP_Controller * controller, AP_HardwareAbstractionLayer * hal);
+			AP_Controller * controller, AP_HardwareAbstractionLayer * hal,
+			float loop0Rate, float loop1Rate, float loop2Rate, float loop3Rate);
 
 	/**
 	 * Accessors
@@ -87,6 +88,17 @@ public:
 		return _hal;
 	}
 
+	float getLoopRate(uint8_t i) {
+		switch(i) {
+		case 0: return _loop0Rate;
+		case 1: return _loop1Rate;
+		case 2: return _loop2Rate;
+		case 3: return _loop3Rate;
+		case 4: return _loop4Rate;
+		default: return 0;
+		}
+	}
+
 private:
 
 	/**
@@ -96,6 +108,7 @@ private:
 	 *  so that the apo public interface may be accessed.
 	 */
 	static void callback0(void * data);
+	float _loop0Rate;
 
 	/**
 	 * Loop 1 Callbacks
@@ -104,6 +117,7 @@ private:
 	 * @see callback0
 	 */
 	static void callback1(void * data);
+	float _loop1Rate;
 
 	/**
 	 * Loop 2 Callbacks
@@ -112,6 +126,7 @@ private:
 	 * @see callback0
 	 */
 	static void callback2(void * data);
+	float _loop2Rate;
 
 	/**
 	 * Loop 3 Callbacks
@@ -119,6 +134,7 @@ private:
 	 * @see callback0
 	 */
 	static void callback3(void * data);
+	float _loop3Rate;
 
 	/**
 	 * Loop 4 Callbacks
@@ -127,6 +143,7 @@ private:
 	 * @see callback0
 	 */
 	static void callback4(void * data);
+	float _loop4Rate;
 
 	/**
 	 * Components

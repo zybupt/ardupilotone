@@ -1,5 +1,5 @@
 /*
- * arduquad.pde
+ * arduplane
  *
  *  Created on: Apr 30, 2011
  *      Author: jgoppert
@@ -20,59 +20,11 @@
 #include <AP_IMU.h>
 #include <APM_BMP085.h>
 
-// Vehicle Configuration
-#include "arducopter.h"
-//#include "mikrokopter.h"
+// Default Vehicle Configuration
+#include "easystar.h"
 
 // Local Modules
 #include "controllers.h"
-
-// Serial 0: debug      /dev/ttyUSB0
-// Serial 1: gps/hil    /dev/ttyUSB1
-// Serial 2: gcs        /dev/ttyUSB2
-
-// select hardware absraction mode from
-// 	MODE_LIVE, actual flight
-// 	TODO: IMPLEMENT --> MODE_HIL_NAV, hardware in the loop with sensors running, tests navigation system and control
-// 	MODE_HIL_CNTL, hardware in the loop with only controller running, just tests controller
-apo::halMode_t halMode = apo::MODE_LIVE;
-
-// select from, BOARD_ARDUPILOTMEGA
-apo::board_t board = apo::BOARD_ARDUPILOTMEGA;
-
-// select from, VEHICLE_CAR, VEHICLE_QUAD, VEHICLE_PLANE
-apo::vehicle_t vehicle = apo::VEHICLE_QUAD;
-
-// optional sensors
-static bool gpsEnabled = false;
-static bool baroEnabled = true;
-static bool compassEnabled = true;
-
-static bool rangeFinderFrontEnabled = true;
-static bool rangeFinderBackEnabled = true;
-static bool rangeFinderLeftEnabled = true;
-static bool rangeFinderRightEnabled = true;
-static bool rangeFinderUpEnabled = true;
-static bool rangeFinderDownEnabled = true;
-
-//---------ADVANCED SECTION ----------------//
-
-// loop rates
-const float loop0Rate = 150;
-const float loop1Rate = 100;
-const float loop2Rate = 10;
-const float loop3Rate = 1;
-const float loop4Rate = 0.1;
-
-// max time in seconds to allow flight without ground station comms
-// zero will ignore timeout
-const uint8_t heartBeatTimeout = 3;
-
-//---------HARDWARE CONFIG ----------------//
-
-#define RANGE_FINDER_CLASS AP_RangeFinder_MaxsonarLV
-
-//---------MAIN ----------------//
 
 /*
  * Required Global Declarations
@@ -81,7 +33,7 @@ FastSerialPort0(Serial);
 FastSerialPort1(Serial1);
 FastSerialPort2(Serial2);
 FastSerialPort3(Serial3);
-apo::AP_Autopilot * autoPilot;
+static apo::AP_Autopilot * autoPilot;
 
 void setup() {
 
@@ -201,7 +153,7 @@ void setup() {
 	 */
 	AP_Navigator * navigator = new DcmNavigator(hal);
 	AP_Guide * guide = new MavlinkGuide(navigator, hal);
-	AP_Controller * controller = new QuadController(navigator, guide, hal);
+	AP_Controller * controller = new CONTROLLER_CLASS(navigator, guide, hal);
 
 	/*
 	 * CommLinks
@@ -212,9 +164,10 @@ void setup() {
 	/*
 	 * Start the autopilot
 	 */
-	hal->debug->printf_P(PSTR("initializing ArduPilotOne\n"));
+	hal->debug->printf_P(PSTR("initializing arduplane\n"));
 	hal->debug->printf_P(PSTR("free ram: %d bytes\n"),freeMemory());
-	autoPilot = new apo::AP_Autopilot(navigator, guide, controller, hal);
+	autoPilot = new apo::AP_Autopilot(navigator, guide, controller, hal,
+			loop0Rate, loop1Rate, loop2Rate, loop3Rate);
 }
 
 void loop() {

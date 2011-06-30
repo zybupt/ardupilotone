@@ -12,26 +12,16 @@ namespace apo {
 class AP_HardwareAbstractionLayer;
 
 AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
-		AP_Controller * controller, AP_HardwareAbstractionLayer * hal) :
+		AP_Controller * controller, AP_HardwareAbstractionLayer * hal,
+		float loop0Rate, float loop1Rate, float loop2Rate, float loop3Rate) :
 	Loop(loop0Rate, callback0, this), _navigator(navigator), _guide(guide),
-			_controller(controller), _hal(hal) {
+			_controller(controller), _hal(hal), _loop0Rate(loop0Rate),
+			_loop1Rate(loop1Rate), _loop2Rate(loop2Rate), _loop3Rate(loop3Rate),
+			_loop4Rate(loop3Rate) {
 
 	hal->setState(MAV_STATE_BOOT);
 	hal->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 	hal->gcs->sendMessage(MAVLINK_MSG_ID_SYS_STATUS);
-
-	/*
-	 * Pins
-	 */
-	if (hal->getBoard() == BOARD_ARDUPILOTMEGA) {
-		hal->debug->println_P(PSTR("settings pin modes"));
-		pinMode(A_LED_PIN, OUTPUT); //  extra led
-		pinMode(B_LED_PIN, OUTPUT); //  imu ledclass AP_CommLink;
-		pinMode(C_LED_PIN, OUTPUT); //  gps led
-		pinMode(SLIDE_SWITCH_PIN, INPUT);
-		pinMode(PUSHBUTTON_PIN, INPUT);
-		DDRL |= B00000100; // set port L, pint 2 to output for the relay
-	}
 
 	/*
 	 * Calibration
@@ -100,10 +90,10 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 	 * Attach loops
 	 */
 	hal->debug->println_P(PSTR("attaching loops"));
-	subLoops().push_back(new Loop(loop1Rate, callback1, this));
-	subLoops().push_back(new Loop(loop2Rate, callback2, this));
-	subLoops().push_back(new Loop(loop3Rate, callback3, this));
-	subLoops().push_back(new Loop(loop4Rate, callback4, this));
+	subLoops().push_back(new Loop(getLoopRate(1), callback1, this));
+	subLoops().push_back(new Loop(getLoopRate(2), callback2, this));
+	subLoops().push_back(new Loop(getLoopRate(3), callback3, this));
+	subLoops().push_back(new Loop(getLoopRate(4), callback4, this));
 
 	hal->debug->println_P(PSTR("running"));
 	hal->gcs->sendText(SEVERITY_LOW, PSTR("running"));
@@ -130,7 +120,7 @@ void AP_Autopilot::callback0(void * data) {
 	 * ahrs update
 	 */
 	if (apo->getNavigator())
-		apo->getNavigator()->updateFast(1.0 / loop0Rate);
+		apo->getNavigator()->updateFast(1.0 / apo->getLoopRate(0));
 }
 
 void AP_Autopilot::callback1(void * data) {
@@ -159,7 +149,7 @@ void AP_Autopilot::callback1(void * data) {
 	 */
 	if (apo->getController()) {
 		//apo->getHal()->debug->println_P(PSTR("updating controller"));
-		apo->getController()->update(1. / loop1Rate);
+		apo->getController()->update(1. / apo->getLoopRate(1));
 	}
 	/*
 	 char msg[50];
@@ -189,7 +179,7 @@ void AP_Autopilot::callback2(void * data) {
 	 * slow navigation loop update
 	 */
 	if (apo->getNavigator()) {
-		apo->getNavigator()->updateSlow(1.0 / loop2Rate);
+		apo->getNavigator()->updateSlow(1.0 / apo->getLoopRate(2));
 	}
 
 	/*
