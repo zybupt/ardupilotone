@@ -34,13 +34,18 @@ debug: build $(SKETCHBOOK)/config.mk
 	
 configure:
 	rm $(SKETCHBOOK)/config.mk
-	make $(SKETCHBOOK)/config.mk
-
-$(SKETCHBOOK)/config.mk:
 	@echo 'creating $(SKETCHBOOK)/config.mk'; \
 	echo -n 'sketch [i.e. arduquad, ardurover] : '; read sketchPath; echo SKETCH_PATH=$$sketchPath > $(SKETCHBOOK)/config.mk; \
 	echo -n 'port [i.e. /dev/ttyUSB0] : '; read port; echo PORT=$$port >> $(SKETCHBOOK)/config.mk; \
 	echo -n 'board [i.e. mega, mega2560] : '; read board; echo BOARD=$$board >> $(SKETCHBOOK)/config.mk; \
+	echo config file written to $(SKETCHBOOK)/config.mk
+	cat $(SKETCHBOOK)/config.mk
+
+$(SKETCHBOOK)/config.mk:
+	@echo 'creating default $(SKETCHBOOK)/config.mk, please edit'; \
+	echo SKETCH_PATH=ardupilotone > $(SKETCHBOOK)/config.mk; \
+	echo PORT=/dev/ttyUSB0 >> $(SKETCHBOOK)/config.mk; \
+	echo BOARD=mega2560 >> $(SKETCHBOOK)/config.mk; \
 	echo config file written to $(SKETCHBOOK)/config.mk
 	cat $(SKETCHBOOK)/config.mk
 	
