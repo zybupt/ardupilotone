@@ -77,7 +77,7 @@ public:
 				_sendingCmds(false), _receivingCmds(false),
 				_cmdTimeLastSent(millis()), _cmdTimeLastReceived(millis()),
 				_cmdDestSysId(0), _cmdDestCompId(0), _cmdRequestIndex(0),
-				_cmdMax(30),
+				_cmdMax(30), _cmdNumberRequested(0),
 
 				// parameters
 				_parameterCount(0), _queuedParameter(NULL),
@@ -320,7 +320,7 @@ public:
 	void requestCmds() {
 		//_hal->debug->printf_P(PSTR("requesting commands\n"));
 		// request cmds one by one
-		if (_receivingCmds && _cmdRequestIndex <= _guide->getNumberOfCommands()) {
+		if (_receivingCmds && _cmdRequestIndex <= _cmdNumberRequested) {
 			mavlink_msg_waypoint_request_send(_channel, _cmdDestSysId,
 					_cmdDestCompId, _cmdRequestIndex);
 		}
@@ -339,6 +339,7 @@ private:
 	uint16_t _cmdDestSysId;
 	uint16_t _cmdDestCompId;
 	uint16_t _cmdRequestIndex;
+	uint16_t _cmdNumberRequested;
 	uint16_t _cmdMax;
 	Vector<mavlink_command_t *> _cmdList;
 
@@ -593,7 +594,7 @@ private:
 			if (packet.count > _cmdMax) {
 				packet.count = _cmdMax;
 			}
-			_guide->setNumberOfCommands(packet.count);
+			_cmdNumberRequested = packet.count;
 			_cmdTimeLastReceived = millis();
 			_receivingCmds = true;
 			_sendingCmds = false;
@@ -635,9 +636,13 @@ private:
 			AP_MavlinkCommand command(packet);
 			//sendText(SEVERITY_HIGH, PSTR("waypoint stored"));
 			_cmdRequestIndex++;
-			if (_cmdRequestIndex >= _guide->getNumberOfCommands()) {
+			if (_cmdRequestIndex == _cmdNumberRequested) {
 				sendMessage(MAVLINK_MSG_ID_WAYPOINT_ACK);
+				_receivingCmds = false;
+				_guide->setNumberOfCommands(_cmdNumberRequested);
 				//sendText(SEVERITY_LOW, PSTR("waypoint ack sent"));
+			} else if (_cmdRequestIndex > _cmdNumberRequested) {
+				_receivingCmds = false;
 			}
 			_cmdTimeLastReceived = millis();
 			break;

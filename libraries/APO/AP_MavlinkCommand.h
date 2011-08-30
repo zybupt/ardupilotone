@@ -40,7 +40,6 @@ public:
 	 */
 	AP_MavlinkCommand(uint16_t index) :
 		_data(k_commands + index), _seq(index) {
-		//Serial.print("x: "); Serial.println(_data.get().x);
 	}
 
 	/**
@@ -449,10 +448,13 @@ public:
 	//calculates cross track of a current location
 	static float crossTrack(AP_MavlinkCommand previous,
 			AP_MavlinkCommand current, int32_t lat_degInt, int32_t lon_degInt) {
-		float d = previous.distanceTo(lat_degInt, lon_degInt);
-		float bCurrent = previous.bearingTo(lat_degInt, lon_degInt);
-		float bNext = previous.bearingTo(current);
-		return asin(sin(d / rEarth) * sin(bCurrent - bNext)) * rEarth;
+		// TODO cross track is currenlty broken
+		// XXX don't fly this
+//		float d = previous.distanceTo(lat_degInt, lon_degInt);
+//		float bCurrent = previous.bearingTo(lat_degInt, lon_degInt);
+//		float bNext = previous.bearingTo(current);
+//		return asin(sin(d / rEarth) * sin(bCurrent - bNext)) * rEarth;
+		return 0;
 	}
 
 	// calculates along  track distance of a current location
