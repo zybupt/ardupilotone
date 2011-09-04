@@ -136,32 +136,40 @@ public:
 		if (_hal->rc[CH_MODE]->getRadioPosition() > 0) {
 			mixRemoteWeight = 1;
 			_mode = MAV_MODE_MANUAL;
-
-			// read and set pwm so they can be read as positions later
-			_hal->rc[CH_ROLL]->setUsingRadio();
-			_hal->rc[CH_PITCH]->setUsingRadio();
-			_hal->rc[CH_YAW]->setUsingRadio();
-			_hal->rc[CH_THRUST]->setUsingRadio();
 		} else {
 			_mode = MAV_MODE_AUTO;
 		}
 
+		// commands for inner loop
+		float cmdRoll = 0;
+		float cmdPitch = 0;
+		float cmdYawRate = 0;
+		float thrustMix = 0;
+
 		switch(_mode) {
+
 		case MAV_MODE_MANUAL: {
 			setAllRadioChannelsManually();
-
 			// "mix manual"
-			float cmdRoll = 0.5 * _hal->rc[CH_ROLL]->getPosition()
+			cmdRoll = 0.5 * _hal->rc[CH_ROLL]->getPosition()
 					* mixRemoteWeight;
-			float cmdPitch = 0.5 * _hal->rc[CH_PITCH]->getPosition()
+			cmdPitch = 0.5 * _hal->rc[CH_PITCH]->getPosition()
 					* mixRemoteWeight;
-			float cmdYawRate = 0.5 * _hal->rc[CH_YAW]->getPosition()
+			cmdYawRate = 0.5 * _hal->rc[CH_YAW]->getPosition()
 					* mixRemoteWeight;
-			float thrustMix = _hal->rc[CH_THRUST]->getPosition() * mixRemoteWeight;
+			thrustMix = _hal->rc[CH_THRUST]->getPosition() * mixRemoteWeight;
 			break;
 		}
 
 		case MAV_MODE_AUTO: {
+
+			// XXX kills all commands, 
+			// auto not currently implemented
+			cmdRoll = 0;
+			cmdPitch = 0;
+			cmdYawRate = 0;
+			thrustMix = 0;
+
 			// position loop
 			/*
 			 float cmdNorthTilt = pidPN.update(_nav->getPN(),_nav->getVN(),dt);
