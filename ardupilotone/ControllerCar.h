@@ -62,14 +62,16 @@ public:
 			_hal->setState(MAV_STATE_EMERGENCY);
 			_hal->debug->printf_P(PSTR("comm lost, send heartbeat from gcs\n"));
 			return;
+		// if throttle less than 5% cut motor power
 		} else if (_hal->rc[CH_THR]->getRadioPosition() < 0.05) {
-			// if throttle less than 5% cut motor power
 			_mode = MAV_MODE_LOCKED;
 			setAllRadioChannelsToNeutral();
 			_hal->setState(MAV_STATE_STANDBY);
 			return;
+		// if in live mode then set state to active
 		} else if (_hal->getMode() == MODE_LIVE) {
 			_hal->setState(MAV_STATE_ACTIVE);
+		// if in hardware in the loop (control) mode, set to hilsim
 		} else if (_hal->getMode() == MODE_HIL_CNTL) {
 			_hal->setState(MAV_STATE_HILSIM);
 		}

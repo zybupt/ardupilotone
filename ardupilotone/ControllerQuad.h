@@ -111,7 +111,7 @@ public:
 
 	virtual void update(const float & dt) {
 
-
+		// check for heartbeat
 		if (_hal->heartBeatLost()) {
 			// heartbeat lost, go to failsafe mode
 			_mode = MAV_MODE_FAILSAFE;
@@ -165,10 +165,6 @@ public:
 
 			// XXX kills all commands, 
 			// auto not currently implemented
-			cmdRoll = 0;
-			cmdPitch = 0;
-			cmdYawRate = 0;
-			thrustMix = 0;
 
 			// position loop
 			/*
