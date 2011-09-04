@@ -111,12 +111,6 @@ public:
 
 	virtual void update(const float & dt) {
 
-		// read and set pwm so they can be read as positions later
-		_hal->rc[CH_MODE]->setUsingRadio();
-		_hal->rc[CH_ROLL]->setUsingRadio();
-		_hal->rc[CH_PITCH]->setUsingRadio();
-		_hal->rc[CH_YAW]->setUsingRadio();
-		_hal->rc[CH_THRUST]->setUsingRadio();
 
 		if (_hal->heartBeatLost()) {
 			// heartbeat lost, go to failsafe mode
@@ -125,7 +119,7 @@ public:
 			_hal->setState(MAV_STATE_EMERGENCY);
 			_hal->debug->printf_P(PSTR("comm lost, send heartbeat from gcs\n"));
 			return;
-		} else if (_hal->rc[CH_THRUST]->getPosition() < 0.05) {
+		} else if (_hal->rc[CH_THRUST]->getRadioPosition() < 0.05) {
 			// if throttle less than 5% cut motor power
 			_mode = MAV_MODE_LOCKED;
 			setAllRadioChannelsToNeutral();
@@ -139,53 +133,69 @@ public:
 
 		// manual mode
 		float mixRemoteWeight = 0;
-		if (_hal->rc[CH_MODE]->getPwm() > 1350) {
+		if (_hal->rc[CH_MODE]->getRadioPosition() > 0) {
 			mixRemoteWeight = 1;
 			_mode = MAV_MODE_MANUAL;
+
+			// read and set pwm so they can be read as positions later
+			_hal->rc[CH_ROLL]->setUsingRadio();
+			_hal->rc[CH_PITCH]->setUsingRadio();
+			_hal->rc[CH_YAW]->setUsingRadio();
+			_hal->rc[CH_THRUST]->setUsingRadio();
 		} else {
 			_mode = MAV_MODE_AUTO;
 		}
 
-		// "mix manual"
-		float cmdRoll = 0.5 * _hal->rc[CH_ROLL]->getPosition()
-				* mixRemoteWeight;
-		float cmdPitch = 0.5 * _hal->rc[CH_PITCH]->getPosition()
-				* mixRemoteWeight;
-		float cmdYawRate = 0.5 * _hal->rc[CH_YAW]->getPosition()
-				* mixRemoteWeight;
-		float thrustMix = _hal->rc[CH_THRUST]->getPosition() * mixRemoteWeight;
+		switch(_mode) {
+		case MAV_MODE_MANUAL: {
+			setAllRadioChannelsManually();
 
-		// position loop
-		/*
-		 float cmdNorthTilt = pidPN.update(_nav->getPN(),_nav->getVN(),dt);
-		 float cmdEastTilt = pidPE.update(_nav->getPE(),_nav->getVE(),dt);
-		 float cmdDown = pidPD.update(_nav->getPD(),_nav->getVD(),dt);
+			// "mix manual"
+			float cmdRoll = 0.5 * _hal->rc[CH_ROLL]->getPosition()
+					* mixRemoteWeight;
+			float cmdPitch = 0.5 * _hal->rc[CH_PITCH]->getPosition()
+					* mixRemoteWeight;
+			float cmdYawRate = 0.5 * _hal->rc[CH_YAW]->getPosition()
+					* mixRemoteWeight;
+			float thrustMix = _hal->rc[CH_THRUST]->getPosition() * mixRemoteWeight;
+			break;
+		}
 
-		 // "transform-to-body"
-		 {
-		 float trigSin = sin(-yaw);
-		 float trigCos = cos(-yaw);
-		 _cmdPitch = _cmdEastTilt * trigCos
-		 - _cmdNorthTilt * trigSin;
-		 _cmdRoll = -_cmdEastTilt * trigSin
-		 + _cmdNorthTilt * trigCos;
-		 // note that the north tilt is negative of the pitch
-		 }
+		case MAV_MODE_AUTO: {
+			// position loop
+			/*
+			 float cmdNorthTilt = pidPN.update(_nav->getPN(),_nav->getVN(),dt);
+			 float cmdEastTilt = pidPE.update(_nav->getPE(),_nav->getVE(),dt);
+			 float cmdDown = pidPD.update(_nav->getPD(),_nav->getVD(),dt);
 
-		 //thrustMix += THRUST_HOVER_OFFSET;
+			 // "transform-to-body"
+			 {
+			 float trigSin = sin(-yaw);
+			 float trigCos = cos(-yaw);
+			 _cmdPitch = _cmdEastTilt * trigCos
+			 - _cmdNorthTilt * trigSin;
+			 _cmdRoll = -_cmdEastTilt * trigSin
+			 + _cmdNorthTilt * trigCos;
+			 // note that the north tilt is negative of the pitch
+			 }
 
-		 // "thrust-trim-adjust"
-		 if (fabs(_cmdRoll) > 0.5) {
-		 _thrustMix *= 1.13949393;
-		 } else {
-		 _thrustMix /= cos(_cmdRoll);
-		 }
-		 if (fabs(_cmdPitch) > 0.5) {
-		 _thrustMix *= 1.13949393;
-		 } else {
-		 _thrustMix /= cos(_cmdPitch);
-		 }
-		 */
+			 //thrustMix += THRUST_HOVER_OFFSET;
+
+			 // "thrust-trim-adjust"
+			 if (fabs(_cmdRoll) > 0.5) {
+			 _thrustMix *= 1.13949393;
+			 } else {
+			 _thrustMix /= cos(_cmdRoll);
+			 }
+			 if (fabs(_cmdPitch) > 0.5) {
+			 _thrustMix *= 1.13949393;
+			 } else {
+			 _thrustMix /= cos(_cmdPitch);
+			 }
+			 */
+		}
+
+		}
 
 		// attitude loop
 		// XXX negative sign added to nav roll, not sure why this is necessary
