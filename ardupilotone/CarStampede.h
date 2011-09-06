@@ -3,6 +3,7 @@
  *
  *  Created on: May 1, 2011
  *      Author: jgoppert
+ *
  */
 
 #ifndef CARSTAMPEDE_H_
