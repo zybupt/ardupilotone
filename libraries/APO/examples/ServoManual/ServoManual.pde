@@ -85,7 +85,7 @@ public:
 		// print pwm
 		Serial.printf("pwm      :\t");
 		for (uint8_t i = 0; i < ch.getSize(); i++)
-			Serial.printf("%7d\t", ch[i]->getPwm());
+			Serial.printf("%7d\t", ch[i]->getRadioPwm());
 		Serial.println();
 
 		// print position

@@ -44,6 +44,10 @@ public:
 	uint16_t getPwm() {
 		return _pwm;
 	}
+	// XXX  Read radio should be renamed to this
+	uint16_t getRadioPwm() {
+		return readRadio();
+	}
 	float getPosition() {
 		return _pwmToPosition(_pwm);
 	}
