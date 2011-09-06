@@ -85,11 +85,15 @@ public:
 	}
 
 	float getLat() const {
+		//Serial.print("getLatfirst");
+		//Serial.println(_lat_degInt * degInt2Rad);
 		return _lat_degInt * degInt2Rad;
 	}
 
 	void setLat(float _lat) {
-		this->_lat_degInt = _lat * rad2DegInt;
+		//Serial.print("setLatfirst");
+		//Serial.println(_lat * rad2DegInt);
+		setLat_degInt(_lat*rad2DegInt);
 	}
 
 	float getLon() const {
@@ -117,7 +121,10 @@ public:
 	}
 
 	int32_t getLat_degInt() const {
+		//Serial.print("getLat_degInt");
+		//Serial.println(_lat_degInt);
 		return _lat_degInt;
+
 	}
 
 	int32_t getLon_degInt() const {
@@ -174,6 +181,8 @@ public:
 
 	void setLat_degInt(int32_t lat_degInt) {
 		_lat_degInt = lat_degInt;
+		//Serial.print("setLat_degInt");
+		//Serial.println(_lat_degInt);
 	}
 
 	void setLon_degInt(int32_t lon_degInt) {

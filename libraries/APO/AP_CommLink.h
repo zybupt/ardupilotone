@@ -380,13 +380,13 @@ private:
 			_navigator->setHeading(packet.hdg * deg2Rad);
 			_navigator->setGroundSpeed(packet.v);
 			_navigator->setAirSpeed(packet.v);
-			//_hal->debug->printf_P(PSTR("received hil gps raw packet\n"));
-			/*
+			_hal->debug->printf_P(PSTR("received hil gps raw packet\n"));
+
 			 _hal->debug->printf_P(PSTR("received lat: %f deg\tlon: %f deg\talt: %f m\n"),
 			 packet.lat,
 			 packet.lon,
 			 packet.alt);
-			 */
+
 			break;
 		}
 

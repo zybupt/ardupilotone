@@ -65,27 +65,27 @@ public:
 
 		Serial.println("============================================================");
 		Serial.println("storing new command from mavlink_waypoint_t");
-		Serial.print("key: "); Serial.println(_data.key(),DEC);
+		Serial.print("key: "); Serial.println(int8_t(_data.key()));
 		Serial.print("number: "); Serial.println(cmd.seq,DEC);
 		Serial.print("command: "); Serial.println(getCommand());
 		Serial.print("autocontinue: "); Serial.println(getAutocontinue(),DEC);
 		Serial.print("frame: "); Serial.println(getFrame(),DEC);
-	    Serial.print("1000*param1: "); Serial.println(int(1000*getParam1()),DEC);
-		Serial.print("1000*param2: "); Serial.println(int(1000*getParam2()),DEC);
-		Serial.print("1000*param3: "); Serial.println(int(1000*getParam3()),DEC);
-		Serial.print("1000*param4: "); Serial.println(int(1000*getParam4()),DEC);
-		Serial.print("1000*x0: "); Serial.println(int(1000*cmd.x),DEC);
-		Serial.print("1000*y0: "); Serial.println(int(1000*cmd.y),DEC);
-		Serial.print("1000*z0: "); Serial.println(int(1000*cmd.z),DEC);
-		Serial.print("1000*x: "); Serial.println(int(1000*getX()),DEC);
-		Serial.print("1000*y: "); Serial.println(int(1000*getY()),DEC);
-		Serial.print("1000*z: "); Serial.println(int(1000*getZ()),DEC);
+	    Serial.print("1000*param1: "); Serial.println(int32_t(1e7*getParam1()));
+		Serial.print("1000*param2: "); Serial.println(int32_t(1e7*getParam2()));
+		Serial.print("1000*param3: "); Serial.println(int32_t(1e7*getParam3()));
+		Serial.print("1000*param4: "); Serial.println(int32_t(1e7*getParam4()));
+		Serial.print("1000*x0: "); Serial.println(int32_t(1e7*cmd.x));
+		Serial.print("1000*y0: "); Serial.println(int32_t(1e7*cmd.y));
+		Serial.print("1000*z0: "); Serial.println(int32_t(1e7*cmd.z));
+		Serial.print("1000*x: "); Serial.println(int32_t(1e7*getX()));
+		Serial.print("1000*y: "); Serial.println(int32_t(1e7*getY()));
+		Serial.print("1000*z: "); Serial.println(int32_t(1e7*getZ()));
 
 		load();
 
-	    Serial.print("1000*x1: "); Serial.println(int(1000*getX()),DEC);
-		Serial.print("1000*y1: "); Serial.println(int(1000*getY()),DEC);
-		Serial.print("1000*z1: "); Serial.println(int(1000*getZ()),DEC);
+	    Serial.print("1000*x1: "); Serial.println(int32_t(1e7*getX()));
+		Serial.print("1000*y1: "); Serial.println(int32_t(1e7*getY()));
+		Serial.print("1000*z1: "); Serial.println(int32_t(1e7*getZ()));
 
 	}
 	bool save() {
@@ -214,10 +214,10 @@ public:
 		setLonDeg(val * rad2Deg);
 	}
 	void setLon_degInt(int32_t val) {
-		setLonDeg(val / 1.0e7);
+		setLonDeg(val / 1e7);
 	}
 	void setLat_degInt(int32_t val) {
-		setLatDeg(val / 1.0e7);
+		setLatDeg(val / 1e7);
 	}
 	int32_t getLon_degInt() const {
 		return getLonDeg() * 1e7;
@@ -398,14 +398,16 @@ public:
 		float a = sinDeltaLat2 * sinDeltaLat2 + cos(getLat()) * cos(
 				lat_degInt * degInt2Rad) * sinDeltaLon2 * sinDeltaLon2;
 		float c = 2 * atan2(sqrt(a), sqrt(1 - a));
-		/*
-		 Serial.print("wp lat_degInt: "); Serial.println(getLat_degInt());
-		 Serial.print("wp lon_degInt: "); Serial.println(getLon_degInt());
+
+		 /*Serial.print("GPS lat_degInt: "); Serial.println(getLat_degInt());
+		 Serial.print("GPS lon_degInt: "); Serial.println(getLon_degInt());
 		 Serial.print("lat_degInt: "); Serial.println(lat_degInt);
 		 Serial.print("lon_degInt: "); Serial.println(lon_degInt);
 		 Serial.print("sinDeltaLat2: "); Serial.println(sinDeltaLat2);
 		 Serial.print("sinDeltaLon2: "); Serial.println(sinDeltaLon2);
-		 */
+		 Serial.print("a: "); Serial.println(a);
+		 Serial.print("c: "); Serial.println(c);*/
+
 		return rEarth * c;
 	}
 
@@ -448,13 +450,21 @@ public:
 	//calculates cross track of a current location
 	static float crossTrack(AP_MavlinkCommand previous,
 			AP_MavlinkCommand current, int32_t lat_degInt, int32_t lon_degInt) {
-		// TODO cross track is currenlty broken
-		// XXX don't fly this
-//		float d = previous.distanceTo(lat_degInt, lon_degInt);
-//		float bCurrent = previous.bearingTo(lat_degInt, lon_degInt);
-//		float bNext = previous.bearingTo(current);
-//		return asin(sin(d / rEarth) * sin(bCurrent - bNext)) * rEarth;
-		return 0;
+		float d = previous.distanceTo(lat_degInt, lon_degInt);
+		float bCurrent = previous.bearingTo(lat_degInt, lon_degInt);
+		float bNext = previous.bearingTo(current);
+/*		Serial.println("float d = ");
+		Serial.println(d);
+		Serial.println("float bCurrent = ");
+		Serial.println(bCurrent);
+		Serial.println("float bNext = ");
+		Serial.println(bNext);
+		Serial.println("float rEarth = ");
+		Serial.println(rEarth);*/
+		float crosstrack = asin(sin(d / rEarth) * sin(bCurrent - bNext)) * rEarth;
+/*		Serial.println("Crosstrack");
+		Serial.println(crosstrack);*/
+		return crosstrack;
 	}
 
 	// calculates along  track distance of a current location
