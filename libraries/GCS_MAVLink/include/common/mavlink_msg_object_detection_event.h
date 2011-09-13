@@ -2,34 +2,19 @@
 
 #define MAVLINK_MSG_ID_OBJECT_DETECTION_EVENT 140
 
-typedef struct __mavlink_object_detection_event_t
+typedef struct __mavlink_object_detection_event_t 
 {
- uint32_t time; ///< Timestamp in milliseconds since system boot
- uint16_t object_id; ///< Object ID
- uint8_t type; ///< Object type: 0: image, 1: letter, 2: ground vehicle, 3: air vehicle, 4: surface vehicle, 5: sub-surface vehicle, 6: human, 7: animal
- char name[20]; ///< Name of the object as defined by the detector
- uint8_t quality; ///< Detection quality / confidence. 0: bad, 255: maximum confidence
- float bearing; ///< Angle of the object with respect to the body frame in NED coordinates in radians. 0: front
- float distance; ///< Ground distance in meters
+	uint32_t time; ///< Timestamp in milliseconds since system boot
+	uint16_t object_id; ///< Object ID
+	uint8_t type; ///< Object type: 0: image, 1: letter, 2: ground vehicle, 3: air vehicle, 4: surface vehicle, 5: sub-surface vehicle, 6: human, 7: animal
+	char name[20]; ///< Name of the object as defined by the detector
+	uint8_t quality; ///< Detection quality / confidence. 0: bad, 255: maximum confidence
+	float bearing; ///< Angle of the object with respect to the body frame in NED coordinates in radians. 0: front
+	float distance; ///< Ground distance in meters
+
 } mavlink_object_detection_event_t;
 
-#define MAVLINK_MSG_ID_OBJECT_DETECTION_EVENT_LEN 36
-#define MAVLINK_MSG_ID_140_LEN 36
-
 #define MAVLINK_MSG_OBJECT_DETECTION_EVENT_FIELD_NAME_LEN 20
-
-#define MAVLINK_MESSAGE_INFO_OBJECT_DETECTION_EVENT { \
-	"OBJECT_DETECTION_EVENT", \
-	7, \
-	{  { "time", NULL, MAVLINK_TYPE_UINT32_T, 0, 0, offsetof(mavlink_object_detection_event_t, time) }, \
-         { "object_id", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_object_detection_event_t, object_id) }, \
-         { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 6, offsetof(mavlink_object_detection_event_t, type) }, \
-         { "name", NULL, MAVLINK_TYPE_CHAR, 20, 7, offsetof(mavlink_object_detection_event_t, name) }, \
-         { "quality", NULL, MAVLINK_TYPE_UINT8_T, 0, 27, offsetof(mavlink_object_detection_event_t, quality) }, \
-         { "bearing", NULL, MAVLINK_TYPE_FLOAT, 0, 28, offsetof(mavlink_object_detection_event_t, bearing) }, \
-         { "distance", NULL, MAVLINK_TYPE_FLOAT, 0, 32, offsetof(mavlink_object_detection_event_t, distance) }, \
-         } \
-}
 
 
 /**
@@ -47,37 +32,24 @@ typedef struct __mavlink_object_detection_event_t
  * @param distance Ground distance in meters
  * @return length of the message in bytes (excluding serial stream start sign)
  */
-static inline uint16_t mavlink_msg_object_detection_event_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
-						       uint32_t time, uint16_t object_id, uint8_t type, const char *name, uint8_t quality, float bearing, float distance)
+static inline uint16_t mavlink_msg_object_detection_event_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, uint32_t time, uint16_t object_id, uint8_t type, const char* name, uint8_t quality, float bearing, float distance)
 {
-#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-	char buf[36];
-	_mav_put_uint32_t(buf, 0, time);
-	_mav_put_uint16_t(buf, 4, object_id);
-	_mav_put_uint8_t(buf, 6, type);
-	_mav_put_uint8_t(buf, 27, quality);
-	_mav_put_float(buf, 28, bearing);
-	_mav_put_float(buf, 32, distance);
-	_mav_put_char_array(buf, 7, name, 20);
-        memcpy(_MAV_PAYLOAD(msg), buf, 36);
-#else
-	mavlink_object_detection_event_t packet;
-	packet.time = time;
-	packet.object_id = object_id;
-	packet.type = type;
-	packet.quality = quality;
-	packet.bearing = bearing;
-	packet.distance = distance;
-	memcpy(packet.name, name, sizeof(char)*20);
-        memcpy(_MAV_PAYLOAD(msg), &packet, 36);
-#endif
-
+	uint16_t i = 0;
 	msg->msgid = MAVLINK_MSG_ID_OBJECT_DETECTION_EVENT;
-	return mavlink_finalize_message(msg, system_id, component_id, 36);
+
+	i += put_uint32_t_by_index(time, i, msg->payload); // Timestamp in milliseconds since system boot
+	i += put_uint16_t_by_index(object_id, i, msg->payload); // Object ID
+	i += put_uint8_t_by_index(type, i, msg->payload); // Object type: 0: image, 1: letter, 2: ground vehicle, 3: air vehicle, 4: surface vehicle, 5: sub-surface vehicle, 6: human, 7: animal
+	i += put_array_by_index((const int8_t*)name, sizeof(char)*20, i, msg->payload); // Name of the object as defined by the detector
+	i += put_uint8_t_by_index(quality, i, msg->payload); // Detection quality / confidence. 0: bad, 255: maximum confidence
+	i += put_float_by_index(bearing, i, msg->payload); // Angle of the object with respect to the body frame in NED coordinates in radians. 0: front
+	i += put_float_by_index(distance, i, msg->payload); // Ground distance in meters
+
+	return mavlink_finalize_message(msg, system_id, component_id, i);
 }
 
 /**
- * @brief Pack a object_detection_event message on a channel
+ * @brief Pack a object_detection_event message
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
  * @param chan The MAVLink channel this message was sent over
@@ -91,34 +63,20 @@ static inline uint16_t mavlink_msg_object_detection_event_pack(uint8_t system_id
  * @param distance Ground distance in meters
  * @return length of the message in bytes (excluding serial stream start sign)
  */
-static inline uint16_t mavlink_msg_object_detection_event_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan,
-							   mavlink_message_t* msg,
-						           uint32_t time,uint16_t object_id,uint8_t type,const char *name,uint8_t quality,float bearing,float distance)
+static inline uint16_t mavlink_msg_object_detection_event_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, uint32_t time, uint16_t object_id, uint8_t type, const char* name, uint8_t quality, float bearing, float distance)
 {
-#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-	char buf[36];
-	_mav_put_uint32_t(buf, 0, time);
-	_mav_put_uint16_t(buf, 4, object_id);
-	_mav_put_uint8_t(buf, 6, type);
-	_mav_put_uint8_t(buf, 27, quality);
-	_mav_put_float(buf, 28, bearing);
-	_mav_put_float(buf, 32, distance);
-	_mav_put_char_array(buf, 7, name, 20);
-        memcpy(_MAV_PAYLOAD(msg), buf, 36);
-#else
-	mavlink_object_detection_event_t packet;
-	packet.time = time;
-	packet.object_id = object_id;
-	packet.type = type;
-	packet.quality = quality;
-	packet.bearing = bearing;
-	packet.distance = distance;
-	memcpy(packet.name, name, sizeof(char)*20);
-        memcpy(_MAV_PAYLOAD(msg), &packet, 36);
-#endif
-
+	uint16_t i = 0;
 	msg->msgid = MAVLINK_MSG_ID_OBJECT_DETECTION_EVENT;
-	return mavlink_finalize_message_chan(msg, system_id, component_id, chan, 36);
+
+	i += put_uint32_t_by_index(time, i, msg->payload); // Timestamp in milliseconds since system boot
+	i += put_uint16_t_by_index(object_id, i, msg->payload); // Object ID
+	i += put_uint8_t_by_index(type, i, msg->payload); // Object type: 0: image, 1: letter, 2: ground vehicle, 3: air vehicle, 4: surface vehicle, 5: sub-surface vehicle, 6: human, 7: animal
+	i += put_array_by_index((const int8_t*)name, sizeof(char)*20, i, msg->payload); // Name of the object as defined by the detector
+	i += put_uint8_t_by_index(quality, i, msg->payload); // Detection quality / confidence. 0: bad, 255: maximum confidence
+	i += put_float_by_index(bearing, i, msg->payload); // Angle of the object with respect to the body frame in NED coordinates in radians. 0: front
+	i += put_float_by_index(distance, i, msg->payload); // Ground distance in meters
+
+	return mavlink_finalize_message_chan(msg, system_id, component_id, chan, i);
 }
 
 /**
@@ -148,35 +106,15 @@ static inline uint16_t mavlink_msg_object_detection_event_encode(uint8_t system_
  */
 #ifdef MAVLINK_USE_CONVENIENCE_FUNCTIONS
 
-static inline void mavlink_msg_object_detection_event_send(mavlink_channel_t chan, uint32_t time, uint16_t object_id, uint8_t type, const char *name, uint8_t quality, float bearing, float distance)
+static inline void mavlink_msg_object_detection_event_send(mavlink_channel_t chan, uint32_t time, uint16_t object_id, uint8_t type, const char* name, uint8_t quality, float bearing, float distance)
 {
-#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-	char buf[36];
-	_mav_put_uint32_t(buf, 0, time);
-	_mav_put_uint16_t(buf, 4, object_id);
-	_mav_put_uint8_t(buf, 6, type);
-	_mav_put_uint8_t(buf, 27, quality);
-	_mav_put_float(buf, 28, bearing);
-	_mav_put_float(buf, 32, distance);
-	_mav_put_char_array(buf, 7, name, 20);
-	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_OBJECT_DETECTION_EVENT, buf, 36);
-#else
-	mavlink_object_detection_event_t packet;
-	packet.time = time;
-	packet.object_id = object_id;
-	packet.type = type;
-	packet.quality = quality;
-	packet.bearing = bearing;
-	packet.distance = distance;
-	memcpy(packet.name, name, sizeof(char)*20);
-	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_OBJECT_DETECTION_EVENT, (const char *)&packet, 36);
-#endif
+	mavlink_message_t msg;
+	mavlink_msg_object_detection_event_pack_chan(mavlink_system.sysid, mavlink_system.compid, chan, &msg, time, object_id, type, name, quality, bearing, distance);
+	mavlink_send_uart(chan, &msg);
 }
 
 #endif
-
 // MESSAGE OBJECT_DETECTION_EVENT UNPACKING
-
 
 /**
  * @brief Get field time from object_detection_event message
@@ -185,7 +123,12 @@ static inline void mavlink_msg_object_detection_event_send(mavlink_channel_t cha
  */
 static inline uint32_t mavlink_msg_object_detection_event_get_time(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_uint32_t(msg,  0);
+	generic_32bit r;
+	r.b[3] = (msg->payload)[0];
+	r.b[2] = (msg->payload)[1];
+	r.b[1] = (msg->payload)[2];
+	r.b[0] = (msg->payload)[3];
+	return (uint32_t)r.i;
 }
 
 /**
@@ -195,7 +138,10 @@ static inline uint32_t mavlink_msg_object_detection_event_get_time(const mavlink
  */
 static inline uint16_t mavlink_msg_object_detection_event_get_object_id(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_uint16_t(msg,  4);
+	generic_16bit r;
+	r.b[1] = (msg->payload+sizeof(uint32_t))[0];
+	r.b[0] = (msg->payload+sizeof(uint32_t))[1];
+	return (uint16_t)r.s;
 }
 
 /**
@@ -205,7 +151,7 @@ static inline uint16_t mavlink_msg_object_detection_event_get_object_id(const ma
  */
 static inline uint8_t mavlink_msg_object_detection_event_get_type(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_uint8_t(msg,  6);
+	return (uint8_t)(msg->payload+sizeof(uint32_t)+sizeof(uint16_t))[0];
 }
 
 /**
@@ -213,9 +159,11 @@ static inline uint8_t mavlink_msg_object_detection_event_get_type(const mavlink_
  *
  * @return Name of the object as defined by the detector
  */
-static inline uint16_t mavlink_msg_object_detection_event_get_name(const mavlink_message_t* msg, char *name)
+static inline uint16_t mavlink_msg_object_detection_event_get_name(const mavlink_message_t* msg, char* r_data)
 {
-	return _MAV_RETURN_char_array(msg, name, 20,  7);
+
+	memcpy(r_data, msg->payload+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint8_t), sizeof(char)*20);
+	return sizeof(char)*20;
 }
 
 /**
@@ -225,7 +173,7 @@ static inline uint16_t mavlink_msg_object_detection_event_get_name(const mavlink
  */
 static inline uint8_t mavlink_msg_object_detection_event_get_quality(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_uint8_t(msg,  27);
+	return (uint8_t)(msg->payload+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint8_t)+sizeof(char)*20)[0];
 }
 
 /**
@@ -235,7 +183,12 @@ static inline uint8_t mavlink_msg_object_detection_event_get_quality(const mavli
  */
 static inline float mavlink_msg_object_detection_event_get_bearing(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_float(msg,  28);
+	generic_32bit r;
+	r.b[3] = (msg->payload+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint8_t)+sizeof(char)*20+sizeof(uint8_t))[0];
+	r.b[2] = (msg->payload+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint8_t)+sizeof(char)*20+sizeof(uint8_t))[1];
+	r.b[1] = (msg->payload+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint8_t)+sizeof(char)*20+sizeof(uint8_t))[2];
+	r.b[0] = (msg->payload+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint8_t)+sizeof(char)*20+sizeof(uint8_t))[3];
+	return (float)r.f;
 }
 
 /**
@@ -245,7 +198,12 @@ static inline float mavlink_msg_object_detection_event_get_bearing(const mavlink
  */
 static inline float mavlink_msg_object_detection_event_get_distance(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_float(msg,  32);
+	generic_32bit r;
+	r.b[3] = (msg->payload+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint8_t)+sizeof(char)*20+sizeof(uint8_t)+sizeof(float))[0];
+	r.b[2] = (msg->payload+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint8_t)+sizeof(char)*20+sizeof(uint8_t)+sizeof(float))[1];
+	r.b[1] = (msg->payload+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint8_t)+sizeof(char)*20+sizeof(uint8_t)+sizeof(float))[2];
+	r.b[0] = (msg->payload+sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint8_t)+sizeof(char)*20+sizeof(uint8_t)+sizeof(float))[3];
+	return (float)r.f;
 }
 
 /**
@@ -256,7 +214,6 @@ static inline float mavlink_msg_object_detection_event_get_distance(const mavlin
  */
 static inline void mavlink_msg_object_detection_event_decode(const mavlink_message_t* msg, mavlink_object_detection_event_t* object_detection_event)
 {
-#if MAVLINK_NEED_BYTE_SWAP
 	object_detection_event->time = mavlink_msg_object_detection_event_get_time(msg);
 	object_detection_event->object_id = mavlink_msg_object_detection_event_get_object_id(msg);
 	object_detection_event->type = mavlink_msg_object_detection_event_get_type(msg);
@@ -264,7 +221,4 @@ static inline void mavlink_msg_object_detection_event_decode(const mavlink_messa
 	object_detection_event->quality = mavlink_msg_object_detection_event_get_quality(msg);
 	object_detection_event->bearing = mavlink_msg_object_detection_event_get_bearing(msg);
 	object_detection_event->distance = mavlink_msg_object_detection_event_get_distance(msg);
-#else
-	memcpy(object_detection_event, _MAV_PAYLOAD(msg), 36);
-#endif
 }
