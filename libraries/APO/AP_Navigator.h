@@ -287,8 +287,8 @@ public:
 			/*
 			 * Gyro has built in warm up cycle and should
 			 * run first */
-			_hal->imu->init_gyro();
-			_hal->imu->init_accel();
+			_hal->imu->init_gyro(NULL);
+			_hal->imu->init_accel(NULL);
 		}
 	}
 	virtual void updateFast(float dt) {

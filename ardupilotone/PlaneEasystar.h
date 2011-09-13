@@ -26,7 +26,7 @@ static const uint8_t heartBeatTimeout = 3;
 #define ADC_CLASS AP_ADC_ADS7844
 #define COMPASS_CLASS AP_Compass_HMC5843
 #define BARO_CLASS APM_BMP085_Class
-#define RANGE_FINDER_CLASS AP_RangeFinder_MaxsonarLV
+#define RANGE_FINDER_CLASS AP_RangeFinder_MaxsonarXL
 #define DEBUG_BAUD 57600
 #define TELEM_BAUD 57600
 #define GPS_BAUD 38400

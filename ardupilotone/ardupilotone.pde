@@ -19,6 +19,7 @@
 #include <AP_GPS.h>
 #include <AP_IMU.h>
 #include <APM_BMP085.h>
+#include <ModeFilter.h>
 
 // Vehicle Configuration
 #include "PlaneEasystar.h"
@@ -99,48 +100,48 @@ void setup() {
 
 	if (rangeFinderFrontEnabled) {
 		hal->debug->println_P(PSTR("initializing front range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
-		rangeFinder->init(1);
+		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+		rangeFinder->set_analog_port(1);
 		rangeFinder->set_orientation(1, 0, 0);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
 	if (rangeFinderBackEnabled) {
 		hal->debug->println_P(PSTR("initializing back range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
-		rangeFinder->init(2);
+		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+		rangeFinder->set_analog_port(2);
 		rangeFinder->set_orientation(-1, 0, 0);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
 	if (rangeFinderLeftEnabled) {
 		hal->debug->println_P(PSTR("initializing left range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
-		rangeFinder->init(3);
+		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+		rangeFinder->set_analog_port(3);
 		rangeFinder->set_orientation(0, -1, 0);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
 	if (rangeFinderRightEnabled) {
 		hal->debug->println_P(PSTR("initializing right range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
-		rangeFinder->init(4);
+		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+		rangeFinder->set_analog_port(4);
 		rangeFinder->set_orientation(0, 1, 0);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
 	if (rangeFinderUpEnabled) {
 		hal->debug->println_P(PSTR("initializing up range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
-		rangeFinder->init(5);
+		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+		rangeFinder->set_analog_port(5);
 		rangeFinder->set_orientation(0, 0, -1);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
 
 	if (rangeFinderDownEnabled) {
 		hal->debug->println_P(PSTR("initializing down range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS;
-		rangeFinder->init(6);
+		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+		rangeFinder->set_analog_port(6);
 		rangeFinder->set_orientation(0, 0, 1);
 		hal->rangeFinders.push_back(rangeFinder);
 	}
