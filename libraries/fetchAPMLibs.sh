@@ -19,4 +19,5 @@ cp -r ardupilot-mega/libraries/APM_RC .
 cp -r ardupilot-mega/libraries/GPS_MTK .
 cp -r ardupilot-mega/libraries/GPS_NMEA .
 cp -r ardupilot-mega/libraries/GPS_UBLOX .
+cp -r ardupilot-mega/libraries/ModeFilter .
 rm -rf ardupilot-mega
