@@ -2,24 +2,13 @@
 
 #define MAVLINK_MSG_ID_CTRL_SRFC_PT 181
 
-typedef struct __mavlink_ctrl_srfc_pt_t
+typedef struct __mavlink_ctrl_srfc_pt_t 
 {
- uint16_t bitfieldPt; ///< Bitfield containing the PT configuration
- uint8_t target; ///< The system setting the commands
+	uint8_t target; ///< The system setting the commands
+	uint16_t bitfieldPt; ///< Bitfield containing the PT configuration
+
 } mavlink_ctrl_srfc_pt_t;
 
-#define MAVLINK_MSG_ID_CTRL_SRFC_PT_LEN 3
-#define MAVLINK_MSG_ID_181_LEN 3
-
-
-
-#define MAVLINK_MESSAGE_INFO_CTRL_SRFC_PT { \
-	"CTRL_SRFC_PT", \
-	2, \
-	{  { "bitfieldPt", NULL, MAVLINK_TYPE_UINT16_T, 0, 0, offsetof(mavlink_ctrl_srfc_pt_t, bitfieldPt) }, \
-         { "target", NULL, MAVLINK_TYPE_UINT8_T, 0, 2, offsetof(mavlink_ctrl_srfc_pt_t, target) }, \
-         } \
-}
 
 
 /**
@@ -32,29 +21,19 @@ typedef struct __mavlink_ctrl_srfc_pt_t
  * @param bitfieldPt Bitfield containing the PT configuration
  * @return length of the message in bytes (excluding serial stream start sign)
  */
-static inline uint16_t mavlink_msg_ctrl_srfc_pt_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
-						       uint8_t target, uint16_t bitfieldPt)
+static inline uint16_t mavlink_msg_ctrl_srfc_pt_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, uint8_t target, uint16_t bitfieldPt)
 {
-#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-	char buf[3];
-	_mav_put_uint16_t(buf, 0, bitfieldPt);
-	_mav_put_uint8_t(buf, 2, target);
-
-        memcpy(_MAV_PAYLOAD(msg), buf, 3);
-#else
-	mavlink_ctrl_srfc_pt_t packet;
-	packet.bitfieldPt = bitfieldPt;
-	packet.target = target;
-
-        memcpy(_MAV_PAYLOAD(msg), &packet, 3);
-#endif
-
+	uint16_t i = 0;
 	msg->msgid = MAVLINK_MSG_ID_CTRL_SRFC_PT;
-	return mavlink_finalize_message(msg, system_id, component_id, 3, 104);
+
+	i += put_uint8_t_by_index(target, i, msg->payload); // The system setting the commands
+	i += put_uint16_t_by_index(bitfieldPt, i, msg->payload); // Bitfield containing the PT configuration
+
+	return mavlink_finalize_message(msg, system_id, component_id, i);
 }
 
 /**
- * @brief Pack a ctrl_srfc_pt message on a channel
+ * @brief Pack a ctrl_srfc_pt message
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
  * @param chan The MAVLink channel this message was sent over
@@ -63,26 +42,15 @@ static inline uint16_t mavlink_msg_ctrl_srfc_pt_pack(uint8_t system_id, uint8_t 
  * @param bitfieldPt Bitfield containing the PT configuration
  * @return length of the message in bytes (excluding serial stream start sign)
  */
-static inline uint16_t mavlink_msg_ctrl_srfc_pt_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan,
-							   mavlink_message_t* msg,
-						           uint8_t target,uint16_t bitfieldPt)
+static inline uint16_t mavlink_msg_ctrl_srfc_pt_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, uint8_t target, uint16_t bitfieldPt)
 {
-#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-	char buf[3];
-	_mav_put_uint16_t(buf, 0, bitfieldPt);
-	_mav_put_uint8_t(buf, 2, target);
-
-        memcpy(_MAV_PAYLOAD(msg), buf, 3);
-#else
-	mavlink_ctrl_srfc_pt_t packet;
-	packet.bitfieldPt = bitfieldPt;
-	packet.target = target;
-
-        memcpy(_MAV_PAYLOAD(msg), &packet, 3);
-#endif
-
+	uint16_t i = 0;
 	msg->msgid = MAVLINK_MSG_ID_CTRL_SRFC_PT;
-	return mavlink_finalize_message_chan(msg, system_id, component_id, chan, 3, 104);
+
+	i += put_uint8_t_by_index(target, i, msg->payload); // The system setting the commands
+	i += put_uint16_t_by_index(bitfieldPt, i, msg->payload); // Bitfield containing the PT configuration
+
+	return mavlink_finalize_message_chan(msg, system_id, component_id, chan, i);
 }
 
 /**
@@ -109,25 +77,13 @@ static inline uint16_t mavlink_msg_ctrl_srfc_pt_encode(uint8_t system_id, uint8_
 
 static inline void mavlink_msg_ctrl_srfc_pt_send(mavlink_channel_t chan, uint8_t target, uint16_t bitfieldPt)
 {
-#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-	char buf[3];
-	_mav_put_uint16_t(buf, 0, bitfieldPt);
-	_mav_put_uint8_t(buf, 2, target);
-
-	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_CTRL_SRFC_PT, buf, 3, 104);
-#else
-	mavlink_ctrl_srfc_pt_t packet;
-	packet.bitfieldPt = bitfieldPt;
-	packet.target = target;
-
-	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_CTRL_SRFC_PT, (const char *)&packet, 3, 104);
-#endif
+	mavlink_message_t msg;
+	mavlink_msg_ctrl_srfc_pt_pack_chan(mavlink_system.sysid, mavlink_system.compid, chan, &msg, target, bitfieldPt);
+	mavlink_send_uart(chan, &msg);
 }
 
 #endif
-
 // MESSAGE CTRL_SRFC_PT UNPACKING
-
 
 /**
  * @brief Get field target from ctrl_srfc_pt message
@@ -136,7 +92,7 @@ static inline void mavlink_msg_ctrl_srfc_pt_send(mavlink_channel_t chan, uint8_t
  */
 static inline uint8_t mavlink_msg_ctrl_srfc_pt_get_target(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_uint8_t(msg,  2);
+	return (uint8_t)(msg->payload)[0];
 }
 
 /**
@@ -146,7 +102,10 @@ static inline uint8_t mavlink_msg_ctrl_srfc_pt_get_target(const mavlink_message_
  */
 static inline uint16_t mavlink_msg_ctrl_srfc_pt_get_bitfieldPt(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_uint16_t(msg,  0);
+	generic_16bit r;
+	r.b[1] = (msg->payload+sizeof(uint8_t))[0];
+	r.b[0] = (msg->payload+sizeof(uint8_t))[1];
+	return (uint16_t)r.s;
 }
 
 /**
@@ -157,10 +116,6 @@ static inline uint16_t mavlink_msg_ctrl_srfc_pt_get_bitfieldPt(const mavlink_mes
  */
 static inline void mavlink_msg_ctrl_srfc_pt_decode(const mavlink_message_t* msg, mavlink_ctrl_srfc_pt_t* ctrl_srfc_pt)
 {
-#if MAVLINK_NEED_BYTE_SWAP
-	ctrl_srfc_pt->bitfieldPt = mavlink_msg_ctrl_srfc_pt_get_bitfieldPt(msg);
 	ctrl_srfc_pt->target = mavlink_msg_ctrl_srfc_pt_get_target(msg);
-#else
-	memcpy(ctrl_srfc_pt, _MAV_PAYLOAD(msg), 3);
-#endif
+	ctrl_srfc_pt->bitfieldPt = mavlink_msg_ctrl_srfc_pt_get_bitfieldPt(msg);
 }

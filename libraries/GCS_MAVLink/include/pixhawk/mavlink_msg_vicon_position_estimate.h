@@ -1,35 +1,19 @@
 // MESSAGE VICON_POSITION_ESTIMATE PACKING
 
-#define MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE 157
+#define MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE 112
 
-typedef struct __mavlink_vicon_position_estimate_t
+typedef struct __mavlink_vicon_position_estimate_t 
 {
- uint64_t usec; ///< Timestamp (milliseconds)
- float x; ///< Global X position
- float y; ///< Global Y position
- float z; ///< Global Z position
- float roll; ///< Roll angle in rad
- float pitch; ///< Pitch angle in rad
- float yaw; ///< Yaw angle in rad
+	uint64_t usec; ///< Timestamp (milliseconds)
+	float x; ///< Global X position
+	float y; ///< Global Y position
+	float z; ///< Global Z position
+	float roll; ///< Roll angle in rad
+	float pitch; ///< Pitch angle in rad
+	float yaw; ///< Yaw angle in rad
+
 } mavlink_vicon_position_estimate_t;
 
-#define MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE_LEN 32
-#define MAVLINK_MSG_ID_157_LEN 32
-
-
-
-#define MAVLINK_MESSAGE_INFO_VICON_POSITION_ESTIMATE { \
-	"VICON_POSITION_ESTIMATE", \
-	7, \
-	{  { "usec", NULL, MAVLINK_TYPE_UINT64_T, 0, 0, offsetof(mavlink_vicon_position_estimate_t, usec) }, \
-         { "x", NULL, MAVLINK_TYPE_FLOAT, 0, 8, offsetof(mavlink_vicon_position_estimate_t, x) }, \
-         { "y", NULL, MAVLINK_TYPE_FLOAT, 0, 12, offsetof(mavlink_vicon_position_estimate_t, y) }, \
-         { "z", NULL, MAVLINK_TYPE_FLOAT, 0, 16, offsetof(mavlink_vicon_position_estimate_t, z) }, \
-         { "roll", NULL, MAVLINK_TYPE_FLOAT, 0, 20, offsetof(mavlink_vicon_position_estimate_t, roll) }, \
-         { "pitch", NULL, MAVLINK_TYPE_FLOAT, 0, 24, offsetof(mavlink_vicon_position_estimate_t, pitch) }, \
-         { "yaw", NULL, MAVLINK_TYPE_FLOAT, 0, 28, offsetof(mavlink_vicon_position_estimate_t, yaw) }, \
-         } \
-}
 
 
 /**
@@ -47,39 +31,24 @@ typedef struct __mavlink_vicon_position_estimate_t
  * @param yaw Yaw angle in rad
  * @return length of the message in bytes (excluding serial stream start sign)
  */
-static inline uint16_t mavlink_msg_vicon_position_estimate_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
-						       uint64_t usec, float x, float y, float z, float roll, float pitch, float yaw)
+static inline uint16_t mavlink_msg_vicon_position_estimate_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, uint64_t usec, float x, float y, float z, float roll, float pitch, float yaw)
 {
-#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-	char buf[32];
-	_mav_put_uint64_t(buf, 0, usec);
-	_mav_put_float(buf, 8, x);
-	_mav_put_float(buf, 12, y);
-	_mav_put_float(buf, 16, z);
-	_mav_put_float(buf, 20, roll);
-	_mav_put_float(buf, 24, pitch);
-	_mav_put_float(buf, 28, yaw);
-
-        memcpy(_MAV_PAYLOAD(msg), buf, 32);
-#else
-	mavlink_vicon_position_estimate_t packet;
-	packet.usec = usec;
-	packet.x = x;
-	packet.y = y;
-	packet.z = z;
-	packet.roll = roll;
-	packet.pitch = pitch;
-	packet.yaw = yaw;
-
-        memcpy(_MAV_PAYLOAD(msg), &packet, 32);
-#endif
-
+	uint16_t i = 0;
 	msg->msgid = MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE;
-	return mavlink_finalize_message(msg, system_id, component_id, 32, 56);
+
+	i += put_uint64_t_by_index(usec, i, msg->payload); // Timestamp (milliseconds)
+	i += put_float_by_index(x, i, msg->payload); // Global X position
+	i += put_float_by_index(y, i, msg->payload); // Global Y position
+	i += put_float_by_index(z, i, msg->payload); // Global Z position
+	i += put_float_by_index(roll, i, msg->payload); // Roll angle in rad
+	i += put_float_by_index(pitch, i, msg->payload); // Pitch angle in rad
+	i += put_float_by_index(yaw, i, msg->payload); // Yaw angle in rad
+
+	return mavlink_finalize_message(msg, system_id, component_id, i);
 }
 
 /**
- * @brief Pack a vicon_position_estimate message on a channel
+ * @brief Pack a vicon_position_estimate message
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
  * @param chan The MAVLink channel this message was sent over
@@ -93,36 +62,20 @@ static inline uint16_t mavlink_msg_vicon_position_estimate_pack(uint8_t system_i
  * @param yaw Yaw angle in rad
  * @return length of the message in bytes (excluding serial stream start sign)
  */
-static inline uint16_t mavlink_msg_vicon_position_estimate_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan,
-							   mavlink_message_t* msg,
-						           uint64_t usec,float x,float y,float z,float roll,float pitch,float yaw)
+static inline uint16_t mavlink_msg_vicon_position_estimate_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, uint64_t usec, float x, float y, float z, float roll, float pitch, float yaw)
 {
-#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-	char buf[32];
-	_mav_put_uint64_t(buf, 0, usec);
-	_mav_put_float(buf, 8, x);
-	_mav_put_float(buf, 12, y);
-	_mav_put_float(buf, 16, z);
-	_mav_put_float(buf, 20, roll);
-	_mav_put_float(buf, 24, pitch);
-	_mav_put_float(buf, 28, yaw);
-
-        memcpy(_MAV_PAYLOAD(msg), buf, 32);
-#else
-	mavlink_vicon_position_estimate_t packet;
-	packet.usec = usec;
-	packet.x = x;
-	packet.y = y;
-	packet.z = z;
-	packet.roll = roll;
-	packet.pitch = pitch;
-	packet.yaw = yaw;
-
-        memcpy(_MAV_PAYLOAD(msg), &packet, 32);
-#endif
-
+	uint16_t i = 0;
 	msg->msgid = MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE;
-	return mavlink_finalize_message_chan(msg, system_id, component_id, chan, 32, 56);
+
+	i += put_uint64_t_by_index(usec, i, msg->payload); // Timestamp (milliseconds)
+	i += put_float_by_index(x, i, msg->payload); // Global X position
+	i += put_float_by_index(y, i, msg->payload); // Global Y position
+	i += put_float_by_index(z, i, msg->payload); // Global Z position
+	i += put_float_by_index(roll, i, msg->payload); // Roll angle in rad
+	i += put_float_by_index(pitch, i, msg->payload); // Pitch angle in rad
+	i += put_float_by_index(yaw, i, msg->payload); // Yaw angle in rad
+
+	return mavlink_finalize_message_chan(msg, system_id, component_id, chan, i);
 }
 
 /**
@@ -154,35 +107,13 @@ static inline uint16_t mavlink_msg_vicon_position_estimate_encode(uint8_t system
 
 static inline void mavlink_msg_vicon_position_estimate_send(mavlink_channel_t chan, uint64_t usec, float x, float y, float z, float roll, float pitch, float yaw)
 {
-#if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-	char buf[32];
-	_mav_put_uint64_t(buf, 0, usec);
-	_mav_put_float(buf, 8, x);
-	_mav_put_float(buf, 12, y);
-	_mav_put_float(buf, 16, z);
-	_mav_put_float(buf, 20, roll);
-	_mav_put_float(buf, 24, pitch);
-	_mav_put_float(buf, 28, yaw);
-
-	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE, buf, 32, 56);
-#else
-	mavlink_vicon_position_estimate_t packet;
-	packet.usec = usec;
-	packet.x = x;
-	packet.y = y;
-	packet.z = z;
-	packet.roll = roll;
-	packet.pitch = pitch;
-	packet.yaw = yaw;
-
-	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE, (const char *)&packet, 32, 56);
-#endif
+	mavlink_message_t msg;
+	mavlink_msg_vicon_position_estimate_pack_chan(mavlink_system.sysid, mavlink_system.compid, chan, &msg, usec, x, y, z, roll, pitch, yaw);
+	mavlink_send_uart(chan, &msg);
 }
 
 #endif
-
 // MESSAGE VICON_POSITION_ESTIMATE UNPACKING
-
 
 /**
  * @brief Get field usec from vicon_position_estimate message
@@ -191,7 +122,16 @@ static inline void mavlink_msg_vicon_position_estimate_send(mavlink_channel_t ch
  */
 static inline uint64_t mavlink_msg_vicon_position_estimate_get_usec(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_uint64_t(msg,  0);
+	generic_64bit r;
+	r.b[7] = (msg->payload)[0];
+	r.b[6] = (msg->payload)[1];
+	r.b[5] = (msg->payload)[2];
+	r.b[4] = (msg->payload)[3];
+	r.b[3] = (msg->payload)[4];
+	r.b[2] = (msg->payload)[5];
+	r.b[1] = (msg->payload)[6];
+	r.b[0] = (msg->payload)[7];
+	return (uint64_t)r.ll;
 }
 
 /**
@@ -201,7 +141,12 @@ static inline uint64_t mavlink_msg_vicon_position_estimate_get_usec(const mavlin
  */
 static inline float mavlink_msg_vicon_position_estimate_get_x(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_float(msg,  8);
+	generic_32bit r;
+	r.b[3] = (msg->payload+sizeof(uint64_t))[0];
+	r.b[2] = (msg->payload+sizeof(uint64_t))[1];
+	r.b[1] = (msg->payload+sizeof(uint64_t))[2];
+	r.b[0] = (msg->payload+sizeof(uint64_t))[3];
+	return (float)r.f;
 }
 
 /**
@@ -211,7 +156,12 @@ static inline float mavlink_msg_vicon_position_estimate_get_x(const mavlink_mess
  */
 static inline float mavlink_msg_vicon_position_estimate_get_y(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_float(msg,  12);
+	generic_32bit r;
+	r.b[3] = (msg->payload+sizeof(uint64_t)+sizeof(float))[0];
+	r.b[2] = (msg->payload+sizeof(uint64_t)+sizeof(float))[1];
+	r.b[1] = (msg->payload+sizeof(uint64_t)+sizeof(float))[2];
+	r.b[0] = (msg->payload+sizeof(uint64_t)+sizeof(float))[3];
+	return (float)r.f;
 }
 
 /**
@@ -221,7 +171,12 @@ static inline float mavlink_msg_vicon_position_estimate_get_y(const mavlink_mess
  */
 static inline float mavlink_msg_vicon_position_estimate_get_z(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_float(msg,  16);
+	generic_32bit r;
+	r.b[3] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float))[0];
+	r.b[2] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float))[1];
+	r.b[1] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float))[2];
+	r.b[0] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float))[3];
+	return (float)r.f;
 }
 
 /**
@@ -231,7 +186,12 @@ static inline float mavlink_msg_vicon_position_estimate_get_z(const mavlink_mess
  */
 static inline float mavlink_msg_vicon_position_estimate_get_roll(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_float(msg,  20);
+	generic_32bit r;
+	r.b[3] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float))[0];
+	r.b[2] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float))[1];
+	r.b[1] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float))[2];
+	r.b[0] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float))[3];
+	return (float)r.f;
 }
 
 /**
@@ -241,7 +201,12 @@ static inline float mavlink_msg_vicon_position_estimate_get_roll(const mavlink_m
  */
 static inline float mavlink_msg_vicon_position_estimate_get_pitch(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_float(msg,  24);
+	generic_32bit r;
+	r.b[3] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float))[0];
+	r.b[2] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float))[1];
+	r.b[1] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float))[2];
+	r.b[0] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float))[3];
+	return (float)r.f;
 }
 
 /**
@@ -251,7 +216,12 @@ static inline float mavlink_msg_vicon_position_estimate_get_pitch(const mavlink_
  */
 static inline float mavlink_msg_vicon_position_estimate_get_yaw(const mavlink_message_t* msg)
 {
-	return _MAV_RETURN_float(msg,  28);
+	generic_32bit r;
+	r.b[3] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float))[0];
+	r.b[2] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float))[1];
+	r.b[1] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float))[2];
+	r.b[0] = (msg->payload+sizeof(uint64_t)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float))[3];
+	return (float)r.f;
 }
 
 /**
@@ -262,7 +232,6 @@ static inline float mavlink_msg_vicon_position_estimate_get_yaw(const mavlink_me
  */
 static inline void mavlink_msg_vicon_position_estimate_decode(const mavlink_message_t* msg, mavlink_vicon_position_estimate_t* vicon_position_estimate)
 {
-#if MAVLINK_NEED_BYTE_SWAP
 	vicon_position_estimate->usec = mavlink_msg_vicon_position_estimate_get_usec(msg);
 	vicon_position_estimate->x = mavlink_msg_vicon_position_estimate_get_x(msg);
 	vicon_position_estimate->y = mavlink_msg_vicon_position_estimate_get_y(msg);
@@ -270,7 +239,4 @@ static inline void mavlink_msg_vicon_position_estimate_decode(const mavlink_mess
 	vicon_position_estimate->roll = mavlink_msg_vicon_position_estimate_get_roll(msg);
 	vicon_position_estimate->pitch = mavlink_msg_vicon_position_estimate_get_pitch(msg);
 	vicon_position_estimate->yaw = mavlink_msg_vicon_position_estimate_get_yaw(msg);
-#else
-	memcpy(vicon_position_estimate, _MAV_PAYLOAD(msg), 32);
-#endif
 }
