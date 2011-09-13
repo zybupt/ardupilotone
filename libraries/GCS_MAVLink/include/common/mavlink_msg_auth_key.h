@@ -45,7 +45,7 @@ static inline uint16_t mavlink_msg_auth_key_pack(uint8_t system_id, uint8_t comp
 #endif
 
 	msg->msgid = MAVLINK_MSG_ID_AUTH_KEY;
-	return mavlink_finalize_message(msg, system_id, component_id, 32);
+	return mavlink_finalize_message(msg, system_id, component_id, 32, 119);
 }
 
 /**
@@ -74,7 +74,7 @@ static inline uint16_t mavlink_msg_auth_key_pack_chan(uint8_t system_id, uint8_t
 #endif
 
 	msg->msgid = MAVLINK_MSG_ID_AUTH_KEY;
-	return mavlink_finalize_message_chan(msg, system_id, component_id, chan, 32);
+	return mavlink_finalize_message_chan(msg, system_id, component_id, chan, 32, 119);
 }
 
 /**
@@ -104,12 +104,12 @@ static inline void mavlink_msg_auth_key_send(mavlink_channel_t chan, const char 
 	char buf[32];
 
 	_mav_put_char_array(buf, 0, key, 32);
-	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_AUTH_KEY, buf, 32);
+	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_AUTH_KEY, buf, 32, 119);
 #else
 	mavlink_auth_key_t packet;
 
 	memcpy(packet.key, key, sizeof(char)*32);
-	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_AUTH_KEY, (const char *)&packet, 32);
+	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_AUTH_KEY, (const char *)&packet, 32, 119);
 #endif
 }
 

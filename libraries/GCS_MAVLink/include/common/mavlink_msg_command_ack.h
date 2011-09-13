@@ -1,6 +1,6 @@
 // MESSAGE COMMAND_ACK PACKING
 
-#define MAVLINK_MSG_ID_COMMAND_ACK 76
+#define MAVLINK_MSG_ID_COMMAND_ACK 77
 
 typedef struct __mavlink_command_ack_t
 {
@@ -9,7 +9,7 @@ typedef struct __mavlink_command_ack_t
 } mavlink_command_ack_t;
 
 #define MAVLINK_MSG_ID_COMMAND_ACK_LEN 8
-#define MAVLINK_MSG_ID_76_LEN 8
+#define MAVLINK_MSG_ID_77_LEN 8
 
 
 
@@ -50,7 +50,7 @@ static inline uint16_t mavlink_msg_command_ack_pack(uint8_t system_id, uint8_t c
 #endif
 
 	msg->msgid = MAVLINK_MSG_ID_COMMAND_ACK;
-	return mavlink_finalize_message(msg, system_id, component_id, 8);
+	return mavlink_finalize_message(msg, system_id, component_id, 8, 8);
 }
 
 /**
@@ -82,7 +82,7 @@ static inline uint16_t mavlink_msg_command_ack_pack_chan(uint8_t system_id, uint
 #endif
 
 	msg->msgid = MAVLINK_MSG_ID_COMMAND_ACK;
-	return mavlink_finalize_message_chan(msg, system_id, component_id, chan, 8);
+	return mavlink_finalize_message_chan(msg, system_id, component_id, chan, 8, 8);
 }
 
 /**
@@ -114,13 +114,13 @@ static inline void mavlink_msg_command_ack_send(mavlink_channel_t chan, float co
 	_mav_put_float(buf, 0, command);
 	_mav_put_float(buf, 4, result);
 
-	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_COMMAND_ACK, buf, 8);
+	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_COMMAND_ACK, buf, 8, 8);
 #else
 	mavlink_command_ack_t packet;
 	packet.command = command;
 	packet.result = result;
 
-	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_COMMAND_ACK, (const char *)&packet, 8);
+	_mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_COMMAND_ACK, (const char *)&packet, 8, 8);
 #endif
 }
 
