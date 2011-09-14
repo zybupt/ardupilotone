@@ -21,8 +21,8 @@ set(${FIRMWARE_NAME}_SRCS
 set(${FIRMWARE_NAME}_HDRS 
         BoatGeneric.h
         CarStampede.h
-        CNIRover.h
-        CNIBoat.h
+        #CNIRover.h
+        #CNIBoat.h
         ControllerBoat.h
         ControllerCar.h
         ControllerPlane.h
@@ -46,6 +46,7 @@ set(${FIRMWARE_NAME}_LIBS
     AP_IMU
     AP_RangeFinder
     APM_BMP085
+	ModeFilter
 )
 	
 
@@ -57,6 +58,7 @@ include_directories(
 ${CMAKE_SOURCE_DIR}/libraries/APO
 ${CMAKE_SOURCE_DIR}/libraries/AP_Common
 ${CMAKE_SOURCE_DIR}/libraries/FastSerial
+${CMAKE_SOURCE_DIR}/libraries/ModeFilter
 ${CMAKE_SOURCE_DIR}/libraries/AP_Compass
 ${CMAKE_SOURCE_DIR}/libraries/AP_RangeFinder
 ${CMAKE_SOURCE_DIR}/libraries/AP_GPS
