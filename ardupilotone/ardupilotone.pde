@@ -46,6 +46,7 @@ void setup() {
 	Serial.begin(DEBUG_BAUD, 128, 128); // debug
 	Serial3.begin(TELEM_BAUD, 128, 128); // gcs
 
+	// debug serial
 	hal->debug = &Serial;
 	hal->debug->println_P(PSTR("initializing debug line"));
 
