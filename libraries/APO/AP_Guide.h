@@ -59,13 +59,11 @@ public:
 
 	void setCurrentIndex(uint8_t val) {
 		_cmdIndex.set_and_save(val);
-		AP_MavlinkCommand current(getCurrentIndex()), previous(getPreviousIndex());
-		current.load();
-		previous.load();
-		_command = current;
-		_previousCommand = previous;
-		Serial.print("Current Index: "); Serial.println(int(getCurrentIndex())); Serial.flush();
-		Serial.print("Previous Index: "); Serial.println(int(getPreviousIndex()));Serial.flush();
+		_command = AP_MavlinkCommand(getCurrentIndex());
+		_command.load();
+		_previousCommand = AP_MavlinkCommand(getPreviousIndex());
+		_previousCommand.load();
+		//_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 
 	uint8_t getNumberOfCommands() {

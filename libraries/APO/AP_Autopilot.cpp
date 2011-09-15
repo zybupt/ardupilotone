@@ -74,7 +74,6 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 		}
 	}
 
-	AP_Var::load_all();
 	AP_MavlinkCommand::home.setAlt(_navigator->getAlt());
 	AP_MavlinkCommand::home.setLat(_navigator->getLat());
 	AP_MavlinkCommand::home.setLon(_navigator->getLon());
@@ -86,22 +85,6 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 	_hal->debug->printf_P(PSTR("home after load lat: %f deg, lon: %f deg\n"),
 			AP_MavlinkCommand::home.getLat()*rad2Deg,
 			AP_MavlinkCommand::home.getLon()*rad2Deg);
-	Serial.println("creating test waypoint");
-	AP_MavlinkCommand test(0);
-	Serial.println("creating test waypoint");
-	test.load();
-	Serial.println("loading test waypoint");
-	Serial.println(test.getLat());
-
-	Serial.println("creating test waypoint 2");
-	AP_MavlinkCommand test2(0);
-	Serial.println("creating test waypoint 2");
-	test2.load();
-	Serial.println("loading test waypoint 2");
-	Serial.println(test2.getLat());
-
-	Serial.println("setting current index");
-	getGuide()->setCurrentIndex(0);
 
 	/*
 	 * Attach loops
