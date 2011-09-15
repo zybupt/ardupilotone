@@ -1,6 +1,0 @@
-
-**** Build of configuration Default for project ardupilotone ****
-
-make all 
-../libraries/AP_Common/Arduino.mk:107: /hsl/homes/xiew/Projects/ardupilotone/config.mk: No such file or directory
-../libraries/AP_Common/Arduino.mk:109: *** ERROR: could not locate /hsl/homes/xiew/Projects/ardupilotone/config.mk, please run 'make configure' first.  Stop.

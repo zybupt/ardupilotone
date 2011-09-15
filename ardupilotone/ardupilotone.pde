@@ -87,63 +87,63 @@ void setup() {
 			hal->compass->init();
 		}
 
-	}
+		/**
+		 * Initialize ultrasonic sensors. If sensors are not plugged in, the navigator will not
+		 * initialize them and NULL will be assigned to those corresponding pointers.
+		 * On detecting NULL assigned to any ultrasonic sensor, its corresponding block of code
+		 * will not be executed by the navigator.
+		 * The coordinate system is assigned by the right hand rule with the thumb pointing down.
+		 * In set_orientation, it is defind as (front/back,left/right,down,up)
+		 */
 
-	/**
-	 * Initialize ultrasonic sensors. If sensors are not plugged in, the navigator will not
-	 * initialize them and NULL will be assigned to those corresponding pointers.
-	 * On detecting NULL assigned to any ultrasonic sensor, its corresponding block of code
-	 * will not be executed by the navigator.
-	 * The coordinate system is assigned by the right hand rule with the thumb pointing down.
-	 * In set_orientation, it is defind as (front/back,left/right,down,up)
-	 */
+		if (rangeFinderFrontEnabled) {
+			hal->debug->println_P(PSTR("initializing front range finder"));
+			RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+			rangeFinder->set_analog_port(1);
+			rangeFinder->set_orientation(1, 0, 0);
+			hal->rangeFinders.push_back(rangeFinder);
+		}
 
-	if (rangeFinderFrontEnabled) {
-		hal->debug->println_P(PSTR("initializing front range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
-		rangeFinder->set_analog_port(1);
-		rangeFinder->set_orientation(1, 0, 0);
-		hal->rangeFinders.push_back(rangeFinder);
-	}
+		if (rangeFinderBackEnabled) {
+			hal->debug->println_P(PSTR("initializing back range finder"));
+			RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+			rangeFinder->set_analog_port(2);
+			rangeFinder->set_orientation(-1, 0, 0);
+			hal->rangeFinders.push_back(rangeFinder);
+		}
 
-	if (rangeFinderBackEnabled) {
-		hal->debug->println_P(PSTR("initializing back range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
-		rangeFinder->set_analog_port(2);
-		rangeFinder->set_orientation(-1, 0, 0);
-		hal->rangeFinders.push_back(rangeFinder);
-	}
+		if (rangeFinderLeftEnabled) {
+			hal->debug->println_P(PSTR("initializing left range finder"));
+			RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+			rangeFinder->set_analog_port(3);
+			rangeFinder->set_orientation(0, -1, 0);
+			hal->rangeFinders.push_back(rangeFinder);
+		}
 
-	if (rangeFinderLeftEnabled) {
-		hal->debug->println_P(PSTR("initializing left range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
-		rangeFinder->set_analog_port(3);
-		rangeFinder->set_orientation(0, -1, 0);
-		hal->rangeFinders.push_back(rangeFinder);
-	}
+		if (rangeFinderRightEnabled) {
+			hal->debug->println_P(PSTR("initializing right range finder"));
+			RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+			rangeFinder->set_analog_port(4);
+			rangeFinder->set_orientation(0, 1, 0);
+			hal->rangeFinders.push_back(rangeFinder);
+		}
 
-	if (rangeFinderRightEnabled) {
-		hal->debug->println_P(PSTR("initializing right range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
-		rangeFinder->set_analog_port(4);
-		rangeFinder->set_orientation(0, 1, 0);
-		hal->rangeFinders.push_back(rangeFinder);
-	}
+		if (rangeFinderUpEnabled) {
+			hal->debug->println_P(PSTR("initializing up range finder"));
+			RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+			rangeFinder->set_analog_port(5);
+			rangeFinder->set_orientation(0, 0, -1);
+			hal->rangeFinders.push_back(rangeFinder);
+		}
 
-	if (rangeFinderUpEnabled) {
-		hal->debug->println_P(PSTR("initializing up range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
-		rangeFinder->set_analog_port(5);
-		rangeFinder->set_orientation(0, 0, -1);
-		hal->rangeFinders.push_back(rangeFinder);
-	}
+		if (rangeFinderDownEnabled) {
+			hal->debug->println_P(PSTR("initializing down range finder"));
+			RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
+			rangeFinder->set_analog_port(6);
+			rangeFinder->set_orientation(0, 0, 1);
+			hal->rangeFinders.push_back(rangeFinder);
+		}
 
-	if (rangeFinderDownEnabled) {
-		hal->debug->println_P(PSTR("initializing down range finder"));
-		RangeFinder * rangeFinder = new RANGE_FINDER_CLASS(hal->adc,new ModeFilter);
-		rangeFinder->set_analog_port(6);
-		rangeFinder->set_orientation(0, 0, 1);
-		hal->rangeFinders.push_back(rangeFinder);
 	}
 
 	/*
