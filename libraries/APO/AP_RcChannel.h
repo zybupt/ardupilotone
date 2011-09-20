@@ -35,7 +35,6 @@ public:
 	rcMode_t _rcMode;AP_Bool _reverse;
 
 	// set
-	uint16_t readRadio();
 	void setUsingRadio();
 	void setPwm(uint16_t pwm);
 	void setPosition(float position);
@@ -44,15 +43,12 @@ public:
 	uint16_t getPwm() {
 		return _pwm;
 	}
-	// XXX  Read radio should be renamed to this
-	uint16_t getRadioPwm() {
-		return readRadio();
-	}
+	uint16_t getRadioPwm();
 	float getPosition() {
 		return _pwmToPosition(_pwm);
 	}
 	float getRadioPosition() {
-		return _pwmToPosition(readRadio());
+		return _pwmToPosition(getRadioPwm());
 	}
 
 private:

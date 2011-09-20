@@ -34,7 +34,7 @@ AP_RcChannel::AP_RcChannel(AP_Var::Key keyValue, const prog_char_t * name,
 
 }
 
-uint16_t AP_RcChannel::readRadio() {
+uint16_t AP_RcChannel::getRadioPwm() {
 	if (_rcMode == RC_MODE_OUT) {
 		Serial.print("tryng to read from output channel: ");
 		Serial.println(int(_ch));
@@ -44,7 +44,7 @@ uint16_t AP_RcChannel::readRadio() {
 }
 
 void AP_RcChannel::setUsingRadio() {
-	setPwm(readRadio());
+	setPwm(getRadioPwm());
 }
 
 void AP_RcChannel::setPwm(uint16_t pwm) {

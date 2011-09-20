@@ -13,7 +13,7 @@
 static const apo::vehicle_t vehicle = apo::VEHICLE_PLANE;
 //static const apo::halMode_t halMode = apo::MODE_LIVE; // live mode, actual flight
 static const apo::halMode_t halMode = apo::MODE_HIL_CNTL; // hardware in the loop, control level
-static const apo::board_t board = apo::BOARD_ARDUPILOTMEGA_2560;
+static const apo::board_t board = apo::BOARD_ARDUPILOTMEGA_2;
 static const uint8_t heartBeatTimeout = 3;
 
 // algorithm selection
@@ -55,7 +55,7 @@ static const float loop4Rate = 0.1;
 static const float rdrAilMix = 1.0; // since there are no ailerons
 
 // bank error to roll servo
-static const float pidBnkRllP = 0.5;
+static const float pidBnkRllP = -0.5;
 static const float pidBnkRllI = 0.0;
 static const float pidBnkRllD = 0.0;
 static const float pidBnkRllAwu = 0.0;
@@ -63,7 +63,7 @@ static const float pidBnkRllLim = 1.0;
 static const float pidBnkRllDFCut = 0.0;
 
 // pitch error to pitch servo
-static const float pidPitPitP = 0.5;
+static const float pidPitPitP = -1;
 static const float pidPitPitI = 0.0;
 static const float pidPitPitD = 0.0;
 static const float pidPitPitAwu = 0.0;
@@ -79,7 +79,7 @@ static const float pidSpdPitLim = 1.0;
 static const float pidSpdPitDFCut = 0.0;
 
 // yaw rate error to yaw servo
-static const float pidYwrYawP = 0.5;
+static const float pidYwrYawP = -0.2;
 static const float pidYwrYawI = 0.0;
 static const float pidYwrYawD = 0.0;
 static const float pidYwrYawAwu = 0.0;
@@ -87,26 +87,26 @@ static const float pidYwrYawLim = 1.0;
 static const float pidYwrYawDFCut = 0.0;
 
 // heading error to bank angle command
-static const float pidHdgBnkP = 0.0;
+static const float pidHdgBnkP = 1.0;
 static const float pidHdgBnkI = 0.0;
 static const float pidHdgBnkD = 0.0;
 static const float pidHdgBnkAwu = 0.0;
-static const float pidHdgBnkLim = 0.0;
+static const float pidHdgBnkLim = 0.5;
 static const float pidHdgBnkDFCut = 0.0;
 
 // altitude error to throttle command
-static const float pidAltThrP = 0.1;
+static const float pidAltThrP = -1;
 static const float pidAltThrI = 0.0;
 static const float pidAltThrD = 0.0;
 static const float pidAltThrAwu = 0.0;
-static const float pidAltThrLim = 0.1;
+static const float pidAltThrLim = 1;
 static const float pidAltThrDFCut = 0.0;
 
 // trim control positions (-1,1)
 static const float ailTrim = 0.0;
 static const float elvTrim = 0.0;
 static const float rdrTrim = 0.0;
-static const float thrTrim = 0.2;
+static const float thrTrim = 0.5;
 
 #include "ControllerPlane.h"
 

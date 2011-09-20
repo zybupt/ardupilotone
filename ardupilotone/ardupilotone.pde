@@ -44,8 +44,9 @@ void setup() {
 	 * Communications
 	 */
 	Serial.begin(DEBUG_BAUD, 128, 128); // debug
-	Serial3.begin(TELEM_BAUD, 128, 128); // gcs
-
+	if (board==BOARD_ARDUPILOTMEGA_2) Serial2.begin(TELEM_BAUD, 128, 128); // gcs
+	else Serial3.begin(TELEM_BAUD, 128, 128); // gcs
+	
 	// debug serial
 	hal->debug = &Serial;
 	hal->debug->println_P(PSTR("initializing debug line"));
@@ -157,7 +158,9 @@ void setup() {
 	/*
 	 * CommLinks
 	 */
-	hal->gcs = new COMMLINK_CLASS(&Serial3, navigator, guide, controller, hal);
+	if (board==BOARD_ARDUPILOTMEGA_2) hal->gcs = new COMMLINK_CLASS(&Serial2, navigator, guide, controller, hal);
+	else hal->gcs = new COMMLINK_CLASS(&Serial3, navigator, guide, controller, hal);
+	
 	hal->hil = new COMMLINK_CLASS(&Serial1, navigator, guide, controller, hal);
 
 	/*

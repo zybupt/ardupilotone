@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<psf version="2.0">
-<provider id="org.eclipse.team.svn.core.svnnature">
-<project reference="1.0.1,https://ardupilotone.googlecode.com/svn/trunk,ArduPilotOne,00118e4d755c00101a769380f3bdab13;https://ardupilotone.googlecode.com/svn;https://ardupilotone.googlecode.com/svn;branches;tags;trunk;true;2d985f29-a1c8-afb7-27ee-997f99665c14;https://ardupilotone.googlecode.com/svn;;false;;;0"/>
-</provider>
-</psf>

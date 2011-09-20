@@ -24,7 +24,7 @@ private:
 	AP_Float _rdrTrim;
 	AP_Float _thrTrim;
 	enum {
-		ch_mode = 0, ch_roll, ch_pitch, ch_yaw, ch_thr
+		ch_mode = 0, ch_roll, ch_pitch, ch_thr, ch_yaw
 	};
 	enum {
 		k_chMode = k_radioChannelsStart,
@@ -93,11 +93,11 @@ public:
 				new AP_RcChannel(k_chPitch, PSTR("pitch_"), APM_RC, 1, 1200,
 						1500, 1800, RC_MODE_INOUT));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chYaw, PSTR("yaw_"), APM_RC, 2, 1200, 1500,
-						1800, RC_MODE_INOUT));
-		_hal->rc.push_back(
-				new AP_RcChannel(k_chThr, PSTR("thr_"), APM_RC, 3, 1100, 1100,
+				new AP_RcChannel(k_chThr, PSTR("thr_"), APM_RC, 2, 1100, 1100,
 						1900, RC_MODE_INOUT));
+		_hal->rc.push_back(
+				new AP_RcChannel(k_chYaw, PSTR("yaw_"), APM_RC, 3, 1200, 1500,
+						1800, RC_MODE_INOUT));
 	}
 	virtual MAV_MODE getMode() {
 		return (MAV_MODE) _mode.get();
