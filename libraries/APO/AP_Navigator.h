@@ -323,7 +323,7 @@ public:
 
 		// dcm class for attitude
 		if (_dcm) {
-			_dcm->update_DCM(dt);
+			_dcm->update_DCM();
 			setRoll(_dcm->roll);
 			setPitch(_dcm->pitch);
 			setYaw(_dcm->yaw);

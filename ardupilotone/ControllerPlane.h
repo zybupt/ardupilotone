@@ -182,6 +182,17 @@ public:
 			_hal->rc[ch_thr]->setPosition(throttle + _thrTrim);
 
 			//_hal->debug->println("automode");
+			
+
+			// heading debug
+			Serial.print("heading command: "); Serial.println(_guide->getHeadingCommand());
+			Serial.print("heading: "); Serial.println(_nav->getHeading());
+			Serial.print("heading error: "); Serial.println(headingError);
+
+			// alt debug
+			Serial.print("alt command: "); Serial.println(_guide->getAltitudeCommand());
+			Serial.print("alt: "); Serial.println(_nav->getAlt());
+			Serial.print("alt error: "); Serial.println(_guide->getAltitudeCommand() - _nav->getAlt());
 			break;
 		}
 
