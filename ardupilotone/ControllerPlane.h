@@ -146,7 +146,7 @@ public:
 		}
 		case MAV_MODE_AUTO: {
 			float headingError = _guide->getHeadingCommand()
-					- _nav->getHeading();
+					- _nav->getYaw();
 			if (headingError > 180 * deg2Rad)
 				headingError -= 360 * deg2Rad;
 			if (headingError < -180 * deg2Rad)
@@ -186,7 +186,7 @@ public:
 
 			// heading debug
 			Serial.print("heading command: "); Serial.println(_guide->getHeadingCommand());
-			Serial.print("heading: "); Serial.println(_nav->getHeading());
+			Serial.print("heading: "); Serial.println(_nav->getYaw());
 			Serial.print("heading error: "); Serial.println(headingError);
 
 			// alt debug
