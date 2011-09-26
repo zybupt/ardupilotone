@@ -93,7 +93,7 @@ public:
 		}
 		case MAV_MODE_AUTO: {
 			float headingError = _guide->getHeadingCommand()
-					- _nav->getHeading();
+					- _nav->getYaw();
 			if (headingError > 180 * deg2Rad)
 				headingError -= 360 * deg2Rad;
 			if (headingError < -180 * deg2Rad)

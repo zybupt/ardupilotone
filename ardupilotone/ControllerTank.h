@@ -17,13 +17,13 @@ private:
 	AP_Var_group _group;
 	AP_Uint8 _mode;
 	enum {
-		k_chMode = k_radioChannelsStart, k_chStr, k_chThr
+		k_chMode = k_radioChannelsStart, k_chLeft, k_chRight, k_chStr, k_chThr
 	};
 	enum {
 		k_pidStr = k_controllersStart, k_pidThr
 	};
 	enum {
-		CH_MODE = 0, CH_LEFT, CH_RIGHT
+		CH_MODE = 0, CH_LEFT, CH_RIGHT, CH_STR, CH_THR
 	};
 	BlockPIDDfb pidStr;
 	BlockPID pidThr;
@@ -41,17 +41,27 @@ public:
 		_hal->debug->println_P(PSTR("initializing tank controller"));
 
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 7, 1100,
-						1500, 1900));
+				new AP_RcChannel(k_chMode, PSTR("MODE_"), APM_RC, 5, 1100,
+						1500, 1900, RC_MODE_IN));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chStr, PSTR("LEFT_"), APM_RC, 0, 1100, 1540,
-						1900));
+				new AP_RcChannel(k_chLeft, PSTR("LEFT_"), APM_RC, 0, 1100, 1500,
+						1900, RC_MODE_OUT));
 		_hal->rc.push_back(
-				new AP_RcChannel(k_chThr, PSTR("RIGHT_"), APM_RC, 1, 1100, 1500,
-						1900));
+				new AP_RcChannel(k_chRight, PSTR("RIGHT_"), APM_RC, 1, 1100, 1500,
+						1900, RC_MODE_OUT));
+		_hal->rc.push_back(
+				new AP_RcChannel(k_chStr, PSTR("STR_"), APM_RC, 0, 1100, 1500,
+						1900, RC_MODE_IN));
+		_hal->rc.push_back(
+				new AP_RcChannel(k_chThr, PSTR("THR_"), APM_RC, 1, 1100, 1500,
+						1900, RC_MODE_IN));
 	}
 	virtual MAV_MODE getMode() {
 		return (MAV_MODE) _mode.get();
+	}
+	void mix(float headingOutput, float throttleOutput) {
+		_hal->rc[CH_LEFT]->setPosition(throttleOutput + headingOutput);
+		_hal->rc[CH_RIGHT]->setPosition(throttleOutput - headingOutput);
 	}
 	virtual void update(const float & dt) {
 
@@ -88,20 +98,20 @@ public:
 
 		case MAV_MODE_MANUAL: {
 			setAllRadioChannelsManually();
+			mix(_hal->rc[CH_STR]->getPosition(),
+					_hal->rc[CH_THR]->getPosition());
 			break;
 		}
 		case MAV_MODE_AUTO: {
 			float headingError = _guide->getHeadingCommand()
-					- _nav->getHeading();
+					- _nav->getYaw();
 			if (headingError > 180 * deg2Rad)
 				headingError -= 360 * deg2Rad;
 			if (headingError < -180 * deg2Rad)
 				headingError += 360 * deg2Rad;
-			float headingOuput = pidStr.update(headingError, _nav->getYawRate(), dt);
-			float throttleOutput = pidThr.update(_guide->getGroundSpeedCommand()
-									- _nav->getGroundSpeed(), dt);
-			_hal->rc[CH_LEFT]->setPosition(throttleOutput + headingOutput);
-			_hal->rc[CH_RIGHT]->setPosition(throttleOutput - headingOutput);
+			mix(pidStr.update(headingError, _nav->getYawRate(), dt),
+				pidThr.update(_guide->getGroundSpeedCommand()
+					- _nav->getGroundSpeed(), dt));
 			//_hal->debug->println("automode");
 			break;
 		}
