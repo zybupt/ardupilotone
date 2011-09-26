@@ -95,7 +95,7 @@ static const float pidHdgBnkLim = 0.5;
 static const float pidHdgBnkDFCut = 0.0;
 
 // altitude error to throttle command
-static const float pidAltThrP = -1;
+static const float pidAltThrP = .01;
 static const float pidAltThrI = 0.0;
 static const float pidAltThrD = 0.0;
 static const float pidAltThrAwu = 0.0;

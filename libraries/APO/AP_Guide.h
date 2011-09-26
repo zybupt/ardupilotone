@@ -174,6 +174,7 @@ public:
 		// go home
 		if (_numberOfCommands == 1) {
 			_mode = MAV_NAV_RETURNING;
+			_altitudeCommand = AP_MavlinkCommand::home.getAlt();
 			_headingCommand = AP_MavlinkCommand::home.bearingTo(
 					_navigator->getLat_degInt(), _navigator->getLon_degInt())
 					+ 180 * deg2Rad;
@@ -184,6 +185,7 @@ public:
 //			headingCommand,AP_MavlinkCommand::home.distanceTo(_navigator->getLat_degInt(),_navigator->getLon_degInt()));
 		} else {
 			_mode = MAV_NAV_WAYPOINT;
+			_altitudeCommand = _command.getAlt();
 			// TODO wrong behavior if 0 selected as waypoint, says previous 0
 			float dXt = AP_MavlinkCommand::crossTrack(_previousCommand,
 					_command, _navigator->getLat_degInt(),

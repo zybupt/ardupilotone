@@ -37,7 +37,7 @@ public:
 	AP_Navigator(AP_HardwareAbstractionLayer * hal) :
 		_hal(hal), _timeStamp(0), _roll(0), _rollRate(0), _pitch(0),
 				_pitchRate(0), _yaw(0), _yawRate(0), _airSpeed(0),
-				_groundSpeed(0), _heading(0), _vD(0), _lat_degInt(0),
+				_groundSpeed(0), _vD(0), _lat_degInt(0),
 				_lon_degInt(0), _alt_intM(0) {
 	}
 	virtual void calibrate() {
@@ -108,12 +108,8 @@ public:
 		return _vD;
 	}
 
-	float getHeading() const {
-		return _heading;
-	}
-
 	float getVE() const {
-		return sin(getHeading()) * getGroundSpeed();
+		return sin(getYaw()) * getGroundSpeed();
 	}
 
 	float getGroundSpeed() const {
@@ -132,7 +128,7 @@ public:
 	}
 
 	float getVN() const {
-		return cos(getHeading()) * getGroundSpeed();
+		return cos(getYaw()) * getGroundSpeed();
 	}
 
 	float getPitch() const {
@@ -161,10 +157,6 @@ public:
 
 	void setAirSpeed(float airSpeed) {
 		_airSpeed = airSpeed;
-	}
-
-	void setHeading(float heading) {
-		_heading = heading;
 	}
 
 	void setAlt_intM(int32_t alt_intM) {
@@ -231,7 +223,6 @@ private:
 	float _yawRate; // rad/s
 	float _airSpeed; // m/s
 	float _groundSpeed; // m/s
-	float _heading; // rad
 	float _vD; // m/s
 	int32_t _lat_degInt; // deg / 1e7
 	int32_t _lon_degInt; // deg / 1e7
@@ -323,7 +314,7 @@ public:
 
 		// dcm class for attitude
 		if (_dcm) {
-			_dcm->update_DCM(dt);
+			_dcm->update_DCM();
 			setRoll(_dcm->roll);
 			setPitch(_dcm->pitch);
 			setYaw(_dcm->yaw);
