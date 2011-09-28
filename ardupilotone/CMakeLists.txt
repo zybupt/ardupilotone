@@ -73,3 +73,8 @@ ${CMAKE_SOURCE_DIR}/libraries/APM_BMP085
 #  Target generation                                                 #
 #====================================================================#
 generate_arduino_firmware(${FIRMWARE_NAME})
+
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/${FIRMWARE_NAME}.hex 
+	DESTINATION bin
+	)

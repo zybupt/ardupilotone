@@ -13,7 +13,7 @@ project(ArdupilotOne C CXX)
 # set these for release
 set(APPLICATION_VERSION_MAJOR "0")
 set(APPLICATION_VERSION_MINOR "1")
-set(APPLICATION_VERSION_PATCH "0")
+set(APPLICATION_VERSION_PATCH "1")
 
 # dependencies
 find_package(Arduino 22 REQUIRED)
