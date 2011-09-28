@@ -2,6 +2,7 @@
 
 # cmake setup
 cmake_minimum_required(VERSION 2.8)
+
 set(CMAKE_MODULE_PATH    ${CMAKE_SOURCE_DIR}/cmake/modules ${CMAKE_SOURCE_DIR}/cmake/arkcmake)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchains/Arduino.cmake)
 set (CMAKE_CXX_SOURCE_FILE_EXTENSIONS pde)
@@ -12,7 +13,6 @@ project(ArdupilotOne C CXX)
 # set these for release
 set(APPLICATION_VERSION_MAJOR "0")
 set(APPLICATION_VERSION_MINOR "1")
-set(CMAKE_CXXFLAGS "-Wformat -Wall -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Wformat=2 -Wno-reorder --mcall-prologues -ffunction-sections -fdata-sections -fno-exceptions")
 set(APPLICATION_VERSION_PATCH "0")
 
 # cmake includes

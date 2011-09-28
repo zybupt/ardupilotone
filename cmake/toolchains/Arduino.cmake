@@ -6,31 +6,31 @@ set(CMAKE_CXX_COMPILER avr-g++)
 #=============================================================================#
 #                              C Flags                                        #
 #=============================================================================#
-set(ARDUINO_C_FLAGS "-ffunction-sections -fdata-sections")
-set(CMAKE_C_FLAGS                "-g -Os       ${ARDUINO_C_FLAGS}" CACHE STRING "")
-set(CMAKE_C_FLAGS_DEBUG          "-g           ${ARDUINO_C_FLAGS}" CACHE STRING "")
-set(CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG ${ARDUINO_C_FLAGS}" CACHE STRING "")
-set(CMAKE_C_FLAGS_RELEASE        "-Os -DNDEBUG -w ${ARDUINO_C_FLAGS}" CACHE STRING "")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-Os -g       -w ${ARDUINO_C_FLAGS}" CACHE STRING "")
+set(ARDUINO_C_FLAGS "-Os -Wall -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Wformat=2")
+set(CMAKE_C_FLAGS                "            ${ARDUINO_C_FLAGS}" CACHE STRING "")
+set(CMAKE_C_FLAGS_DEBUG          "g      	  ${ARDUINO_C_FLAGS}" CACHE STRING "")
+set(CMAKE_C_FLAGS_MINSIZEREL     "-DNDEBUG 	  ${ARDUINO_C_FLAGS}" CACHE STRING "")
+set(CMAKE_C_FLAGS_RELEASE        "-DNDEBUG -w ${ARDUINO_C_FLAGS}" CACHE STRING "")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g       -w ${ARDUINO_C_FLAGS}" CACHE STRING "")
 
 #=============================================================================#
 #                             C++ Flags                                       #
 #=============================================================================#
-set(ARDUINO_CXX_FLAGS "${ARDUINO_C_FLAGS} -fno-exceptions")
-set(CMAKE_CXX_FLAGS                "-g -Os       ${ARDUINO_CXX_FLAGS}" CACHE STRING "")
-set(CMAKE_CXX_FLAGS_DEBUG          "-g           ${ARDUINO_CXX_FLAGS}" CACHE STRING "")
-set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG ${ARDUINO_CXX_FLAGS}" CACHE STRING "")
-set(CMAKE_CXX_FLAGS_RELEASE        "-Os -DNDEBUG ${ARDUINO_CXX_FLAGS}" CACHE STRING "")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Os -g       ${ARDUINO_CXX_FLAGS}" CACHE STRING "")
+set(ARDUINO_CXX_FLAGS "${ARDUINO_C_FLAGS} -fno-exceptions -Wno-reorder")
+set(CMAKE_CXX_FLAGS                "-g       ${ARDUINO_CXX_FLAGS}" CACHE STRING "")
+set(CMAKE_CXX_FLAGS_DEBUG          "-g       ${ARDUINO_CXX_FLAGS}" CACHE STRING "")
+set(CMAKE_CXX_FLAGS_MINSIZEREL     "-DNDEBUG ${ARDUINO_CXX_FLAGS}" CACHE STRING "")
+set(CMAKE_CXX_FLAGS_RELEASE        "-DNDEBUG ${ARDUINO_CXX_FLAGS}" CACHE STRING "")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g       ${ARDUINO_CXX_FLAGS}" CACHE STRING "")
 
 #=============================================================================#
 #                       Executable Linker Flags                               #
 #=============================================================================#
-set(ARDUINO_LINKER_FLAGS "-lc -lm -Wl,--gc-sections")
+set(ARDUINO_LINKER_FLAGS "-Os -lc -lm -Wl,--gc-sections")
 set(CMAKE_EXE_LINKER_FLAGS                "${ARDUINO_LINKER_FLAGS}" CACHE STRING "")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG          "${ARDUINO_LINKER_FLAGS}" CACHE STRING "")
 set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL     "${ARDUINO_LINKER_FLAGS}" CACHE STRING "")
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE        "-O s ${ARDUINO_LINKER_FLAGS}" CACHE STRING "")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE        "${ARDUINO_LINKER_FLAGS}" CACHE STRING "")
 set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${ARDUINO_LINKER_FLAGS}" CACHE STRING "")
 
 #=============================================================================#
