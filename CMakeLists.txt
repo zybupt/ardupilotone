@@ -15,8 +15,8 @@ set(APPLICATION_VERSION_MAJOR "0")
 set(APPLICATION_VERSION_MINOR "1")
 set(APPLICATION_VERSION_PATCH "0")
 
-# cmake includes
-include(CPack)
+# dependencies
+find_package(Arduino 22 REQUIRED)
 
 # cmake settigns
 set(APPLICATION_NAME ${PROJECT_NAME})
@@ -26,9 +26,15 @@ set(APPLICATION_VERSION "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINO
 include(MacroEnsureOutOfSourceBuild)
 
 # disallow in-source build
-include(MacroEnsureOutOfSourceBuild)
 macro_ensure_out_of_source_build("${PROJECT_NAME} requires an out of source build. 
 Please create a separate build directory and run 'cmake /path/to/${PROJECT_NAME} [options]' there.")
+
+# options
+if (NOT DEFINED BOARD)
+	message(STATUS "please define the board type (for example: cmake -DBOARD=mega, assuming mega")
+	set(BOARD "mega")
+endif()
+PRINT_BOARD_SETTINGS("${BOARD}")
 
 # cpack settings
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "universal autopilot system for ArduPilotMega")
@@ -46,15 +52,12 @@ set(CPACK_SET_DESTDIR TRUE)
 set(CPACK_SOURCE_IGNORE_FILES ${CPACK_SOURCE_IGNORE_FILES}
 	/.git/;/build/;~$;.*\\\\.bin$;.*\\\\.swp$)
 set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
-
-# dependencies
-find_package(Arduino 22 REQUIRED)
+set(CPACK_SOURCE_GENERATOR "ZIP")
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_PACKAGE_NAME "${APPLICATION_NAME}_${BOARD}")
+include(CPack)
 
 # subdirectories
 add_subdirectory(libraries)
 add_subdirectory(ardupilotone)
 #add_subdirectory(testtool)
-
-option(BOARD "The avr board you are using (mega/mega2560)." mega2560)
-
-PRINT_BOARD_SETTINGS("${BOARD}")

@@ -9,7 +9,7 @@
 #====================================================================#
 set(FIRMWARE_NAME ardupilotone)
 
-set(${FIRMWARE_NAME}_BOARD mega2560)               # Arduino Target board
+set(${FIRMWARE_NAME}_BOARD ${BOARD})               # Arduino Target board
 
 set(${FIRMWARE_NAME}_SKETCHES
 	ardupilotone.pde	
