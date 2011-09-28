@@ -8,7 +8,7 @@ set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchains/Arduino.cmake)
 set (CMAKE_CXX_SOURCE_FILE_EXTENSIONS pde)
 
 # project
-project(ArdupilotOne C CXX)
+project(ardupilotone C CXX)
 
 # set these for release
 set(APPLICATION_VERSION_MAJOR "0")
