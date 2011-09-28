@@ -5,10 +5,11 @@
  *      Author: jgoppert
  */
 
+#define ENABLE_FASTSERIAL_DEBUG
+
 // Libraries
-#include <APO.h>
-#include <AP_Common.h>
 #include <FastSerial.h>
+#include <AP_Common.h>
 #include <APM_RC.h>
 #include <AP_RangeFinder.h>
 #include <GCS_MAVLink.h>
@@ -20,6 +21,12 @@
 #include <AP_IMU.h>
 #include <APM_BMP085.h>
 #include <ModeFilter.h>
+#include <APO.h>
+
+FastSerialPort0(Serial);
+FastSerialPort1(Serial1);
+FastSerialPort2(Serial2);
+FastSerialPort3(Serial3);
 
 // Vehicle Configuration
 #include "PlaneEasystar.h"
@@ -27,18 +34,14 @@
 /*
  * Required Global Declarations
  */
-FastSerialPort0(Serial);
-FastSerialPort1(Serial1);
-FastSerialPort2(Serial2);
-FastSerialPort3(Serial3);
+
 static apo::AP_Autopilot * autoPilot;
 
 void setup() {
 
 	using namespace apo;
-
-	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(
-			halMode, board, vehicle, heartBeatTimeout);
+	
+	AP_Var::load_all();
 
 	/*
 	 * Communications
@@ -46,6 +49,10 @@ void setup() {
 	Serial.begin(DEBUG_BAUD, 128, 128); // debug
 	if (board==BOARD_ARDUPILOTMEGA_2) Serial2.begin(TELEM_BAUD, 128, 128); // gcs
 	else Serial3.begin(TELEM_BAUD, 128, 128); // gcs
+
+	// hardware abstraction layer
+	AP_HardwareAbstractionLayer * hal = new AP_HardwareAbstractionLayer(
+			halMode, board, vehicle, heartBeatTimeout);
 	
 	// debug serial
 	hal->debug = &Serial;

@@ -12,7 +12,7 @@
 #include "../AP_Common/AP_Common.h"
 #include "AP_Var_keys.h"
 #include "constants.h"
-#include "HardwareSerial.h"
+#include "../FastSerial/FastSerial.h"
 
 namespace apo {
 
@@ -34,60 +34,24 @@ private:
 	uint16_t _seq;
 public:
 	static AP_MavlinkCommand home;
+
+	/**
+	 * Copy Constructor
+	 */
+	AP_MavlinkCommand(const AP_MavlinkCommand & v);
+
 	/**
 	 * Basic Constructor
 	 * @param index Start at zero.
 	 */
-	AP_MavlinkCommand(uint16_t index) :
-		_data(k_commands + index), _seq(index) {
-	}
+	AP_MavlinkCommand(uint16_t index, bool doLoad = true);
 
 	/**
 	 * Constructor for copying/ saving from a mavlink waypoint.
 	 * @param cmd The mavlink_waopint_t structure for the command.
 	 */
-	AP_MavlinkCommand(mavlink_waypoint_t cmd) :
-		_data(k_commands + cmd.seq), _seq(cmd.seq) {
-		setCommand(MAV_CMD(cmd.command));
-		setAutocontinue(cmd.autocontinue);
-		setFrame(MAV_FRAME(cmd.frame));
-		setParam1(cmd.param1);
-		setParam2(cmd.param2);
-		setParam3(cmd.param3);
-		setParam4(cmd.param4);
-		setX(cmd.x);
-		setY(cmd.y);
-		setZ(cmd.z);
-		save();
+	AP_MavlinkCommand(mavlink_waypoint_t cmd);
 
-		// reload home if sent
-		if (cmd.seq == 0) home.load();
-
-		Serial.println("============================================================");
-		Serial.println("storing new command from mavlink_waypoint_t");
-		Serial.print("key: "); Serial.println(_data.key(),DEC);
-		Serial.print("number: "); Serial.println(cmd.seq,DEC);
-		Serial.print("command: "); Serial.println(getCommand());
-		Serial.print("autocontinue: "); Serial.println(getAutocontinue(),DEC);
-		Serial.print("frame: "); Serial.println(getFrame(),DEC);
-	    Serial.print("1000*param1: "); Serial.println(int(1000*getParam1()),DEC);
-		Serial.print("1000*param2: "); Serial.println(int(1000*getParam2()),DEC);
-		Serial.print("1000*param3: "); Serial.println(int(1000*getParam3()),DEC);
-		Serial.print("1000*param4: "); Serial.println(int(1000*getParam4()),DEC);
-		Serial.print("1000*x0: "); Serial.println(int(1000*cmd.x),DEC);
-		Serial.print("1000*y0: "); Serial.println(int(1000*cmd.y),DEC);
-		Serial.print("1000*z0: "); Serial.println(int(1000*cmd.z),DEC);
-		Serial.print("1000*x: "); Serial.println(int(1000*getX()),DEC);
-		Serial.print("1000*y: "); Serial.println(int(1000*getY()),DEC);
-		Serial.print("1000*z: "); Serial.println(int(1000*getZ()),DEC);
-
-		load();
-
-	    Serial.print("1000*x1: "); Serial.println(int(1000*getX()),DEC);
-		Serial.print("1000*y1: "); Serial.println(int(1000*getY()),DEC);
-		Serial.print("1000*z1: "); Serial.println(int(1000*getZ()),DEC);
-
-	}
 	bool save() {
 		return _data.save();
 	}
@@ -314,42 +278,14 @@ public:
 	 * conversion for outbound packets to ground station
 	 * @return output the mavlink_waypoint_t packet
 	 */
-	mavlink_waypoint_t convert(uint8_t current) {
-		mavlink_waypoint_t mavCmd;
-		mavCmd.seq = getSeq();
-		mavCmd.command = getCommand();
-		mavCmd.frame = getFrame();
-		mavCmd.param1 = getParam1();
-		mavCmd.param2 = getParam2();
-		mavCmd.param3 = getParam3();
-		mavCmd.param4 = getParam4();
-		mavCmd.x = getX();
-		mavCmd.y = getY();
-		mavCmd.z = getZ();
-		mavCmd.autocontinue = getAutocontinue();
-		mavCmd.current = (getSeq() == current);
-		mavCmd.target_component = mavlink_system.compid;
-		mavCmd.target_system = mavlink_system.sysid;
-		return mavCmd;
-	}
+	mavlink_waypoint_t convert(uint8_t current);
+
 	/**
 	 * Calculate the bearing from this command to the next command
 	 * @param next The command to calculate the bearing to.
 	 * @return the bearing
 	 */
-	float bearingTo(AP_MavlinkCommand next) const {
-		float deltaLon = next.getLon() - getLon();
-		/*
-		 Serial.print("Lon: "); Serial.println(getLon());
-		 Serial.print("nextLon: "); Serial.println(next.getLon());
-		 Serial.print("deltaLonDeg * 1e7: "); Serial.println(deltaLon*rad2DegInt);
-		 */
-		float bearing = atan2(
-				sin(deltaLon) * cos(next.getLat()),
-				cos(getLat()) * sin(next.getLat()) - sin(getLat()) * cos(
-						next.getLat()) * cos(deltaLon));
-		return bearing;
-	}
+	float bearingTo(AP_MavlinkCommand next) const;
 
 	/**
 	 * Bearing form this command to a gps coordinate in integer units
@@ -357,32 +293,14 @@ public:
 	 * @param lonDegInt longitude in degrees E-7
 	 * @return
 	 */
-	float bearingTo(int32_t latDegInt, int32_t lonDegInt) const {
-		// have to be careful to maintain the precision of the gps coordinate
-		float deltaLon = (lonDegInt - getLon_degInt()) * degInt2Rad;
-		float nextLat = latDegInt * degInt2Rad;
-		float bearing = atan2(
-				sin(deltaLon) * cos(nextLat),
-				cos(getLat()) * sin(nextLat) - sin(getLat()) * cos(nextLat)
-						* cos(deltaLon));
-		if (bearing < 0)
-			bearing += 2 * M_PI;
-		return bearing;
-	}
+	float bearingTo(int32_t latDegInt, int32_t lonDegInt) const;
 
 	/**
 	 * Distance to another command
 	 * @param next The command to measure to.
 	 * @return The distance in meters.
 	 */
-	float distanceTo(AP_MavlinkCommand next) const {
-		float sinDeltaLat2 = sin((getLat() - next.getLat()) / 2);
-		float sinDeltaLon2 = sin((getLon() - next.getLon()) / 2);
-		float a = sinDeltaLat2 * sinDeltaLat2 + cos(getLat()) * cos(
-				next.getLat()) * sinDeltaLon2 * sinDeltaLon2;
-		float c = 2 * atan2(sqrt(a), sqrt(1 - a));
-		return rEarth * c;
-	}
+	float distanceTo(AP_MavlinkCommand next) const;
 
 	/**
 	 * Distance to a gps coordinate in integer units
@@ -390,24 +308,7 @@ public:
 	 * @param lonDegInt longitude in degrees E-7
 	 * @return The distance in meters.
 	 */
-	float distanceTo(int32_t lat_degInt, int32_t lon_degInt) const {
-		float sinDeltaLat2 = sin(
-				(lat_degInt - getLat_degInt()) * degInt2Rad / 2);
-		float sinDeltaLon2 = sin(
-				(lon_degInt - getLon_degInt()) * degInt2Rad / 2);
-		float a = sinDeltaLat2 * sinDeltaLat2 + cos(getLat()) * cos(
-				lat_degInt * degInt2Rad) * sinDeltaLon2 * sinDeltaLon2;
-		float c = 2 * atan2(sqrt(a), sqrt(1 - a));
-		/*
-		 Serial.print("wp lat_degInt: "); Serial.println(getLat_degInt());
-		 Serial.print("wp lon_degInt: "); Serial.println(getLon_degInt());
-		 Serial.print("lat_degInt: "); Serial.println(lat_degInt);
-		 Serial.print("lon_degInt: "); Serial.println(lon_degInt);
-		 Serial.print("sinDeltaLat2: "); Serial.println(sinDeltaLat2);
-		 Serial.print("sinDeltaLon2: "); Serial.println(sinDeltaLon2);
-		 */
-		return rEarth * c;
-	}
+	float distanceTo(int32_t lat_degInt, int32_t lon_degInt) const;
 
 	float getPN(int32_t lat_degInt, int32_t lon_degInt) const {
 		// local tangent approximation at this waypoint
@@ -446,25 +347,10 @@ public:
 	}
 
 	//calculates cross track of a current location
-	static float crossTrack(AP_MavlinkCommand previous,
-			AP_MavlinkCommand current, int32_t lat_degInt, int32_t lon_degInt) {
-		// TODO cross track is currenlty broken
-		// XXX don't fly this
-//		float d = previous.distanceTo(lat_degInt, lon_degInt);
-//		float bCurrent = previous.bearingTo(lat_degInt, lon_degInt);
-//		float bNext = previous.bearingTo(current);
-//		return asin(sin(d / rEarth) * sin(bCurrent - bNext)) * rEarth;
-		return 0;
-	}
+	float crossTrack(AP_MavlinkCommand previous, int32_t lat_degInt, int32_t lon_degInt);
 
 	// calculates along  track distance of a current location
-	static float alongTrack(AP_MavlinkCommand previous,
-			AP_MavlinkCommand current, int32_t lat_degInt, int32_t lon_degInt) {
-		// ignores lat/lon since single prec.
-		float dXt = crossTrack(previous, current, lat_degInt, lon_degInt);
-		float d = previous.distanceTo(lat_degInt, lon_degInt);
-		return dXt / tan(asin(dXt / d));
-	}
+	float alongTrack(AP_MavlinkCommand previous, int32_t lat_degInt, int32_t lon_degInt);
 };
 
 } // namespace apo

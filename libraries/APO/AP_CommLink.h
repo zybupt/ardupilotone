@@ -571,10 +571,15 @@ private:
 			// decode
 			mavlink_waypoint_set_current_t packet;
 			mavlink_msg_waypoint_set_current_decode(msg, &packet);
+			Serial.print("Packet Sequence:");
+			Serial.println(packet.seq);
 			if (_checkTarget(packet.target_system, packet.target_component))
 				break;
 
 			// set current waypoint
+			Serial.print("Current Index:");
+			Serial.println(_guide->getCurrentIndex());
+			Serial.flush();
 			_guide->setCurrentIndex(packet.seq);
 			mavlink_msg_waypoint_current_send(_channel,
 					_guide->getCurrentIndex());

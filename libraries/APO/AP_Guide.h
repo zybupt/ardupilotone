@@ -44,10 +44,12 @@ public:
 				_headingCommand(0), _airSpeedCommand(0),
 				_groundSpeedCommand(0), _altitudeCommand(0), _pNCmd(0),
 				_pECmd(0), _pDCmd(0), _mode(MAV_NAV_LOST),
-				_numberOfCommands(1), _cmdIndex(0) {
+				_numberOfCommands(1), _cmdIndex(0), _nextCommandCalls(0),
+				_nextCommandTimer(0) {
 	}
 
 	virtual void update() = 0;
+
 	virtual void nextCommand() = 0;
 
 	MAV_NAV getMode() const {
@@ -129,7 +131,11 @@ protected:
 	float _pNCmd;
 	float _pECmd;
 	float _pDCmd;
-	MAV_NAV _mode;AP_Uint8 _numberOfCommands;AP_Uint8 _cmdIndex;
+	MAV_NAV _mode;
+	AP_Uint8 _numberOfCommands;
+	AP_Uint8 _cmdIndex;
+	uint16_t _nextCommandCalls;
+	uint16_t _nextCommandTimer;
 };
 
 class MavlinkGuide: public AP_Guide {
@@ -187,8 +193,8 @@ public:
 			_mode = MAV_NAV_WAYPOINT;
 			_altitudeCommand = _command.getAlt();
 			// TODO wrong behavior if 0 selected as waypoint, says previous 0
-			float dXt = AP_MavlinkCommand::crossTrack(_previousCommand,
-					_command, _navigator->getLat_degInt(),
+			float dXt = _command.crossTrack(_previousCommand,
+					_navigator->getLat_degInt(),
 					_navigator->getLon_degInt());
 			float temp = dXt * _crossTrackGain * deg2Rad; // crosstrack gain, rad/m
 			if (temp > _crossTrackLim * deg2Rad)
@@ -197,15 +203,18 @@ public:
 				temp = -_crossTrackLim * deg2Rad;
 			float bearing = _previousCommand.bearingTo(_command);
 			_headingCommand = bearing - temp;
-			float alongTrack = AP_MavlinkCommand::alongTrack(_previousCommand,
-					_command, _navigator->getLat_degInt(),
+			float alongTrack = _command.alongTrack(_previousCommand,
+					_navigator->getLat_degInt(),
 					_navigator->getLon_degInt());
 			float distanceToNext = _command.distanceTo(
 					_navigator->getLat_degInt(), _navigator->getLon_degInt());
 			float segmentLength = _previousCommand.distanceTo(_command);
 			if (distanceToNext < _command.getRadius() || alongTrack
 					> segmentLength)
+			{
+				Serial.println("radius reached");
 				nextCommand();
+			}
 //			_hal->debug->printf_P(
 //					PSTR("nav: bCurrent2Dest: %f\tdXt: %f\tcmdHeading: %f\tnextWpDistance: %f\talongTrack: %f\n"),
 //					bearing * rad2Deg, dXt, _headingCommand * rad2Deg, distanceToNext, alongTrack);
@@ -259,16 +268,29 @@ public:
 	}
 
 	void nextCommand() {
+		// within 1 seconds, check if more than 5 calls to next command occur
+		// if they do, go to home waypoint
+		if (millis() - _nextCommandTimer < 1000) {
+			if (_nextCommandCalls > 5) {
+				Serial.println("commands loading too fast, returning home");
+				setCurrentIndex(0);
+				setNumberOfCommands(1);
+				_nextCommandCalls = 0;
+				_nextCommandTimer = millis();
+				return;
+			}
+			_nextCommandCalls++;
+		} else {
+			_nextCommandTimer = millis();
+			_nextCommandCalls = 0;
+		}
+
 		_cmdIndex = getNextIndex();
-		Serial.print("cmd       : "); Serial.println(_cmdIndex);
+		Serial.print("cmd       : "); Serial.println(int(_cmdIndex));
 		Serial.print("cmd prev  : "); Serial.println(int(getPreviousIndex()));
 		Serial.print("cmd num    : "); Serial.println(int(getNumberOfCommands()));
-		Serial.flush();
 		_command = AP_MavlinkCommand(getCurrentIndex());
-		_command.load();
 		_previousCommand = AP_MavlinkCommand(getPreviousIndex());
-		_previousCommand.load();
-		//_hal->gcs->sendMessage(MAVLINK_MSG_ID_WAYPOINT_CURRENT);
 	}
 
 	void handleCommand(AP_MavlinkCommand command,
@@ -281,6 +303,7 @@ public:
 					_navigator->getLon_degInt());
 			if (d < command.getRadius()) {
 				nextCommand();
+				Serial.println("radius reached");
 			}
 			break;
 		}
@@ -314,6 +337,7 @@ public:
 //		case MAV_CMD_NAV_TAKEOFF:
 		default:
 			// unhandled command, skip
+			Serial.println("unhandled command");
 			nextCommand();
 			break;
 		}
