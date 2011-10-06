@@ -29,24 +29,19 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 	hal->setState(MAV_STATE_CALIBRATING);
 	hal->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 	hal->gcs->sendMessage(MAVLINK_MSG_ID_SYS_STATUS);
-	navigator->calibrate();
 
-	// start clock
-	//uint32_t timeStart = millis();
-	//uint16_t gpsWaitTime = 5000; // 5 second wait for gps
+	if (navigator) navigator->calibrate();
 
 	/*
 	 * Look for valid initial state
 	 */
-	while (1) {
+	while (_navigator) {
 		// letc gcs known we are alive
 		hal->gcs->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
 		hal->gcs->sendMessage(MAVLINK_MSG_ID_SYS_STATUS);
-		hal->hil->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
-		delay(1000);
 		if (hal->getMode() == MODE_LIVE) {
 			_navigator->updateSlow(0);
-			if (_hal->gps) {
+			if (hal->gps) {
 				if (hal->gps->fix) {
 					break;
 				} else {
@@ -58,7 +53,8 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 				break;
 			}
 		} else if (hal->getMode() == MODE_HIL_CNTL) { // hil
-			_hal->hil->receive();
+			hal->hil->sendMessage(MAVLINK_MSG_ID_HEARTBEAT);
+			hal->hil->receive();
 			Serial.println("HIL Receive Called");
 			if (_navigator->getTimeStamp() != 0) {
 				// give hil a chance to send some packets
@@ -71,9 +67,10 @@ AP_Autopilot::AP_Autopilot(AP_Navigator * navigator, AP_Guide * guide,
 				break;
 			}
 			hal->debug->println_P(PSTR("waiting for hil packet"));
+			delay(1000);
 		}
 	}
-
+	
 	AP_MavlinkCommand::home.setAlt(_navigator->getAlt());
 	AP_MavlinkCommand::home.setLat(_navigator->getLat());
 	AP_MavlinkCommand::home.setLon(_navigator->getLon());

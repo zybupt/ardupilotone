@@ -1,6 +1,0 @@
-#!/bin/bash
-astyle --style=k/r $(find . -regex '.*\.\(cpp\|c\|cc\|h\|hpp\|pde\)')
-rm -f $(find . -regex '.*\.\(orig\|tmp\)')
-rm -f $(find . -name 'tags')
-svn add --force *
-svn commit

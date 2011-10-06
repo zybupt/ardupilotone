@@ -281,9 +281,9 @@ public:
 					temp = -_crossTrackLim * deg2Rad;
 				float bearing = _previousCommand.bearingTo(_command);
 				_headingCommand = bearing - temp;
-				_hal->debug->printf_P(
-						PSTR("nav: bCurrent2Dest: %f\tdXt: %f\tcmdHeading: %f\tnextWpDistance: %f\talongTrack: %f\n"),
-						bearing * rad2Deg, dXt, _headingCommand * rad2Deg, distanceToNext, alongTrack);
+				//_hal->debug->printf_P(
+						//PSTR("nav: bCurrent2Dest: %f\tdXt: %f\tcmdHeading: %f\tnextWpDistance: %f\talongTrack: %f\n"),
+						//bearing * rad2Deg, dXt, _headingCommand * rad2Deg, distanceToNext, alongTrack);
 			}
 
 			_groundSpeedCommand = _velocityCommand;
@@ -296,11 +296,11 @@ public:
 			_pDCmd = _command.getPD(_navigator->getAlt_intM());
 
 			// debug 
-			_hal->debug->printf_P(
-				PSTR("guide loop, number: %d, current index: %d, previous index: %d\n"),
-				getNumberOfCommands(),
-				getCurrentIndex(),
-				getPreviousIndex());
+			//_hal->debug->printf_P(
+				//PSTR("guide loop, number: %d, current index: %d, previous index: %d\n"),
+				//getNumberOfCommands(),
+				//getCurrentIndex(),
+				//getPreviousIndex());
 
 			break;
 		}
