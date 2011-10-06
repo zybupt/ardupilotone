@@ -497,7 +497,6 @@ private:
 
 			_hal->debug->printf_P(PSTR("sequence: %d\n"),packet.seq);
 			AP_MavlinkCommand cmd(packet.seq);
-			cmd.load();
 
 			mavlink_waypoint_t wp = cmd.convert(_guide->getCurrentIndex());
 			mavlink_msg_waypoint_send(_channel, _cmdDestSysId, _cmdDestCompId,
