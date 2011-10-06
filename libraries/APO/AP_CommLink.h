@@ -359,7 +359,7 @@ private:
 		uint32_t timeStamp = micros();
 
 		switch (msg->msgid) {
-		//_hal->debug->printf_P(PSTR("message received: %d"), msg->msgid);
+		_hal->debug->printf_P(PSTR("message received: %d"), msg->msgid);
 
 		case MAVLINK_MSG_ID_HEARTBEAT: {
 			mavlink_heartbeat_t packet;

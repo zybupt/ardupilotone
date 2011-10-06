@@ -41,11 +41,9 @@ void setup() {
 	 */
 	if (hal->getMode() == MODE_LIVE) {
 
-		if (adcEnabled) {
-			hal->debug->println_P(PSTR("initializing adc"));
-			hal->adc = new ADC_CLASS;
-			hal->adc->Init();
-		}
+		hal->debug->println_P(PSTR("initializing adc"));
+		hal->adc = new ADC_CLASS;
+		hal->adc->Init();
 
 		if (gpsEnabled) {
 			Serial1.begin(GPS_BAUD, 128, 16); // gps
@@ -126,11 +124,6 @@ void setup() {
 		}
 
 	} else 
-	// HIL MODE
-	{
-		Serial1.begin(HIL_BAUD, 128, 128);
-		hal->hil = new COMMLINK_CLASS(&Serial1, navigator, guide, controller, hal);
-	}
 
 	/*
 	 * Select guidance, navigation, control algorithms
@@ -152,6 +145,16 @@ void setup() {
 	   	Serial3.begin(TELEM_BAUD, 128, 128); // gcs
 		hal->gcs = new COMMLINK_CLASS(&Serial3, navigator, guide, controller, hal);
 	}
+
+	/*
+	 * Hardware in the Loop
+	 */
+	if (hal->getMode() == MODE_HIL_CNTL) {
+		Serial.println("HIL line setting up");
+		Serial1.begin(HIL_BAUD, 128, 128);
+		hal->hil = new COMMLINK_CLASS(&Serial1, navigator, guide, controller, hal);
+	}
+
 
 	/*
 	 * Start the autopilot

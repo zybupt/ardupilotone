@@ -34,7 +34,6 @@ static const uint8_t heartBeatTimeout = 3;
 static bool gpsEnabled = false;
 static bool baroEnabled = false;
 static bool compassEnabled = false;
-static bool adcEnabled = true;
 
 static bool rangeFinderFrontEnabled = false;
 static bool rangeFinderBackEnabled = false;
